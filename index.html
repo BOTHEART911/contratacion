@@ -26,14 +26,7 @@
       color:#111;
       background: url('https://res.cloudinary.com/dqqeavica/image/upload/v1746905869/fondo_rosa_n775m4.png') center/cover fixed no-repeat;
     }
-    .container{
-  width:100%;
-  max-width:1100px;
-  margin:0 auto;
-  padding:16px;
-  background:rgba(255,255,255,0.05); /* transparencia adicional pedida */
-  box-sizing:border-box;
-}
+    .container{ max-width: 1100px; margin: 0 auto; padding: 16px; }
 
     .view{ display:none; opacity:0; transform: translateY(8px);
       transition: opacity .25s ease, transform .25s ease;
@@ -42,9 +35,12 @@
     .view.active{ display:block; opacity:1; transform: translateY(0); }
 
     .card{
-  background:rgba(255,255,255,0.72);
-  backdrop-filter:blur(6px);
-}
+      background: rgba(255,255,255,.75);
+      backdrop-filter: blur(4px);
+      border: 2px solid #ddd; border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0,0,0,.18);
+      max-width: 820px; margin: 16px auto; padding: 20px 20px 16px;
+    }
     h1,h2,h3{ margin: 8px 0 12px; text-align:center; }
     p.helper{ color:#444; font-size:.95rem; text-align:center; margin:8px 0 16px; }
     label{ display:block; font-weight:700; margin: 10px 0 6px; color:var(--primary); }
@@ -258,97 +254,6 @@
       .btn-row{ flex-direction:column; }
       .item-header{ flex-direction:column; align-items:flex-start; }
     }
-
-    /* Vista Instalar fullscreen sin contenedor */
-.view-instalar-full{
-  position:fixed;
-  inset:0;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  padding:32px 20px;
-  text-align:center;
-  background:rgba(255,255,255,0.08);
-  backdrop-filter:blur(4px);
-  z-index:50;
-}
-.view-instalar-full .instalar-titulo{
-  color:#06402B;
-  font-size:2rem;
-  font-weight:800;
-  margin:0 0 12px;
-  text-shadow:0 2px 4px rgba(0,0,0,.25);
-}
-.view-instalar-full .instalar-banner{
-  width:280px;
-  max-width:80vw;
-  border-radius:16px;
-  box-shadow:0 8px 22px rgba(0,0,0,.35);
-  margin:0 0 18px;
-}
-.view-instalar-full .instalar-descripcion{
-  font-weight:600;
-  font-size:1rem;
-  max-width:600px;
-  margin:0 0 16px;
-  color:#033323;
-}
-.view-instalar-full .btn-instalar{
-  background:#06402B;
-  color:#fff;
-  border:2px solid #04281C;
-  font-weight:700;
-  padding:14px 28px;
-  border-radius:10px;
-  cursor:pointer;
-  box-shadow:0 6px 16px rgba(0,0,0,.25);
-  font-size:1.05rem;
-  transition:background .2s ease, transform .2s ease;
-}
-.view-instalar-full .btn-instalar:hover{
-  background:#04281C;
-  transform:translateY(-2px);
-}
-.view-instalar-full .instalar-nota{
-  margin:18px 0 0;
-  font-size:.85rem;
-  color:#333;
-  font-weight:600;
-}
-
-/* Toggle password estilos (login) */
-.input-pass-group{
-  position:relative;
-  width:100%;
-}
-.input-pass-group input{
-  width:100%;
-  padding-right:44px; /* espacio para botón ojo */
-}
-.toggle-pass-btn{
-  position:absolute;
-  top:50%;
-  right:10px;
-  transform:translateY(-50%);
-  background:transparent;
-  border:none;
-  color:#06402B;
-  cursor:pointer;
-  padding:4px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-.toggle-pass-btn:focus-visible{
-  outline:2px solid #06402B;
-  border-radius:4px;
-}
-.toggle-pass-btn svg{
-  width:20px;
-  height:20px;
-  pointer-events:none;
-}
   </style>
 </head>
 <body>
@@ -362,14 +267,18 @@
 
   <div class="container">
 
-    <!-- VISTA INSTALAR (FULLSCREEN SIN CONTENEDOR) -->
-<section id="view-instalar" class="view view-instalar-full">
-  <h2 class="instalar-titulo">App de Contrtación</h2>
-  <img class="instalar-banner" alt="Instalar" src="https://res.cloudinary.com/dqqeavica/image/upload/v1763930524/menu_t9xli7.gif" />
-  <p class="instalar-descripcion">Herramienta de uso exclusivo para el equipo de Contratación de la Alcaldía de Flandes</p>
-  <button id="btn-instalar" class="btn-instalar" style="display:none;">Instalar la App 📲</button>
-  <p class="instalar-nota">Si ya instalaste la App y no se inicia automáticamente, refresca en unos segundos.</p>
-</section>
+    <!-- VISTA INSTALAR -->
+    <section id="view-instalar" class="view">
+      <div class="card narrow" style="text-align:center;">
+        <h2 style="color:var(--primary);">App de Contrtación</h2>
+        <img class="brand" alt="Instalar" src="https://res.cloudinary.com/dqqeavica/image/upload/v1763930524/menu_t9xli7.gif" />
+        <p style="font-weight:600;">Herramienta de uso exclusivo para el equipo de Contratación de la Alcaldía de Flandes</p>
+        <div class="btn-row" style="justify-content:center; margin-top:12px;">
+          <button id="btn-instalar" class="btn-primary" style="display:none;">Instalar la App 📲</button>
+        </div>
+        <p class="muted" style="margin-top:14px;">Si ya instalaste la App y no se inicia automáticamente, refresca en unos segundos.</p>
+      </div>
+    </section>
 
     <!-- VISTA LOGIN -->
     <section id="view-login" class="view">
@@ -377,28 +286,8 @@
         <h1 style="color:var(--primary); text-shadow: 0 2px 2px #031732;">ACCESO CONTRATACIÓN</h1>
         <p class="helper"><b>Solo el personal del área de contratación de la Alcaldía de Flandes está autorizado para hacer uso de esta App.</b></p>
 
-        <label for="login-cedula"><b>Documento</b></label>
-<div class="input-pass-group">
-  <input id="login-cedula"
-         type="password"
-         inputmode="numeric"
-         autocomplete="off"
-         placeholder="Sin puntos ni espacios"
-         pattern="[0-9]*"
-         aria-label="Cédula sin puntos ni espacios">
-  <button type="button"
-          id="toggleLoginCedula"
-          class="toggle-pass-btn"
-          aria-label="Mostrar u ocultar cédula"
-          aria-pressed="false">
-    <!-- Ícono ojo cerrado inicial -->
-    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
-      <path d="m10.79 12.912-1.614-1.615a3.5 3.5 0 0 1-4.474-4.474l-2.06-2.06C.938 6.278 0 8 0 8s3 5.5 8 5.5a7 7 0 0 0 2.79-.588"/>
-      <path d="M5.21 3.088A7 7 0 0 1 8 2.5c5 0 8 5.5 8 5.5s-.939 1.721-2.641 3.238l-2.062-2.062a3.5 3.5 0 0 0-4.474-4.474z"/>
-      <path d="M5.525 7.646a2.5 2.5 0 0 0 2.829 2.829zm4.95.708-2.829-2.83a2.5 2.5 0 0 1 2.829 2.829zm3.171 6-12-12 .708-.708 12 12z"/>
-    </svg>
-  </button>
-</div>
+        <label>Cédula</label>
+        <input id="login-cedula" type="password" inputmode="numeric" autocomplete="off" placeholder="Sin puntos ni espacios" />
 
         <div class="btn-row spaced">
           <button class="btn-primary" id="btn-login">Iniciar Sesión</button>
@@ -773,7 +662,7 @@ btnLogin.addEventListener('click', async () => {
     if (!res || !res.encontrado){
       // Envío de mensaje de soporte vía Builderbot
       sendBuilderbotMessage('573103230712',
-        'Buen día *Oscar*\n\nNo tengo acceso a la app de Contratación\n\nA continuación, te dejo mi información'
+        'Buen día *Oscar*\n\nNo tengo acceso a la app de Contratación\n\nCordialmente,\n*' + (res?.profesional || 'Usuario') + '*'
       );
       await Swal.fire({
         icon:'error',
@@ -796,37 +685,6 @@ btnLogin.addEventListener('click', async () => {
     Swal.fire({ icon:'error', title:'Error', text:e.message });
   }
 });
-
-  /* === Toggle mostrar/ocultar cédula (login) === */
-(function(){
-  const input = document.getElementById('login-cedula');
-  const btn = document.getElementById('toggleLoginCedula');
-
-  if(!input || !btn) return;
-
-  const ICON_EYE = `
-<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
-  <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0"/>
-  <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8m8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7"/>
-</svg>`;
-  const ICON_EYE_SLASH = `
-<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
-  <path d="m10.79 12.912-1.614-1.615a3.5 3.5 0 0 1-4.474-4.474l-2.06-2.06C.938 6.278 0 8 0 8s3 5.5 8 5.5a7 7 0 0 0 2.79-.588"/>
-  <path d="M5.21 3.088A7 7 0 0 1 8 2.5c5 0 8 5.5 8 5.5s-.939 1.721-2.641 3.238l-2.062-2.062a3.5 3.5 0 0 0-4.474-4.474z"/>
-  <path d="M5.525 7.646a2.5 2.5 0 0 0 2.829 2.829zm4.95.708-2.829-2.83a2.5 2.5 0 0 1 2.829 2.829zm3.171 6-12-12 .708-.708 12 12z"/>
-</svg>`;
-
-  btn.addEventListener('click', ()=>{
-    const showing = input.type === 'password';
-    input.type = showing ? 'text' : 'password';
-    btn.setAttribute('aria-pressed', String(showing));
-    btn.innerHTML = showing ? ICON_EYE : ICON_EYE_SLASH;
-    try{
-      input.focus();
-      input.setSelectionRange(input.value.length, input.value.length);
-    }catch(e){}
-  });
-})();
 
 document.getElementById('btn-logout').addEventListener('click', ()=>{
   playSoundOnce(SOUNDS.logout);
