@@ -35,12 +35,15 @@
     .view.active{ display:block; opacity:1; transform: translateY(0); }
 
     .card{
-      background: rgba(255,255,255,.75);
-      backdrop-filter: blur(4px);
-      border: 2px solid #ddd; border-radius: 16px;
-      box-shadow: 0 8px 20px rgba(0,0,0,.18);
-      max-width: 820px; margin: 16px auto; padding: 20px 20px 16px;
-    }
+  background: rgba(255,255,255,.06); /* transparencia tipo portal */
+  backdrop-filter: blur(3px);
+  border: 2px solid #ddd;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0,0,0,.18);
+  max-width: 820px;
+  margin: 16px auto;
+  padding: 20px 20px 16px;
+}
     h1,h2,h3{ margin: 8px 0 12px; text-align:center; }
     p.helper{ color:#444; font-size:.95rem; text-align:center; margin:8px 0 16px; }
     label{ display:block; font-weight:700; margin: 10px 0 6px; color:var(--primary); }
@@ -123,13 +126,16 @@
       margin-top:14px;
     }
     .item-card{
-      background:#fff;
-      border:2px solid #ddd;
-      border-radius:16px;
-      padding:14px 16px;
-      box-shadow:0 6px 14px rgba(0,0,0,.12);
-      display:flex; flex-direction:column; gap:6px;
-    }
+  background: rgba(255,255,255,.06); /* mismo efecto glass */
+  backdrop-filter: blur(3px);
+  border: 2px solid #ddd;
+  border-radius:16px;
+  padding:14px 16px;
+  box-shadow:0 6px 14px rgba(0,0,0,.12);
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
     .item-header{
       display:flex; flex-wrap:wrap;
       gap:8px; align-items:center; justify-content:space-between;
@@ -773,9 +779,15 @@ function pintarContratistas(list){
     title.className='item-title';
     title.textContent='NOMBRE: '+(c.nombre||'');
 
-    const estadoSpan=document.createElement('span');
-    estadoSpan.className='estado-badge '+(c.estado==='ACTIVO'?'':'inactivo');
-    estadoSpan.textContent=c.estado;
+    /* NUEVO: toggle en el badge */
+let nuevoEstado = c.estado;
+estadoSpan.style.cursor='pointer';
+estadoSpan.title='Tocar para alternar entre ACTIVO e INACTIVO';
+estadoSpan.addEventListener('click', ()=>{
+  nuevoEstado = (nuevoEstado==='ACTIVO' ? 'INACTIVO' : 'ACTIVO');
+  estadoSpan.textContent = nuevoEstado;
+  estadoSpan.className = 'estado-badge ' + (nuevoEstado==='ACTIVO' ? '' : 'inactivo');
+});
 
     header.appendChild(title);
     header.appendChild(estadoSpan);
@@ -811,53 +823,46 @@ function pintarContratistas(list){
     btnDetalles.textContent='MOSTRAR DETALLES';
     btnDetalles.addEventListener('click',()=> mostrarDetallesContratista(c.documento));
 
-    const btnWhatsapp=document.createElement('button');
-    btnWhatsapp.textContent='WhatsApp';
-    btnWhatsapp.addEventListener('click',()=>{
-      const tel=c.telefono||'';
-      if(!tel){ Swal.fire({icon:'info',title:'Sin teléfono'}); return; }
-      window.open('https://wa.me/'+tel,'_blank');
-    });
+    const btnWhatsapp = document.createElement('button');
+btnWhatsapp.innerHTML = '<img src="https://res.cloudinary.com/dqqeavica/image/upload/v1759166341/WhatsApp_mljaqm.webp" alt="WhatsApp" style="width:26px;height:26px;display:block;">';
+btnWhatsapp.setAttribute('aria-label','Abrir chat de WhatsApp');
+btnWhatsapp.addEventListener('click',()=>{
+  const tel = c.telefono || '';
+  if(!tel){ Swal.fire({icon:'info',title:'Sin teléfono'}); return; }
+  window.open('https://wa.me/'+tel,'_blank');
+});
 
-    const btnDrive=document.createElement('button');
-    btnDrive.textContent='Drive';
-    btnDrive.addEventListener('click',()=>{
-      if(c.carpetaContratista){
-        window.open('https://drive.google.com/drive/folders/'+c.carpetaContratista,'_blank');
-      }else{
-        Swal.fire({icon:'info',title:'Sin carpeta',text:'No hay carpeta asociada.'});
-      }
-    });
+    const btnDrive = document.createElement('button');
+btnDrive.innerHTML = '<img src="https://res.cloudinary.com/dqqeavica/image/upload/v1763997280/DRIVE_bycgsc.webp" alt="Drive" style="width:26px;height:26px;display:block;">';
+btnDrive.setAttribute('aria-label','Abrir carpeta Drive');
+btnDrive.addEventListener('click',()=>{
+  if(c.carpetaContratista){
+    window.open('https://drive.google.com/drive/folders/'+c.carpetaContratista,'_blank');
+  }else{
+    Swal.fire({icon:'info',title:'Sin carpeta',text:'No hay carpeta asociada.'});
+  }
+});
 
-    const btnEstado=document.createElement('button');
-    btnEstado.className='estado-toggle-btn '+(c.estado==='ACTIVO'?'green':'red');
-    btnEstado.textContent=c.estado;
-    let nuevoEstado=c.estado;
-    btnEstado.addEventListener('click',()=>{
-      nuevoEstado=(nuevoEstado==='ACTIVO'?'INACTIVO':'ACTIVO');
-      btnEstado.textContent=nuevoEstado;
-      btnEstado.className='estado-toggle-btn '+(nuevoEstado==='ACTIVO'?'green':'red');
-    });
+    
 
     const btnGuardarEstado=document.createElement('button');
-    btnGuardarEstado.textContent='GUARDAR ESTADO';
-    btnGuardarEstado.addEventListener('click', async ()=>{
-      try{
-        await apiPost('guardarEstadoContratista',{
-          documento:c.documento,
-          estado:nuevoEstado
-        });
-        Swal.fire({icon:'success',title:'Estado actualizado',timer:1600,showConfirmButton:false});
-        await cargarContratistas();
-      }catch(e){
-        Swal.fire({icon:'error',title:'Error',text:e.message});
-      }
+btnGuardarEstado.textContent='GUARDAR ESTADO';
+btnGuardarEstado.addEventListener('click', async ()=>{
+  try{
+    await apiPost('guardarEstadoContratista',{
+      documento:c.documento,
+      estado:nuevoEstado
     });
+    Swal.fire({icon:'success',title:'Estado actualizado',timer:1600,showConfirmButton:false});
+    await cargarContratistas();
+  }catch(e){
+    Swal.fire({icon:'error',title:'Error',text:e.message});
+  }
+});
 
     btnRow.appendChild(btnDetalles);
     btnRow.appendChild(btnWhatsapp);
     btnRow.appendChild(btnDrive);
-    btnRow.appendChild(btnEstado);
     btnRow.appendChild(btnGuardarEstado);
 
     div.appendChild(header);
@@ -1056,6 +1061,14 @@ function pintarCuentas(list){
     btnRevisar.textContent='REVISAR';
     btnRevisar.addEventListener('click',()=> abrirRevisionCuenta(c.documento));
     btnRow.appendChild(btnRevisar);
+
+    if (c.telefono){
+  const btnWhatsapp=document.createElement('button');
+  btnWhatsapp.innerHTML='<img src="https://res.cloudinary.com/dqqeavica/image/upload/v1759166341/WhatsApp_mljaqm.webp" alt="WhatsApp" style="width:26px;height:26px;display:block;">';
+  btnWhatsapp.setAttribute('aria-label','Abrir chat de WhatsApp');
+  btnWhatsapp.addEventListener('click',()=> window.open('https://wa.me/'+c.telefono,'_blank'));
+  btnRow.appendChild(btnWhatsapp);
+}
 
     div.appendChild(header);
     div.appendChild(pDoc);
