@@ -849,140 +849,134 @@ function pintarContratistas(list){
     return;
   }
   for(const c of list){
-  const div=document.createElement('div');
-  div.className='item-card';
+    const div=document.createElement('div');
+    div.className='item-card';
 
-  const header=document.createElement('div');
-  header.className='item-header';
+    const header=document.createElement('div');
+    header.className='item-header';
 
-  const title=document.createElement('p');
-  title.className='item-title';
-  title.textContent='NOMBRE: '+(c.nombre||'');
+    const title=document.createElement('p');
+    title.className='item-title';
+    title.textContent='NOMBRE: '+(c.nombre||'');
 
-  // Badge de estado (creación + toggle)
-  const estadoSpan = document.createElement('span');
-  estadoSpan.className = 'estado-badge ' + (c.estado === 'ACTIVO' ? '' : 'inactivo');
-  estadoSpan.textContent = c.estado;
+    // Badge de estado (creación + toggle)
+const estadoSpan = document.createElement('span');
+estadoSpan.className = 'estado-badge ' + (c.estado === 'ACTIVO' ? '' : 'inactivo');
+estadoSpan.textContent = c.estado;
 
-  let nuevoEstado = c.estado;
-  estadoSpan.style.cursor = 'pointer';
-  estadoSpan.title = 'Tocar para alternar entre ACTIVO e INACTIVO';
-  estadoSpan.addEventListener('click', ()=>{
-    nuevoEstado = (nuevoEstado === 'ACTIVO' ? 'INACTIVO' : 'ACTIVO');
-    estadoSpan.textContent = nuevoEstado;
-    estadoSpan.className = 'estado-badge ' + (nuevoEstado === 'ACTIVO' ? '' : 'inactivo');
-  });
+let nuevoEstado = c.estado;
+estadoSpan.style.cursor = 'pointer';
+estadoSpan.title = 'Tocar para alternar entre ACTIVO e INACTIVO';
+estadoSpan.addEventListener('click', ()=>{
+  nuevoEstado = (nuevoEstado === 'ACTIVO' ? 'INACTIVO' : 'ACTIVO');
+  estadoSpan.textContent = nuevoEstado;
+  estadoSpan.className = 'estado-badge ' + (nuevoEstado === 'ACTIVO' ? '' : 'inactivo');
+});
 
-  header.appendChild(title);
-  header.appendChild(estadoSpan);
-  div.appendChild(header); // <<< Faltaba
+// Añadir al header
+header.appendChild(title);
+header.appendChild(estadoSpan);
 
-  // Párrafos de detalles (estos tampoco se estaban agregando)
-  const pDoc=document.createElement('p');
-  pDoc.className='item-sub';
-  pDoc.textContent='CC: '+(c.documento||'');
-  div.appendChild(pDoc);
+    const pDoc=document.createElement('p');
+    pDoc.className='item-sub';
+    pDoc.textContent='CC: '+(c.documento||'');
 
-  const pSec=document.createElement('p');
-  pSec.className='item-sub';
-  pSec.textContent='SECRETARÍA: '+(c.secretaria||'');
-  div.appendChild(pSec);
+    const pSec=document.createElement('p');
+    pSec.className='item-sub';
+    pSec.textContent='SECRETARÍA: '+(c.secretaria||'');
 
-  const pSup=document.createElement('p');
-  pSup.className='item-sub';
-  pSup.textContent='SUPERVISOR: '+(c.supervisor||'');
-  div.appendChild(pSup);
+    const pSup=document.createElement('p');
+    pSup.className='item-sub';
+    pSup.textContent='SUPERVISOR: '+(c.supervisor||'');
 
-  const pContrato=document.createElement('p');
-  pContrato.className='item-sub';
-  pContrato.textContent='CONTRATO: '+(c.contrato||'')+' de: '+(c.fechaContrato||'');
-  div.appendChild(pContrato);
+    const pContrato=document.createElement('p');
+    pContrato.className='item-sub';
+    pContrato.textContent='CONTRATO: '+(c.contrato||'')+' de: '+(c.fechaContrato||'');
 
-  const pInicio=document.createElement('p');
-  pInicio.className='item-sub';
-  pInicio.textContent='FECHA INICIO: '+(c.fechaInicio||'');
-  div.appendChild(pInicio);
+    const pInicio=document.createElement('p');
+    pInicio.className='item-sub';
+    pInicio.textContent='FECHA INICIO: '+(c.fechaInicio||'');
 
-  const pTermino=document.createElement('p');
-  pTermino.className='item-sub';
-  pTermino.textContent='FECHA TERMINO: '+(c.fechaTermino||'');
-  div.appendChild(pTermino);
+    const pTermino=document.createElement('p');
+    pTermino.className='item-sub';
+    pTermino.textContent='FECHA TERMINO: '+(c.fechaTermino||'');
 
-  /* ===== Fila de acciones reestructurada ===== */
-  const actionsRow = document.createElement('div');
-  actionsRow.className = 'contr-actions';
+/* ===== Fila de acciones reestructurada ===== */
+const actionsRow = document.createElement('div');
+actionsRow.className = 'contr-actions';
 
-  const leftGroup = document.createElement('div');
-  leftGroup.className = 'left-group';
+const leftGroup = document.createElement('div');
+leftGroup.className = 'left-group';
 
-  const rightGroup = document.createElement('div');
-  rightGroup.className = 'right-group';
+const rightGroup = document.createElement('div');
+rightGroup.className = 'right-group';
 
-  /* Botón MOSTRAR DETALLES */
-  const btnDetalles = document.createElement('button');
-  btnDetalles.textContent = 'MOSTRAR DETALLES';
-  btnDetalles.addEventListener('click', ()=> mostrarDetallesContratista(c.documento));
+/* Botón MOSTRAR DETALLES */
+const btnDetalles = document.createElement('button');
+btnDetalles.textContent = 'MOSTRAR DETALLES';
+btnDetalles.addEventListener('click', ()=> mostrarDetallesContratista(c.documento));
 
-  /* Botón GUARDAR ESTADO */
-  const btnGuardarEstado = document.createElement('button');
-  btnGuardarEstado.textContent = 'GUARDAR ESTADO';
-  btnGuardarEstado.addEventListener('click', async ()=>{
-    try{
-      await apiPost('guardarEstadoContratista',{
-        documento: c.documento,
-        estado: nuevoEstado
-      });
-      Swal.fire({icon:'success',title:'Estado actualizado',timer:1600,showConfirmButton:false});
-      await cargarContratistas();
-    }catch(e){
-      Swal.fire({icon:'error',title:'Error',text:e.message});
-    }
-  });
+/* Botón GUARDAR ESTADO */
+const btnGuardarEstado = document.createElement('button');
+btnGuardarEstado.textContent = 'GUARDAR ESTADO';
+btnGuardarEstado.addEventListener('click', async ()=>{
+  try{
+    await apiPost('guardarEstadoContratista',{
+      documento: c.documento,
+      estado: nuevoEstado    // usa la variable que definiste junto al badge
+    });
+    Swal.fire({icon:'success',title:'Estado actualizado',timer:1600,showConfirmButton:false});
+    await cargarContratistas();
+  }catch(e){
+    Swal.fire({icon:'error',title:'Error',text:e.message});
+  }
+});
 
-  /* Ícono WhatsApp (derecha) */
-  const btnWhatsapp = document.createElement('button');
-  btnWhatsapp.className = 'btn-icon';
-  btnWhatsapp.innerHTML = '<img src="https://res.cloudinary.com/dqqeavica/image/upload/v1759166341/WhatsApp_mljaqm.webp" alt="WhatsApp">';
-  btnWhatsapp.setAttribute('aria-label','Abrir chat de WhatsApp');
-  btnWhatsapp.addEventListener('click', ()=>{
-    let tel = String(c.telefono||'').replace(/\D/g,''); // solo dígitos
-    if(!tel){
-      Swal.fire({icon:'info',title:'Sin teléfono'}); return;
-    }
-    // Si no comienza por 57, se antepone
-    if(!tel.startsWith('57')) tel = '57' + tel;
-    // Validar formato final (12 dígitos: 57 + 10 del celular)
-    if(!/^57\d{10}$/.test(tel)){
-      Swal.fire({icon:'warning',title:'Teléfono inválido'}); return;
-    }
-    window.open('https://wa.me/' + tel, '_blank');
-  });
+/* Ícono WhatsApp (derecha) */
+const btnWhatsapp = document.createElement('button');
+btnWhatsapp.className = 'btn-icon';
+btnWhatsapp.innerHTML = '<img src="https://res.cloudinary.com/dqqeavica/image/upload/v1759166341/WhatsApp_mljaqm.webp" alt="WhatsApp">';
+btnWhatsapp.setAttribute('aria-label','Abrir chat de WhatsApp');
+btnWhatsapp.addEventListener('click', ()=>{
+  let tel = (c.telefono || '').replace(/\D/g,'');
+if (tel.length === 10 && tel.startsWith('3')) tel = '57' + tel;
+  // Si viniera ya con 57 y luego el 3 (ej: 57310...), no lo duplicamos
+  if (tel && !/^57\d{10}$/.test(tel) && tel.length === 12 && tel.startsWith('57')) {
+    // se asume correcto; no haces nada
+  }
+  if(!tel){
+    Swal.fire({icon:'info',title:'Sin teléfono'}); return;
+  }
+  window.open('https://wa.me/' + tel, '_blank');
+});
 
-  /* Ícono Drive (derecha) */
-  const btnDrive = document.createElement('button');
-  btnDrive.className = 'btn-icon';
-  btnDrive.innerHTML = '<img src="https://res.cloudinary.com/dqqeavica/image/upload/v1763997280/DRIVE_bycgsc.webp" alt="Drive">';
-  btnDrive.setAttribute('aria-label','Abrir carpeta Drive');
-  btnDrive.addEventListener('click', ()=>{
-    if (c.carpetaContratista){
-      window.open('https://drive.google.com/drive/folders/' + c.carpetaContratista, '_blank');
-    }else{
-      Swal.fire({icon:'info',title:'Sin carpeta',text:'No hay carpeta asociada.'});
-    }
-  });
+/* Ícono Drive (derecha) */
+const btnDrive = document.createElement('button');
+btnDrive.className = 'btn-icon';
+btnDrive.innerHTML = '<img src="https://res.cloudinary.com/dqqeavica/image/upload/v1763997280/DRIVE_bycgsc.webp" alt="Drive">';
+btnDrive.setAttribute('aria-label','Abrir carpeta Drive');
+btnDrive.addEventListener('click', ()=>{
+  if (c.carpetaContratista){
+    window.open('https://drive.google.com/drive/folders/' + c.carpetaContratista, '_blank');
+  }else{
+    Swal.fire({icon:'info',title:'Sin carpeta',text:'No hay carpeta asociada.'});
+  }
+});
 
-  /* Ensamblar grupos */
-  leftGroup.appendChild(btnDetalles);
-  leftGroup.appendChild(btnGuardarEstado);
-  rightGroup.appendChild(btnWhatsapp);
-  rightGroup.appendChild(btnDrive);
-  actionsRow.appendChild(leftGroup);
-  actionsRow.appendChild(rightGroup);
+/* Ensamblar grupos */
+leftGroup.appendChild(btnDetalles);
+leftGroup.appendChild(btnGuardarEstado);
 
-  div.appendChild(actionsRow);
+rightGroup.appendChild(btnWhatsapp);
+rightGroup.appendChild(btnDrive);
 
-  wrap.appendChild(div);
-}
+actionsRow.appendChild(leftGroup);
+actionsRow.appendChild(rightGroup);
+
+div.appendChild(actionsRow);
+
+    wrap.appendChild(div);
+  }
 }
 document.getElementById('contr-filter').addEventListener('input',()=>{
   const q=document.getElementById('contr-filter').value.trim().toLowerCase();
@@ -1174,15 +1168,9 @@ function pintarCuentas(list){
   btnWhatsapp.className = 'btn-icon';
   btnWhatsapp.innerHTML = '<img src="https://res.cloudinary.com/dqqeavica/image/upload/v1759166341/WhatsApp_mljaqm.webp" alt="WhatsApp">';
   btnWhatsapp.setAttribute('aria-label','Abrir chat de WhatsApp');
-  btnWhatsapp.addEventListener('click', ()=>{
-  let tel = String(c.telefono||'').replace(/\D/g,'');
-  if(!tel){ Swal.fire({icon:'info',title:'Sin teléfono'}); return; }
-  if(!tel.startsWith('57')) tel = '57' + tel;
-  if(!/^57\d{10}$/.test(tel)){
-    Swal.fire({icon:'warning',title:'Teléfono inválido'}); return;
-  }
-  window.open('https://wa.me/'+tel,'_blank');
-});
+  btnWhatsapp.addEventListener('click',()=> window.open('https://wa.me/'+c.telefono,'_blank'));
+  btnRow.appendChild(btnWhatsapp);
+}
 
     div.appendChild(header);
     div.appendChild(pDoc);
