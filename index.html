@@ -74,6 +74,33 @@
     }
     .danger{ background:#e11; border-color:#e11; color:#fff; }
 
+    /* Botones de icono: sin recuadro ni fondo */
+.btn-icon{
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 10px !important;
+  display: flex;                 /* centra el icono */
+  align-items: center;
+  justify-content: center;
+}
+.btn-icon:hover,
+.btn-icon:active{
+  background: transparent !important;
+  color: inherit !important;
+  border: 0 !important;
+}
+.btn-icon:focus-visible{
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(4,40,28,.28); /* anillo de enfoque accesible */
+  border-radius: 10px;
+}
+.btn-icon img{
+  width: 26px; height: 26px; display: block;
+  border: 0; border-radius: 0; background: transparent;
+  pointer-events: none; /* evita arrastre del icono */
+}
+
     /* Loader centrado */
     .loader{
       position:fixed; inset:0;
@@ -831,7 +858,8 @@ header.appendChild(estadoSpan);
     btnDetalles.addEventListener('click',()=> mostrarDetallesContratista(c.documento));
 
     const btnWhatsapp = document.createElement('button');
-btnWhatsapp.innerHTML = '<img src="https://res.cloudinary.com/dqqeavica/image/upload/v1759166341/WhatsApp_mljaqm.webp" alt="WhatsApp" style="width:26px;height:26px;display:block;">';
+btnWhatsapp.className = 'btn-icon';
+btnWhatsapp.innerHTML = '<img src="https://res.cloudinary.com/dqqeavica/image/upload/v1759166341/WhatsApp_mljaqm.webp" alt="WhatsApp">';
 btnWhatsapp.setAttribute('aria-label','Abrir chat de WhatsApp');
 btnWhatsapp.addEventListener('click',()=>{
   const tel = c.telefono || '';
@@ -840,7 +868,8 @@ btnWhatsapp.addEventListener('click',()=>{
 });
 
     const btnDrive = document.createElement('button');
-btnDrive.innerHTML = '<img src="https://res.cloudinary.com/dqqeavica/image/upload/v1763997280/DRIVE_bycgsc.webp" alt="Drive" style="width:26px;height:26px;display:block;">';
+btnDrive.className = 'btn-icon';
+btnDrive.innerHTML = '<img src="https://res.cloudinary.com/dqqeavica/image/upload/v1763997280/DRIVE_bycgsc.webp" alt="Drive">';
 btnDrive.setAttribute('aria-label','Abrir carpeta Drive');
 btnDrive.addEventListener('click',()=>{
   if(c.carpetaContratista){
@@ -1070,8 +1099,9 @@ function pintarCuentas(list){
     btnRow.appendChild(btnRevisar);
 
     if (c.telefono){
-  const btnWhatsapp=document.createElement('button');
-  btnWhatsapp.innerHTML='<img src="https://res.cloudinary.com/dqqeavica/image/upload/v1759166341/WhatsApp_mljaqm.webp" alt="WhatsApp" style="width:26px;height:26px;display:block;">';
+  const btnWhatsapp = document.createElement('button');
+  btnWhatsapp.className = 'btn-icon';
+  btnWhatsapp.innerHTML = '<img src="https://res.cloudinary.com/dqqeavica/image/upload/v1759166341/WhatsApp_mljaqm.webp" alt="WhatsApp">';
   btnWhatsapp.setAttribute('aria-label','Abrir chat de WhatsApp');
   btnWhatsapp.addEventListener('click',()=> window.open('https://wa.me/'+c.telefono,'_blank'));
   btnRow.appendChild(btnWhatsapp);
