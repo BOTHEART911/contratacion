@@ -188,17 +188,19 @@
       border-color:#dc2626;
     }
 
-    .estado-toggle-btn{
-      font-size:.65rem;
-    }
+   
 
     /* Secciones expandibles en revisión */
     .section-toggle{ margin:12px 0; }
     .section-content{
-      margin:8px 0 18px;
-      background:#fff; border:2px solid #ddd; border-radius:14px; padding:14px;
-      box-shadow:0 6px 16px rgba(0,0,0,.12);
-    }
+  margin:8px 0 18px;
+  background: rgba(255,255,255,.06);
+  backdrop-filter: blur(3px);
+  border:2px solid #ddd;
+  border-radius:14px;
+  padding:14px;
+  box-shadow:0 6px 16px rgba(0,0,0,.12);
+}
     .section-content.hidden{ display:none; }
 
     .oblig-block{
@@ -779,18 +781,23 @@ function pintarContratistas(list){
     title.className='item-title';
     title.textContent='NOMBRE: '+(c.nombre||'');
 
-    /* NUEVO: toggle en el badge */
+    // Badge de estado (creación + toggle)
+const estadoSpan = document.createElement('span');
+estadoSpan.className = 'estado-badge ' + (c.estado === 'ACTIVO' ? '' : 'inactivo');
+estadoSpan.textContent = c.estado;
+
 let nuevoEstado = c.estado;
-estadoSpan.style.cursor='pointer';
-estadoSpan.title='Tocar para alternar entre ACTIVO e INACTIVO';
+estadoSpan.style.cursor = 'pointer';
+estadoSpan.title = 'Tocar para alternar entre ACTIVO e INACTIVO';
 estadoSpan.addEventListener('click', ()=>{
-  nuevoEstado = (nuevoEstado==='ACTIVO' ? 'INACTIVO' : 'ACTIVO');
+  nuevoEstado = (nuevoEstado === 'ACTIVO' ? 'INACTIVO' : 'ACTIVO');
   estadoSpan.textContent = nuevoEstado;
-  estadoSpan.className = 'estado-badge ' + (nuevoEstado==='ACTIVO' ? '' : 'inactivo');
+  estadoSpan.className = 'estado-badge ' + (nuevoEstado === 'ACTIVO' ? '' : 'inactivo');
 });
 
-    header.appendChild(title);
-    header.appendChild(estadoSpan);
+// Añadir al header
+header.appendChild(title);
+header.appendChild(estadoSpan);
 
     const pDoc=document.createElement('p');
     pDoc.className='item-sub';
