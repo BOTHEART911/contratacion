@@ -1,0 +1,1590 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>CONTRATACIÓN</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="https://res.cloudinary.com/dqqeavica/image/upload/v1763928947/Logo_lt365u.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <style>
+    :root{
+      --primary:#06402B;
+      --primary-2:#04281C;
+      --ok:#16a34a;
+      --error:#dc2626;
+      --scrim:rgba(0,0,0,.35);
+    }
+    html,body{
+      margin:0; padding:0; height:100%; width:100%;
+      overflow-x:hidden;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:#111;
+      background: url('https://res.cloudinary.com/dqqeavica/image/upload/v1746905869/fondo_rosa_n775m4.png') center/cover fixed no-repeat;
+    }
+    .container{ max-width: 1100px; margin: 0 auto; padding: 16px; }
+
+    .view{ display:none; opacity:0; transform: translateY(8px);
+      transition: opacity .25s ease, transform .25s ease;
+      box-sizing:border-box; padding:16px;
+    }
+    .view.active{ display:block; opacity:1; transform: translateY(0); }
+
+    .card{
+      background: rgba(255,255,255,.75);
+      backdrop-filter: blur(4px);
+      border: 2px solid #ddd; border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0,0,0,.18);
+      max-width: 820px; margin: 16px auto; padding: 20px 20px 16px;
+    }
+    h1,h2,h3{ margin: 8px 0 12px; text-align:center; }
+    p.helper{ color:#444; font-size:.95rem; text-align:center; margin:8px 0 16px; }
+    label{ display:block; font-weight:700; margin: 10px 0 6px; color:var(--primary); }
+    input, select, textarea, button{
+      width:100%; padding:12px; box-sizing:border-box;
+      border:1.5px solid #ccc; border-radius:8px; background:#fff;
+      outline:none; transition: border-color .2s ease, transform .08s ease;
+      font-size:16px;
+    }
+    input:focus, select:focus, textarea:focus{ border-color:var(--primary); }
+    button{
+      cursor:pointer; border:2px solid var(--primary);
+      background:#fff; color:#000; font-weight:700;
+    }
+    button:hover{ background:var(--primary-2); color:#fff; border-color:var(--primary-2); }
+    .btn-primary{ background:var(--primary); color:#fff; }
+    .btn-row{ display:flex; gap:12px; flex-wrap:wrap; }
+    .btn-row > *{ flex:1; }
+    .muted{ color:#666; font-size:.85rem; }
+    .center{ text-align:center; }
+    .image-center{ display:flex; justify-content:center; }
+    .brand{ width:240px; border-radius:12px; display:block; margin:12px auto 4px; }
+    .banner-bottom{ width:240px; border-radius:12px; display:block; margin:16px auto 8px; }
+    .chip{
+      padding:8px 12px; border-radius:999px; border:2px solid var(--primary);
+      background:#fff; font-weight:700; color:#000; text-decoration:none;
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    }
+    .danger{ background:#e11; border-color:#e11; color:#fff; }
+
+    /* Loader centrado */
+    .loader{
+      position:fixed; inset:0;
+      display:flex; align-items:center; justify-content:center;
+      background:rgba(0,0,0,.35);
+      z-index:9999; backdrop-filter: blur(2px);
+      opacity:1; transition: opacity .12s ease;
+      will-change: opacity;
+    }
+    .loader.hidden{
+      opacity:0; pointer-events:none;
+    }
+
+    .spinner-ios{
+      position:relative; width:64px; height:64px;
+    }
+    .spinner-ios i{
+      position:absolute; left:50%; top:50%;
+      width:6px; height:18px; margin:-9px 0 0 -3px;
+      background:#fff; border-radius:3px;
+      opacity:.2;
+      animation:iosFade 1.2s linear infinite;
+      transform-origin: center center;
+    }
+    @keyframes iosFade{
+      0%, 39%, 100% { opacity:.2; }
+      40% { opacity:1; }
+    }
+    .spinner-ios i:nth-child(1)  { transform: rotate(  0deg) translateY(-24px); animation-delay:-1.1s; }
+    .spinner-ios i:nth-child(2)  { transform: rotate( 30deg) translateY(-24px); animation-delay:-1.0s; }
+    .spinner-ios i:nth-child(3)  { transform: rotate( 60deg) translateY(-24px); animation-delay:-0.9s; }
+    .spinner-ios i:nth-child(4)  { transform: rotate( 90deg) translateY(-24px); animation-delay:-0.8s; }
+    .spinner-ios i:nth-child(5)  { transform: rotate(120deg) translateY(-24px); animation-delay:-0.7s; }
+    .spinner-ios i:nth-child(6)  { transform: rotate(150deg) translateY(-24px); animation-delay:-0.6s; }
+    .spinner-ios i:nth-child(7)  { transform: rotate(180deg) translateY(-24px); animation-delay:-0.5s; }
+    .spinner-ios i:nth-child(8)  { transform: rotate(210deg) translateY(-24px); animation-delay:-0.4s; }
+    .spinner-ios i:nth-child(9)  { transform: rotate(240deg) translateY(-24px); animation-delay:-0.3s; }
+    .spinner-ios i:nth-child(10) { transform: rotate(270deg) translateY(-24px); animation-delay:-0.2s; }
+    .spinner-ios i:nth-child(11) { transform: rotate(300deg) translateY(-24px); animation-delay:-0.1s; }
+    .spinner-ios i:nth-child(12) { transform: rotate(330deg) translateY(-24px); animation-delay: 0s; }
+
+    .hidden{ display:none !important; }
+
+    .narrow{ max-width: 560px; margin: 0 auto; }
+    .spaced{ margin-top:12px; }
+
+    /* Listados reutilizables */
+    .list-grid{
+      display:flex; flex-direction:column; gap:14px;
+      margin-top:14px;
+    }
+    .item-card{
+      background:#fff;
+      border:2px solid #ddd;
+      border-radius:16px;
+      padding:14px 16px;
+      box-shadow:0 6px 14px rgba(0,0,0,.12);
+      display:flex; flex-direction:column; gap:6px;
+    }
+    .item-header{
+      display:flex; flex-wrap:wrap;
+      gap:8px; align-items:center; justify-content:space-between;
+    }
+    .item-title{
+      font-weight:900; font-size:1rem; color:var(--primary); margin:0;
+    }
+    .item-sub{
+      font-size:.72rem; font-weight:700; color:#333; margin:0;
+    }
+
+    .tag-count{
+      display:inline-block;
+      border-radius:999px;
+      padding:8px 16px;
+      font-weight:900; text-align:center;
+      color:#06402B; background:#d7f8e3;
+      border:3px solid #7adf9b;
+      box-shadow:0 4px 10px rgba(0,0,0,.12);
+      min-width:120px;
+    }
+    .filter-input{
+      appearance:none;
+      border-radius:999px;
+      background:#fff;
+      border:3px solid #06402B;
+      padding:12px 16px;
+      font-weight:700;
+      min-width:240px;
+      max-width:420px;
+      box-shadow:0 8px 18px rgba(0,0,0,.08);
+      outline:none;
+      font-size:.95rem;
+    }
+    .filter-input::placeholder{ color:#999; font-weight:600; }
+
+    .estado-badge{
+      display:inline-block;
+      border-radius:999px;
+      padding:6px 14px;
+      font-weight:800;
+      background:#c6f6d5;
+      color:#06402B;
+      border:2px solid #16a34a;
+      font-size:.72rem;
+    }
+    .estado-badge.inactivo{
+      background:#fee2e2;
+      color:#991b1b;
+      border-color:#dc2626;
+    }
+
+    .estado-toggle-btn{
+      font-size:.65rem;
+    }
+
+    /* Secciones expandibles en revisión */
+    .section-toggle{ margin:12px 0; }
+    .section-content{
+      margin:8px 0 18px;
+      background:#fff; border:2px solid #ddd; border-radius:14px; padding:14px;
+      box-shadow:0 6px 16px rgba(0,0,0,.12);
+    }
+    .section-content.hidden{ display:none; }
+
+    .oblig-block{
+      background:#f8f8f8;
+      border:1.5px solid #ccc;
+      border-radius:12px;
+      padding:10px 12px;
+      margin:10px 0;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .oblig-title{
+      font-weight:800;
+      margin:0;
+      color:var(--primary);
+      font-size:.9rem;
+    }
+    .oblig-sub{
+      margin:0;
+      font-size:.75rem;
+      color:#333;
+      font-weight:600;
+    }
+
+    .evidence-grid{
+      display:flex; flex-wrap:wrap; gap:10px;
+    }
+    .evidence-thumb{
+      width:100%; max-width:320px;
+      aspect-ratio:4/3;
+      object-fit:cover;
+      border-radius:10px;
+      border:2px solid #ddd;
+      background:#eee;
+      cursor:zoom-in;
+    }
+
+    /* Modal Requerimiento */
+    .modal-backdrop{
+      position:fixed; inset:0;
+      background:rgba(0,0,0,.55);
+      display:flex; align-items:center; justify-content:center;
+      z-index:9998; padding:20px;
+    }
+    .modal{
+      background:#fff; border-radius:16px;
+      max-width:520px; width:100%;
+      padding:20px 20px 14px;
+      box-shadow:0 8px 22px rgba(0,0,0,.25);
+      animation:modalIn .25s ease;
+    }
+    @keyframes modalIn{
+      from{ opacity:0; transform:translateY(12px); }
+      to{ opacity:1; transform:translateY(0); }
+    }
+
+    @media (max-width: 700px){
+      .btn-row{ flex-direction:column; }
+      .item-header{ flex-direction:column; align-items:flex-start; }
+    }
+  </style>
+</head>
+<body>
+ <!-- Loader -->
+<div id="loader" class="loader hidden" aria-live="polite" aria-busy="true">
+  <div class="spinner-ios" role="status" aria-label="Cargando">
+    <i></i><i></i><i></i><i></i><i></i><i></i>
+    <i></i><i></i><i></i><i></i><i></i><i></i>
+  </div>
+</div>
+
+  <div class="container">
+
+    <!-- VISTA INSTALAR -->
+    <section id="view-instalar" class="view">
+      <div class="card narrow" style="text-align:center;">
+        <h2 style="color:var(--primary);">App de Contrtación</h2>
+        <img class="brand" alt="Instalar" src="https://res.cloudinary.com/dqqeavica/image/upload/v1763930524/menu_t9xli7.gif" />
+        <p style="font-weight:600;">Herramienta de uso exclusivo para el equipo de Contratación de la Alcaldía de Flandes</p>
+        <div class="btn-row" style="justify-content:center; margin-top:12px;">
+          <button id="btn-instalar" class="btn-primary" style="display:none;">Instalar la App 📲</button>
+        </div>
+        <p class="muted" style="margin-top:14px;">Si ya instalaste la App y no se inicia automáticamente, refresca en unos segundos.</p>
+      </div>
+    </section>
+
+    <!-- VISTA LOGIN -->
+    <section id="view-login" class="view">
+      <div class="card narrow">
+        <h1 style="color:var(--primary); text-shadow: 0 2px 2px #031732;">ACCESO CONTRATACIÓN</h1>
+        <p class="helper"><b>Solo el personal del área de contratación de la Alcaldía de Flandes está autorizado para hacer uso de esta App.</b></p>
+
+        <label>Cédula</label>
+        <input id="login-cedula" type="password" inputmode="numeric" autocomplete="off" placeholder="Sin puntos ni espacios" />
+
+        <div class="btn-row spaced">
+          <button class="btn-primary" id="btn-login">Iniciar Sesión</button>
+        </div>
+
+        <img class="brand" alt="Logo" src="https://res.cloudinary.com/dqqeavica/image/upload/v1763928947/Logo_lt365u.png" />
+        <img class="banner-bottom" alt="Banner" src="https://res.cloudinary.com/dqqeavica/image/upload/v1763921425/Digital_sw3wk9.gif" />
+        <p class="center muted">Copyright © <b>CONTRATACIÓN</b></p>
+      </div>
+    </section>
+
+    <!-- VISTA INICIO -->
+    <section id="view-inicio" class="view">
+      <div class="card">
+        <div class="btn-row" style="margin-bottom:12px;">
+          <button class="danger" id="btn-logout">Cerrar Sesión</button>
+        </div>
+
+        <h2 id="inicio-profesional" style="color:var(--primary); font-weight:900;"></h2>
+        <p id="inicio-fecha" class="center" style="font-weight:700; font-size:.95rem;"></p>
+
+        <div class="btn-row spaced">
+          <button id="go-contratistas" class="btn-primary">CONTRATISTAS</button>
+          <button id="go-revision" class="btn-primary">REVISAR CUENTAS</button>
+          <button id="go-requerimientos" class="btn-primary">REQUERIMIENTO</button>
+          <button id="go-comunicados" class="btn-primary">COMUNICADOS</button>
+          <button id="go-soporte" class="btn-primary">SOPORTE</button>
+        </div>
+
+        <img class="banner-bottom" alt="Banner" src="https://res.cloudinary.com/dqqeavica/image/upload/v1763921425/Digital_sw3wk9.gif" />
+        <p class="center muted">Copyright © <b>CONTRATACIÓN</b></p>
+      </div>
+    </section>
+
+    <!-- VISTA CONTRATISTAS -->
+    <section id="view-contratistas" class="view">
+      <div class="card">
+        <h2 style="color:var(--primary)">CONTRATISTAS</h2>
+
+        <div class="center">
+          <div id="contr-count" class="tag-count" style="display:none;"></div>
+          <p id="contr-caption" class="muted" style="margin:6px 0 12px;">N° de Contratistas OPS</p>
+        </div>
+
+        <input id="contr-filter" class="filter-input" type="text" placeholder="Filtrar por nombre, documento, secretaria, supervisor o teléfono" aria-label="Filtrar contratistas">
+
+        <div class="btn-row spaced">
+          <button id="btn-add-contratista" class="btn-primary">AGREGAR CONTRATISTA</button>
+          <button id="contr-volver" class="danger">REGRESAR</button>
+        </div>
+
+        <div id="contr-list" class="list-grid"></div>
+      </div>
+    </section>
+
+    <!-- VISTA AGREGAR CONTRATISTA -->
+    <section id="view-agregar" class="view">
+      <div class="card narrow">
+        <h2 style="color:var(--primary)">AGREGANDO CONTRATISTA</h2>
+
+        <label>Documento</label>
+        <input id="add-documento" type="tel" inputmode="numeric" placeholder="Sin puntos ni espacios">
+
+        <label>Nombre del Contratista</label>
+        <input id="add-nombre" type="text" placeholder="Nombre completo">
+
+        <label>Secretaría</label>
+        <select id="add-secretaria">
+          <option value="" disabled selected>Selecciona la Secretaría</option>
+          <option value="DESPACHO MUNICIPAL">DESPACHO MUNICIPAL</option>
+          <option value="SECRETARÍA DE GOBIERNO Y SERVICIOS ADMINISTRATIVOS">SECRETARÍA DE GOBIERNO Y SERVICIOS ADMINISTRATIVOS</option>
+          <option value="SECRETARÍA DE HACIENDA">SECRETARÍA DE HACIENDA</option>
+          <option value="SECRETARÍA DE EDUCACIÓN, DESARROLLO ECONÓMICO Y SOCIAL">SECRETARÍA DE EDUCACIÓN, DESARROLLO ECONÓMICO Y SOCIAL</option>
+          <option value="SECRETARÍA DE PLANEACIÓN E INFRAESTRUCTURA">SECRETARÍA DE PLANEACIÓN E INFRAESTRUCTURA</option>
+          <option value="SECRETARÍA DE ASUNTOS AGROPECUARIOS">SECRETARÍA DE ASUNTOS AGROPECUARIOS</option>
+          <option value="SECRETARÍA DE SALUD">SECRETARÍA DE SALUD</option>
+        </select>
+
+        <input id="add-carpetaSecretaria" type="hidden">
+
+        <label>Supervisor</label>
+        <select id="add-supervisor">
+          <option value="" disabled selected>Selecciona Supervisor</option>
+          <option value="ANA JUDITH GAMBOA MANTILLA">ANA JUDITH GAMBOA MANTILLA</option>
+          <option value="LADY BRIGITTE GUERRERO MUÑOZ">LADY BRIGITTE GUERRERO MUÑOZ</option>
+          <option value="LUZ HAYDEE ORTEGA MAYORGA">LUZ HAYDEE ORTEGA MAYORGA</option>
+          <option value="VALENTINA PÁEZ GUZMÁN">VALENTINA PÁEZ GUZMÁN</option>
+          <option value="JOSE ARCESIO VARGAS BENITEZ">JOSE ARCESIO VARGAS BENITEZ</option>
+          <option value="JOHAN SEBASTIÁN CUARTAS GUARÍN">JOHAN SEBASTIÁN CUARTAS GUARÍN</option>
+          <option value="YEIMY SUGEY ORTIZ SAENZ">YEIMY SUGEY ORTIZ SAENZ</option>
+          <option value="JHONATAN RODRIGUEZ BELTRAN">JHONATAN RODRIGUEZ BELTRAN</option>
+          <option value="SANDRA YULIETH BERNAL ARIAS">SANDRA YULIETH BERNAL ARIAS</option>
+          <option value="LIDA ERIKA SANCHEZ PEÑA">LIDA ERIKA SANCHEZ PEÑA</option>
+        </select>
+
+        <input id="add-contactoSupervisor" type="hidden">
+
+        <div class="btn-row spaced">
+          <button id="btn-add-guardar" class="btn-primary">Guardar</button>
+          <button id="btn-add-volver" class="danger">Regresar</button>
+        </div>
+
+        <p class="center muted spaced"><b>Revisa muy bien la información antes de Guardar</b></p>
+      </div>
+    </section>
+
+    <!-- VISTA DETALLES CONTRATISTA -->
+    <section id="view-detalles" class="view">
+      <div class="card">
+        <h2 style="color:var(--primary)">DETALLES DE CONTRATISTA</h2>
+        <div id="detalles-body" class="narrow"></div>
+        <div class="btn-row spaced">
+          <button id="detalles-ocultar" class="danger">OCULTAR</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- VISTA REVISIÓN DE CUENTAS -->
+    <section id="view-revision" class="view">
+      <div class="card">
+        <h2 style="color:var(--primary)">REVISIÓN DE CUENTAS</h2>
+
+        <div class="center">
+          <div id="cuentas-count" class="tag-count" style="display:none;"></div>
+          <p class="muted" style="margin:6px 0 12px;">N° de Cuentas Pendientes</p>
+        </div>
+
+        <input id="cuentas-filter" class="filter-input" type="text" placeholder="Filtrar por nombre, documento, informe o total informes">
+
+        <div class="btn-row spaced">
+          <button id="revision-volver" class="danger">REGRESAR</button>
+        </div>
+
+        <div id="cuentas-list" class="list-grid"></div>
+      </div>
+    </section>
+
+    <!-- VISTA REVISAR CUENTA -->
+    <section id="view-revisar-cuenta" class="view">
+      <div class="card">
+        <h2 id="rc-title" style="color:var(--primary)">REVISIÓN DE CUENTA</h2>
+        <div id="rc-body" class="narrow"></div>
+
+        <div class="section-toggle">
+          <button id="btn-toggle-contrato" class="chip">Ver Información del Contrato</button>
+        </div>
+        <div id="sec-contrato" class="section-content hidden"></div>
+
+        <div class="section-toggle">
+          <button id="btn-toggle-informe" class="chip">Ver Relación de Informe y Pago</button>
+        </div>
+        <div id="sec-informe" class="section-content hidden"></div>
+
+        <div class="section-toggle">
+          <button id="btn-toggle-planilla" class="chip">Ver Relación de Planilla</button>
+        </div>
+        <div id="sec-planilla" class="section-content hidden"></div>
+
+        <div class="section-toggle">
+          <button id="btn-toggle-planilla2" class="chip">Ver Relación de Planilla Anexa</button>
+        </div>
+        <div id="sec-planilla2" class="section-content hidden"></div>
+
+        <div class="section-toggle">
+          <button id="btn-toggle-actividades" class="chip">Ver Relación de Actividades</button>
+        </div>
+        <div id="sec-actividades" class="section-content hidden">
+          <div id="actividades-blocks"></div>
+          <div class="btn-row" id="actividades-mas-menor" style="display:none; margin-top:10px;">
+            <button id="act-mostrar-mas" class="btn-primary">Mostrar más</button>
+            <button id="act-mostrar-menos" class="danger hidden">Mostrar menos</button>
+          </div>
+        </div>
+
+        <h3 style="color:var(--primary); margin-top:18px;">TUS OBSERVACIONES</h3>
+        <textarea id="rc-observaciones" rows="4" placeholder="Edita solo si vas a devolver la cuenta…"></textarea>
+
+        <div class="btn-row spaced">
+          <button id="rc-guardar" class="btn-primary">Guardar</button>
+          <button id="rc-volver" class="danger">Regresar</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- VISTA REQUERIMIENTOS -->
+    <section id="view-requerimientos" class="view">
+      <div class="card">
+        <h2 style="color:var(--primary)">REQUERIMIENTOS</h2>
+        <div class="center">
+          <div id="req-count" class="tag-count" style="display:none;"></div>
+          <p class="muted" style="margin:6px 0 12px;">N° de Contratistas</p>
+        </div>
+        <input id="req-filter" class="filter-input" type="text" placeholder="Filtrar por nombre, documento, secretaria, supervisor o teléfono">
+        <div id="req-list" class="list-grid"></div>
+        <div class="btn-row spaced">
+          <button id="req-volver" class="danger">REGRESAR</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODAL REQUERIMIENTO -->
+    <div id="modal-requerimiento" class="modal-backdrop hidden">
+      <div class="modal">
+        <h3 style="color:var(--primary)">Redacta tu Requerimiento</h3>
+        <textarea id="modal-req-text" rows="5" placeholder="Redacta el Requerimiento"></textarea>
+        <div class="btn-row" style="margin-top:14px;">
+          <button id="modal-req-enviar" class="btn-primary">Enviar</button>
+          <button id="modal-req-cancelar" class="danger">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- VISTA COMUNICADOS -->
+    <section id="view-comunicados" class="view">
+      <div class="card narrow">
+        <h2 style="color:var(--primary)">EMITE COMUNICADO</h2>
+        <textarea id="comunicado-text" rows="6" placeholder="Escribe tu comunicado"></textarea>
+        <div class="btn-row spaced">
+          <button id="comunicado-enviar" class="btn-primary">Enviar</button>
+          <button id="comunicado-volver" class="danger">Regresar</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- VISTA SOPORTE -->
+    <section id="view-soporte" class="view">
+      <div class="card narrow">
+        <h2 style="color:var(--primary)">¿QUÉ NECESITAS?</h2>
+        <textarea id="soporte-text" rows="6" placeholder="Redacta detalladamente tu pregunta o sugerencia"></textarea>
+        <div class="btn-row spaced">
+          <button id="soporte-enviar" class="btn-primary">Enviar</button>
+          <button id="soporte-volver" class="danger">Regresar</button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+<script>
+/* ================== CONFIGURACIÓN PRINCIPAL ================== */
+const API_BASE = 'https://script.google.com/macros/s/AKfycbxrDWVwRyjKheTVrijr8cPSVLd_iMZUb1qCuLB1c6PkJQktHc9Mhp2bduGqHK2sTW6PJg/exec';
+const BUILDERBOT_ENDPOINT = 'https://app.builderbot.cloud/api/v2/85c2e4d1-278c-45a8-af29-03b6cb3b32ac/messages';
+const BUILDERBOT_API_KEY  = 'bb-97e59701-055d-4ce6-8c70-1345786c8626';
+
+/* ================== SONIDOS ================== */
+const SOUNDS = {
+  question: 'https://res.cloudinary.com/dqqeavica/video/upload/v1759011577/Pay_fail_ls2aif.mp3',
+  info: 'https://res.cloudinary.com/dqqeavica/video/upload/v1759011578/Default_notification_pkp4wr.mp3',
+  success: 'https://res.cloudinary.com/dqqeavica/video/upload/v1759011577/Pay_success_t5aawh.mp3',
+  error: 'https://res.cloudinary.com/dqqeavica/video/upload/v1759011578/Low_battery_d5qua1.mp3',
+  warning: 'https://res.cloudinary.com/dqqeavica/video/upload/v1759011578/Low_battery_d5qua1.mp3',
+  login: 'https://res.cloudinary.com/dqqeavica/video/upload/v1759011577/Siri_star_g1owy4.mp3',
+  logout: 'https://res.cloudinary.com/dqqeavica/video/upload/v1759011577/Siri_End_kelv02.mp3',
+  back: 'https://res.cloudinary.com/dqqeavica/video/upload/v1759011578/Keyboard_Enter_b9k2dc.mp3'
+};
+function playSoundOnce(url){
+  try{
+    const a = new Audio(url);
+    a.preload = 'auto';
+    a.play().catch(()=>{});
+  }catch(e){}
+}
+if (window.Swal && typeof Swal.fire === 'function'){
+  const __fire = Swal.fire.bind(Swal);
+  Swal.fire = function(options = {}, ...rest){
+    try{
+      const icon = options.icon || options.type;
+      if (icon && SOUNDS[icon]) playSoundOnce(SOUNDS[icon]);
+    }catch(e){}
+    return __fire(options, ...rest);
+  }
+}
+
+/* ================== LOADER ================== */
+const loader = document.getElementById('loader');
+let loadingCount = 0;
+let loaderTimer = null;
+
+function startLoading(){
+  loadingCount++;
+  if (loadingCount === 1){
+    loaderTimer = setTimeout(()=>{
+      loader.classList.remove('hidden');
+      loaderTimer = null;
+    }, 120);
+  }
+}
+function stopLoading(){
+  if (loadingCount === 0) return;
+  loadingCount--;
+  if (loadingCount === 0){
+    if (loaderTimer){
+      clearTimeout(loaderTimer);
+      loaderTimer = null;
+    }
+    loader.classList.add('hidden');
+  }
+}
+
+/* ================== API HELPERS ================== */
+async function apiGet(action, params = {}){
+  startLoading();
+  try{
+    const url = new URL(API_BASE);
+    url.search = new URLSearchParams({ action, ...params }).toString();
+    const r = await fetch(url.toString(), { method: 'GET' });
+    const j = await r.json();
+    if(!j.ok) throw new Error(j.error || 'Error');
+    return j.data;
+  } finally { stopLoading(); }
+}
+async function apiPost(action, body = {}){
+  startLoading();
+  try{
+    const url = API_BASE + '?action=' + encodeURIComponent(action);
+    const r = await fetch(url, {
+      method:'POST',
+      headers: { 'Content-Type':'text/plain;charset=utf-8' },
+      body: JSON.stringify(body)
+    });
+    const j = await r.json();
+    if(!j.ok) throw new Error(j.error || 'Error');
+    return j.data;
+  } finally { stopLoading(); }
+}
+
+/* ================== BUILDERBOT ================== */
+function sendBuilderbotMessage(destino, mensaje){
+  try {
+    fetch(BUILDERBOT_ENDPOINT, {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-builderbot':BUILDERBOT_API_KEY
+      },
+      body:JSON.stringify({
+        messages:{ content: mensaje },
+        number:String(destino),
+        checkIfExists:false
+      })
+    }).catch(()=>{});
+  }catch(_){}
+}
+
+/* ================== ESTADO GLOBAL ================== */
+let currentUser = null;
+
+/* ================== VISTAS ================== */
+function showView(id){
+  for(const el of document.querySelectorAll('.view')) el.classList.remove('active');
+  const v = document.getElementById(id);
+  if(v) v.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ================== LOGIN ================== */
+const btnLogin = document.getElementById('btn-login');
+const loginCedula = document.getElementById('login-cedula');
+
+btnLogin.addEventListener('click', async () => {
+  const cedula = (loginCedula.value || '').trim();
+  if (cedula === '') {
+    Swal.fire({ icon:'warning', title:'Ingresa la Cédula', text:'Campo requerido.' });
+    return;
+  }
+  if (!/^\d{6,10}$/.test(cedula)) {
+    Swal.fire({ icon:'warning', title:'Cédula inválida', text:'Debe tener de 6 a 10 dígitos SIN PUNTOS NI ESPACIOS' });
+    return;
+  }
+  try {
+    const res = await apiGet('login', { cedula });
+    if (!res || !res.encontrado){
+      // Envío de mensaje de soporte vía Builderbot
+      sendBuilderbotMessage('573103230712',
+        'Buen día *Oscar*\n\nNo tengo acceso a la app de Contratación\n\nCordialmente,\n*' + (res?.profesional || 'Usuario') + '*'
+      );
+      await Swal.fire({
+        icon:'error',
+        title:'NO TIENES ACCESO',
+        html:'Comunícate con soporte para validar.',
+        timer:8000,
+        showConfirmButton:false
+      });
+      return;
+    }
+    currentUser = {
+      cedula,
+      profesional: res.profesional || '',
+      celular: res.celular || ''
+    };
+    playSoundOnce(SOUNDS.login);
+    renderInicio();
+    showView('view-inicio');
+  } catch (e) {
+    Swal.fire({ icon:'error', title:'Error', text:e.message });
+  }
+});
+
+document.getElementById('btn-logout').addEventListener('click', ()=>{
+  playSoundOnce(SOUNDS.logout);
+  currentUser = null;
+  loginCedula.value = '';
+  showView('view-login');
+});
+
+/* ================== INICIO ================== */
+function renderInicio(){
+  document.getElementById('inicio-profesional').textContent = 'PROFESIONAL: ' + (currentUser?.profesional || '');
+  document.getElementById('inicio-fecha').textContent = formatoFechaHumana(new Date());
+}
+function formatoFechaHumana(date){
+  const dias=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const meses=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const d=dias[date.getDay()];
+  const dia=('0'+date.getDate()).slice(-2);
+  const mes=meses[date.getMonth()];
+  const y=date.getFullYear();
+  return `${d}, ${dia} de ${mes} de ${y}`;
+}
+function formatoFechaHoraCorta(date){
+  let h=date.getHours(); const min=('0'+date.getMinutes()).slice(-2);
+  const ampm=h<12?'AM':'PM'; h=h%12||12;
+  const dd=('0'+date.getDate()).slice(-2);
+  const mm=('0'+(date.getMonth()+1)).slice(-2);
+  const yyyy=date.getFullYear();
+  return `${dd}/${mm}/${yyyy} ${h}:${min} ${ampm}`;
+}
+
+/* ================== NAVEGACIÓN PRINCIPAL ================== */
+document.getElementById('go-contratistas').addEventListener('click', async ()=>{
+  await cargarContratistas();
+  showView('view-contratistas');
+});
+document.getElementById('go-revision').addEventListener('click', async ()=>{
+  await cargarCuentasPendientes();
+  showView('view-revision');
+});
+document.getElementById('go-requerimientos').addEventListener('click', async ()=>{
+  await cargarRequerimientosBase();
+  showView('view-requerimientos');
+});
+document.getElementById('go-comunicados').addEventListener('click', ()=> showView('view-comunicados'));
+document.getElementById('go-soporte').addEventListener('click', ()=> showView('view-soporte'));
+
+/* ================== CONTRATISTAS ================== */
+let CONTR_DATA=[];
+async function cargarContratistas(){
+  try{
+    const list=await apiGet('listContratistas');
+    CONTR_DATA=Array.isArray(list)?list:[];
+    pintarContratistas(CONTR_DATA);
+    actualizarResumenContratistas(CONTR_DATA);
+  }catch(e){
+    CONTR_DATA=[];
+    pintarContratistas(CONTR_DATA);
+    actualizarResumenContratistas(CONTR_DATA);
+    Swal.fire({icon:'error',title:'Error',text:e.message});
+  }
+}
+function actualizarResumenContratistas(list){
+  const box=document.getElementById('contr-count');
+  if(!box) return;
+  if(!list.length){ box.style.display='none'; box.textContent=''; return; }
+  box.textContent=String(list.length);
+  box.style.display='inline-block';
+}
+function pintarContratistas(list){
+  const wrap=document.getElementById('contr-list');
+  if(!wrap) return;
+  wrap.innerHTML='';
+  if(!list.length){
+    wrap.innerHTML='<p class="muted center">No hay contratistas activos.</p>';
+    return;
+  }
+  for(const c of list){
+    const div=document.createElement('div');
+    div.className='item-card';
+
+    const header=document.createElement('div');
+    header.className='item-header';
+
+    const title=document.createElement('p');
+    title.className='item-title';
+    title.textContent='NOMBRE: '+(c.nombre||'');
+
+    const estadoSpan=document.createElement('span');
+    estadoSpan.className='estado-badge '+(c.estado==='ACTIVO'?'':'inactivo');
+    estadoSpan.textContent=c.estado;
+
+    header.appendChild(title);
+    header.appendChild(estadoSpan);
+
+    const pDoc=document.createElement('p');
+    pDoc.className='item-sub';
+    pDoc.textContent='CC: '+(c.documento||'');
+
+    const pSec=document.createElement('p');
+    pSec.className='item-sub';
+    pSec.textContent='SECRETARÍA: '+(c.secretaria||'');
+
+    const pSup=document.createElement('p');
+    pSup.className='item-sub';
+    pSup.textContent='SUPERVISOR: '+(c.supervisor||'');
+
+    const pContrato=document.createElement('p');
+    pContrato.className='item-sub';
+    pContrato.textContent='CONTRATO: '+(c.contrato||'')+' de: '+(c.fechaContrato||'');
+
+    const pInicio=document.createElement('p');
+    pInicio.className='item-sub';
+    pInicio.textContent='FECHA INICIO: '+(c.fechaInicio||'');
+
+    const pTermino=document.createElement('p');
+    pTermino.className='item-sub';
+    pTermino.textContent='FECHA TERMINO: '+(c.fechaTermino||'');
+
+    const btnRow=document.createElement('div');
+    btnRow.className='btn-row';
+
+    const btnDetalles=document.createElement('button');
+    btnDetalles.textContent='MOSTRAR DETALLES';
+    btnDetalles.addEventListener('click',()=> mostrarDetallesContratista(c.documento));
+
+    const btnWhatsapp=document.createElement('button');
+    btnWhatsapp.textContent='WhatsApp';
+    btnWhatsapp.addEventListener('click',()=>{
+      const tel=c.telefono||'';
+      if(!tel){ Swal.fire({icon:'info',title:'Sin teléfono'}); return; }
+      window.open('https://wa.me/'+tel,'_blank');
+    });
+
+    const btnDrive=document.createElement('button');
+    btnDrive.textContent='Drive';
+    btnDrive.addEventListener('click',()=>{
+      if(c.carpetaContratista){
+        window.open('https://drive.google.com/drive/folders/'+c.carpetaContratista,'_blank');
+      }else{
+        Swal.fire({icon:'info',title:'Sin carpeta',text:'No hay carpeta asociada.'});
+      }
+    });
+
+    const btnEstado=document.createElement('button');
+    btnEstado.className='estado-toggle-btn '+(c.estado==='ACTIVO'?'green':'red');
+    btnEstado.textContent=c.estado;
+    let nuevoEstado=c.estado;
+    btnEstado.addEventListener('click',()=>{
+      nuevoEstado=(nuevoEstado==='ACTIVO'?'INACTIVO':'ACTIVO');
+      btnEstado.textContent=nuevoEstado;
+      btnEstado.className='estado-toggle-btn '+(nuevoEstado==='ACTIVO'?'green':'red');
+    });
+
+    const btnGuardarEstado=document.createElement('button');
+    btnGuardarEstado.textContent='GUARDAR ESTADO';
+    btnGuardarEstado.addEventListener('click', async ()=>{
+      try{
+        await apiPost('guardarEstadoContratista',{
+          documento:c.documento,
+          estado:nuevoEstado
+        });
+        Swal.fire({icon:'success',title:'Estado actualizado',timer:1600,showConfirmButton:false});
+        await cargarContratistas();
+      }catch(e){
+        Swal.fire({icon:'error',title:'Error',text:e.message});
+      }
+    });
+
+    btnRow.appendChild(btnDetalles);
+    btnRow.appendChild(btnWhatsapp);
+    btnRow.appendChild(btnDrive);
+    btnRow.appendChild(btnEstado);
+    btnRow.appendChild(btnGuardarEstado);
+
+    div.appendChild(header);
+    div.appendChild(pDoc);
+    div.appendChild(pSec);
+    div.appendChild(pSup);
+    div.appendChild(pContrato);
+    div.appendChild(pInicio);
+    div.appendChild(pTermino);
+    div.appendChild(btnRow);
+
+    wrap.appendChild(div);
+  }
+}
+document.getElementById('contr-filter').addEventListener('input',()=>{
+  const q=document.getElementById('contr-filter').value.trim().toLowerCase();
+  const filtered=CONTR_DATA.filter(c=>{
+    return [c.nombre,c.documento,c.secretaria,c.supervisor,c.telefono]
+      .some(v=>String(v||'').toLowerCase().includes(q));
+  });
+  pintarContratistas(filtered);
+  actualizarResumenContratistas(filtered);
+});
+document.getElementById('contr-volver').addEventListener('click',()=> showView('view-inicio'));
+
+/* ================== AGREGAR CONTRATISTA ================== */
+const MAP_SECRETARIA_CARPETA={
+  'DESPACHO MUNICIPAL':'1KkTSaWUnNkKzES_Drn7cO449hYYDT-Pd',
+  'SECRETARÍA DE GOBIERNO Y SERVICIOS ADMINISTRATIVOS':'1X5spQ24vs5wzZyI1AtiMMMBrTCzKMNOH',
+  'SECRETARÍA DE HACIENDA':'1v_0D71jH-9nK0HgAWr5gzLHxRCF3R2bG',
+  'SECRETARÍA DE EDUCACIÓN, DESARROLLO ECONÓMICO Y SOCIAL':'1EM4GpZB29vaxCABp3T--dN9bYy9z0eJz',
+  'SECRETARÍA DE PLANEACIÓN E INFRAESTRUCTURA':'1Z7FrxQc8APQQjabcZvf9kLLwT5nodD0g',
+  'SECRETARÍA DE ASUNTOS AGROPECUARIOS':'1kiDmMAzHGUjWn3UEI_mjhzJkDvXBcCRe',
+  'SECRETARÍA DE SALUD':'1c87Bg1pQQ6ydrtG7dTEVyByWqUHrWnMD'
+};
+const MAP_SUPERVISOR_CONTACTO={
+  'ANA JUDITH GAMBOA MANTILLA':'573204832824',
+  'LADY BRIGITTE GUERRERO MUÑOZ':'573134815822',
+  'LUZ HAYDEE ORTEGA MAYORGA':'573222622322',
+  'VALENTINA PÁEZ GUZMÁN':'573104569019',
+  'JOSE ARCESIO VARGAS BENITEZ':'573155844147',
+  'JOHAN SEBASTIÁN CUARTAS GUARÍN':'573106307707',
+  'YEIMY SUGEY ORTIZ SAENZ':'573203469760',
+  'JHONATAN RODRIGUEZ BELTRAN':'573115574000',
+  'SANDRA YULIETH BERNAL ARIAS':'3108865269',
+  'LIDA ERIKA SANCHEZ PEÑA':'573133641048'
+};
+
+document.getElementById('btn-add-contratista').addEventListener('click',()=> showView('view-agregar'));
+document.getElementById('add-secretaria').addEventListener('change',()=>{
+  const val=document.getElementById('add-secretaria').value;
+  document.getElementById('add-carpetaSecretaria').value=MAP_SECRETARIA_CARPETA[val]||'';
+});
+document.getElementById('add-supervisor').addEventListener('change',()=>{
+  const val=document.getElementById('add-supervisor').value;
+  document.getElementById('add-contactoSupervisor').value=MAP_SUPERVISOR_CONTACTO[val]||'';
+});
+document.getElementById('btn-add-volver').addEventListener('click',()=> showView('view-contratistas'));
+
+document.getElementById('btn-add-guardar').addEventListener('click',async()=>{
+  const documento=(document.getElementById('add-documento').value||'').trim();
+  const nombre=(document.getElementById('add-nombre').value||'').trim();
+  const secretaria=(document.getElementById('add-secretaria').value||'').trim();
+  const carpetaSecretaria=(document.getElementById('add-carpetaSecretaria').value||'').trim();
+  const supervisor=(document.getElementById('add-supervisor').value||'').trim();
+  const contacto=(document.getElementById('add-contactoSupervisor').value||'').trim();
+
+  if(!/^\d{6,10}$/.test(documento)){
+    Swal.fire({icon:'warning',title:'Documento inválido'}); return;
+  }
+  const nombreParts=nombre.split(/\s+/).filter(Boolean);
+  if(nombreParts.length<2){
+    Swal.fire({icon:'warning',title:'Nombre incompleto',text:'Ingresa mínimo nombre y apellido'}); return;
+  }
+  if(!secretaria || !supervisor || !carpetaSecretaria || !contacto){
+    Swal.fire({icon:'warning',title:'Campos incompletos'}); return;
+  }
+
+  try{
+    const res=await apiPost('agregarContratista',{
+      documento,
+      nombre:nombre.toUpperCase(),
+      secretaria,
+      carpetaSecretaria,
+      supervisor,
+      contacto
+    });
+    Swal.fire({icon:'success',title:'Contratista agregado',timer:2000,showConfirmButton:false});
+    await cargarContratistas();
+    showView('view-contratistas');
+  }catch(e){
+    Swal.fire({icon:'error',title:'Error',text:e.message});
+  }
+});
+
+/* ================== DETALLES CONTRATISTA ================== */
+async function mostrarDetallesContratista(documento){
+  try{
+    const d=await apiGet('detallesContratista',{documento});
+    const body=document.getElementById('detalles-body');
+    body.innerHTML='';
+    if(!d){
+      body.innerHTML='<p class="muted center">No encontrado.</p>';
+    }else{
+      const lines=[
+        `<b>NOMBRE:</b> ${d.nombre||''}`,
+        `<b>CC:</b> ${d.documento||''} de ${d.expedida||''}`,
+        `<b>TELEFONO:</b> ${d.telefono||'SIN REGISTRO'}`,
+        `<b>CORREO:</b> ${d.correo||'SIN REGISTRO'}`,
+        `<b>CUENTA:</b> ${d.cuenta||''} ${d.tipoCuenta||''} ${d.banco||''}`,
+        `<b>EPS:</b> ${d.eps||''}`,
+        `<b>AFP:</b> ${d.pension||''}`,
+        `<b>ARL:</b> ${d.arl||''}`,
+        `<b>SECRETARÍA:</b> ${d.secretaria||''}`,
+        `<b>SUPERVISOR:</b> ${d.supervisor||''}`,
+        `<b>CONTRATO:</b> ${d.contrato||''} de: ${d.fechaContrato||''}`,
+        `<b>OBJETO:</b> ${d.objeto||''}`,
+        `<b>FECHA DE INICIO:</b> ${d.fechaInicio||''}`,
+        `<b>FECHA DE TERMINO:</b> ${d.fechaTermino||''}`,
+        `<b>MRA:</b> ${d.mra||''}`,
+        `<b>VALOR:</b> ${d.valorFinal||''}`,
+        `<b>CDP:</b> ${d.cdp||''}`,
+        `<b>RP:</b> ${d.rp||''}`,
+        `<b>CDP ADICIÓN:</b> ${d.cdpAdicion||''}`,
+        `<b>RP ADICIÓN:</b> ${d.rpAdicion||''}`,
+        `<b>REGIMEN:</b> ${d.regimen||''}`
+      ];
+      for(let i=1;i<=26;i++){
+        const val=d['obligacion'+i];
+        if(val && val!=='-'){
+          lines.push(`<b>OBLIGACIÓN ${i}:</b> ${val}`);
+        }
+      }
+      body.innerHTML=lines.map(l=>`<p>${l}</p>`).join('');
+    }
+    showView('view-detalles');
+  }catch(e){
+    Swal.fire({icon:'error',title:'Error',text:e.message});
+  }
+}
+document.getElementById('detalles-ocultar').addEventListener('click',()=> showView('view-contratistas'));
+
+/* ================== REVISIÓN DE CUENTAS (Listado) ================== */
+let CUENTAS_DATA=[];
+async function cargarCuentasPendientes(){
+  try{
+    const list=await apiGet('listCuentasPendientes');
+    CUENTAS_DATA=Array.isArray(list)?list:[];
+    pintarCuentas(CUENTAS_DATA);
+    actualizarResumenCuentas(CUENTAS_DATA);
+  }catch(e){
+    CUENTAS_DATA=[];
+    pintarCuentas(CUENTAS_DATA);
+    actualizarResumenCuentas(CUENTAS_DATA);
+    Swal.fire({icon:'error',title:'Error',text:e.message});
+  }
+}
+function actualizarResumenCuentas(list){
+  const box=document.getElementById('cuentas-count');
+  if(!box) return;
+  if(!list.length){ box.style.display='none'; box.textContent=''; return; }
+  box.textContent=String(list.length);
+  box.style.display='inline-block';
+}
+function pintarCuentas(list){
+  const wrap=document.getElementById('cuentas-list');
+  wrap.innerHTML='';
+  if(!list.length){
+    wrap.innerHTML='<p class="muted center">No hay cuentas pendientes.</p>';
+    return;
+  }
+  for(const c of list){
+    const div=document.createElement('div');
+    div.className='item-card';
+
+    const header=document.createElement('div');
+    header.className='item-header';
+
+    const title=document.createElement('p');
+    title.className='item-title';
+    title.textContent='NOMBRE: '+(c.nombre||'');
+    header.appendChild(title);
+
+    const pDoc=document.createElement('p');
+    pDoc.className='item-sub';
+    pDoc.textContent='CC: '+(c.documento||'');
+
+    const pInf=document.createElement('p');
+    pInf.className='item-sub';
+    pInf.textContent='INFORME: '+(c.informe||'')+' de: '+(c.totalInformes||'');
+
+    const btnRow=document.createElement('div');
+    btnRow.className='btn-row';
+
+    const btnRevisar=document.createElement('button');
+    btnRevisar.textContent='REVISAR';
+    btnRevisar.addEventListener('click',()=> abrirRevisionCuenta(c.documento));
+    btnRow.appendChild(btnRevisar);
+
+    div.appendChild(header);
+    div.appendChild(pDoc);
+    div.appendChild(pInf);
+    div.appendChild(btnRow);
+    wrap.appendChild(div);
+  }
+}
+document.getElementById('cuentas-filter').addEventListener('input',()=>{
+  const q=document.getElementById('cuentas-filter').value.trim().toLowerCase();
+  const filtered=CUENTAS_DATA.filter(c=>{
+    return [c.nombre,c.documento,c.informe,c.totalInformes]
+      .some(v=>String(v||'').toLowerCase().includes(q));
+  });
+  pintarCuentas(filtered);
+  actualizarResumenCuentas(filtered);
+});
+document.getElementById('revision-volver').addEventListener('click',()=> showView('view-inicio'));
+
+/* ================== REVISAR CUENTA (Detalle) ================== */
+let REV_CUENTA=null;
+async function abrirRevisionCuenta(documento){
+  try{
+    const data=await apiGet('revisarCuentaData',{documento});
+    if(!data){
+      Swal.fire({icon:'info',title:'No encontrado'}); return;
+    }
+    REV_CUENTA=data;
+    renderRevisionCuenta();
+    showView('view-revisar-cuenta');
+  }catch(e){
+    Swal.fire({icon:'error',title:'Error',text:e.message});
+  }
+}
+function renderRevisionCuenta(){
+  const c=REV_CUENTA?.contratista;
+  const cu=REV_CUENTA?.cuenta;
+  const rcTitle=document.getElementById('rc-title');
+  const rcBody=document.getElementById('rc-body');
+  rcTitle.textContent='REVISIÓN DE CUENTA DE '+(c?.nombre||'')+' CC: '+(c?.documento||'');
+  rcBody.innerHTML='';
+  const baseInfo=[
+    `<b>DOCUMENTO:</b> ${c?.documento||''}`,
+    `<b>SECRETARÍA:</b> ${c?.secretaria||''}`,
+    `<b>SUPERVISOR:</b> ${c?.supervisor||''}`
+  ];
+  rcBody.innerHTML=baseInfo.map(x=>`<p>${x}</p>`).join('');
+
+  const sContrato=document.getElementById('sec-contrato');
+  sContrato.innerHTML=[
+    `<b>CONTRATO N°:</b> ${c?.contrato||''}`,
+    `<b>FECHA DE CONTRATO:</b> ${c?.fechaContrato||''}`,
+    `<b>FECHA DE INICIO:</b> ${c?.fechaInicio||''}`,
+    `<b>FECHA DE TERMINO:</b> ${c?.fechaTermino||''}`,
+    `<b>VALOR INICIAL:</b> ${c?.valor||''||'-'}`,
+    `<b>MRA:</b> ${c?.mra||''}`,
+    `<b>VALOR FINAL:</b> ${c?.valorFinal||''}`,
+    `<b>CDP:</b> ${c?.cdp||''}`,
+    `<b>RP:</b> ${c?.rp||''}`,
+    `<b>CDP ADICIÓN:</b> ${c?.cdpAdicion||''}`,
+    `<b>RP ADICIÓN:</b> ${c?.rpAdicion||''}`,
+    `<b>SECRETARÍA:</b> ${c?.secretaria||''}`,
+    `<b>SUPERVISOR:</b> ${c?.supervisor||''}`,
+    `<b>CONTACTO SUPERVISOR:</b> ${c?.contacto||''}`
+  ].map(x=>`<p>${x}</p>`).join('');
+
+  const sInforme=document.getElementById('sec-informe');
+  sInforme.innerHTML=[
+    `<h4 style="margin:4px 0;color:var(--primary)">RELACIÓN DE INFORME</h4>`,
+    `<p><b>INFORME:</b> ${cu?.informe||''} de ${cu?.totalInformes||''}</p>`,
+    `<p><b>INICIO DE PERIODO RATIFICADO:</b> ${cu?.inicioRatificar||''}</p>`,
+    `<p><b>FIN DE PERIODO RATIFICADO:</b> ${cu?.finRatificar||''}</p>`,
+    `<h4 style="margin:14px 0 4px;color:var(--primary)">RELACIÓN DE PAGO</h4>`,
+    `<p><b>SALDO ACTUAL:</b> ${cu?.saldoActual||''}</p>`,
+    `<p><b>VALOR COBRADO:</b> ${cu?.menos||''}</p>`,
+    `<p><b>NUEVO SALDO:</b> ${cu?.nuevoSaldo||''}</p>`
+  ].join('');
+
+  const sPlanilla=document.getElementById('sec-planilla');
+  sPlanilla.innerHTML=[
+    `<h4 style="margin:4px 0;color:var(--primary)">RELACIÓN DE PLANILLA</h4>`,
+    `<p><b>PLANILLA N°:</b> ${cu?.planilla||''} de ${cu?.mesPlanilla||''}</p>`,
+    `<p><b>BASE DE COTIZACIÓN:</b> ${cu?.base||''}</p>`,
+    `<p><b>APORTES A SALUD:</b> ${cu?.salud||''}</p>`,
+    `<p><b>APORTES A PENSIÓN:</b> ${cu?.fondo||''}</p>`,
+    `<p><b>APORTES A ARL:</b> ${cu?.riesgos||''}</p>`,
+    `<p><b>APORTES FPS:</b> ${cu?.solidario||''} ${cu?.aporte||''}</p>`
+  ].join('');
+
+  const sPlanilla2=document.getElementById('sec-planilla2');
+  sPlanilla2.innerHTML=[
+    `<h4 style="margin:4px 0;color:var(--primary)">RELACIÓN DE PLANILLA ANEXA</h4>`,
+    `<p><b>PLANILLA ANEXA N°:</b> ${cu?.planilla2||''} de ${cu?.mesPlanilla2||''}</p>`,
+    `<p><b>BASE DE COTIZACIÓN:</b> ${cu?.base2||''}</p>`,
+    `<p><b>APORTES A SALUD:</b> ${cu?.salud2||''}</p>`,
+    `<p><b>APORTES A PENSIÓN:</b> ${cu?.fondo2||''}</p>`,
+    `<p><b>APORTES A ARL:</b> ${cu?.riesgos2||''}</p>`,
+    `<p><b>APORTES FPS:</b> ${cu?.solidario2||''} ${cu?.aporte2||''}</p>`
+  ].join('');
+
+  const blocksWrap=document.getElementById('actividades-blocks');
+  blocksWrap.innerHTML='';
+  const actividades=REV_CUENTA?.actividades||[];
+  const evidencias=REV_CUENTA?.evidencias||[];
+  const obligaciones=REV_CUENTA?.obligaciones||[];
+  const total=obligaciones.length;
+
+  function evidenciaThumb(url){
+    if(!url) return null;
+    const m=String(url).match(/\/d\/([A-Za-z0-9_-]{10,})\//);
+    const id=m?m[1]:'';
+    if(!id) return url;
+    return 'https://drive.google.com/thumbnail?sz=w1000&id='+id;
+  }
+  function evidenciaFull(url){
+    if(!url) return null;
+    const m=String(url).match(/\/d\/([A-Za-z0-9_-]{10,})\//);
+    const id=m?m[1]:'';
+    if(!id) return url;
+    return 'https://drive.google.com/uc?export=view&id='+id;
+  }
+
+  function renderActividadRango(from,to){
+    blocksWrap.innerHTML='';
+    for(let i=from;i<=to && i<=total;i++){
+      const oblig=obligaciones[i-1];
+      const act=actividades[i-1];
+      const evid=evidencias[i-1];
+
+      if(
+        (!oblig || oblig==='-') &&
+        (!act || act==='-') &&
+        (!evid || evid==='-')
+      ) continue;
+
+      const block=document.createElement('div');
+      block.className='oblig-block';
+
+      const titulo=document.createElement('p');
+      titulo.className='oblig-title';
+      titulo.textContent='OBLIGACIÓN N° '+i;
+      block.appendChild(titulo);
+
+      if(oblig && oblig!=='-'){
+        const ob=document.createElement('p');
+        ob.className='oblig-sub';
+        ob.innerHTML='<b>Obligación:</b> '+oblig;
+        block.appendChild(ob);
+      }
+      if(act && act!=='-'){
+        const ac=document.createElement('p');
+        ac.className='oblig-sub';
+        ac.innerHTML='<b>Actividades:</b> '+act;
+        block.appendChild(ac);
+      }
+      if(evid && evid!=='-'){
+        const evDiv=document.createElement('div');
+        evDiv.className='evidence-grid';
+        const img=document.createElement('img');
+        img.className='evidence-thumb';
+        img.src=evidenciaThumb(evid)||evid;
+        img.alt='Evidencia '+i;
+        img.addEventListener('click',()=>{
+          const full=evidenciaFull(evid)||evid;
+          Swal.fire({
+            title:'Evidencia '+i,
+            html:`<img src="${full}" style="max-width:100%;border-radius:12px;">`,
+            width:'80%'
+          });
+        });
+        evDiv.appendChild(img);
+        block.appendChild(evDiv);
+      }
+      blocksWrap.appendChild(block);
+    }
+  }
+
+  const masMenos=document.getElementById('actividades-mas-menor');
+  let rangoEstado=1;
+  function actualizarRango(){
+    if(rangoEstado===1){
+      renderActividadRango(1,10);
+      masMenos.style.display=(total>10)?'flex':'none';
+      document.getElementById('act-mostrar-mas').classList.remove('hidden');
+      document.getElementById('act-mostrar-menos').classList.add('hidden');
+    }else if(rangoEstado===2){
+      renderActividadRango(11,20);
+      document.getElementById('act-mostrar-mas').classList.remove('hidden');
+      document.getElementById('act-mostrar-menos').classList.remove('hidden');
+    }else{
+      renderActividadRango(21,26);
+      document.getElementById('act-mostrar-mas').classList.add('hidden');
+      document.getElementById('act-mostrar-menos').classList.remove('hidden');
+    }
+  }
+  actualizarRango();
+  document.getElementById('act-mostrar-mas').onclick=()=>{
+    if(rangoEstado===1 && total>10){ rangoEstado=2; actualizarRango(); }
+    else if(rangoEstado===2 && total>20){ rangoEstado=3; actualizarRango(); }
+  };
+  document.getElementById('act-mostrar-menos').onclick=()=>{
+    if(rangoEstado===3){ rangoEstado=2; actualizarRango(); }
+    else if(rangoEstado===2){ rangoEstado=1; actualizarRango(); }
+  };
+}
+document.getElementById('rc-volver').addEventListener('click',()=> showView('view-revision'));
+
+function toggleSection(btnId, secId, txtShow, txtHide){
+  const btn=document.getElementById(btnId);
+  const sec=document.getElementById(secId);
+  btn.addEventListener('click',()=>{
+    const visible=!sec.classList.contains('hidden');
+    if(visible){
+      sec.classList.add('hidden');
+      btn.textContent=txtShow;
+    }else{
+      sec.classList.remove('hidden');
+      btn.textContent=txtHide;
+    }
+  });
+}
+toggleSection('btn-toggle-contrato','sec-contrato','Ver Información del Contrato','Ocultar Información del Contrato');
+toggleSection('btn-toggle-informe','sec-informe','Ver Relación de Informe y Pago','Ocultar Relación de Informe y Pago');
+toggleSection('btn-toggle-planilla','sec-planilla','Ver Relación de Planilla','Ocultar Relación de Planilla');
+toggleSection('btn-toggle-planilla2','sec-planilla2','Ver Relación de Planilla Anexa','Ocultar Relación de Planilla Anexa');
+toggleSection('btn-toggle-actividades','sec-actividades','Ver Relación de Actividades','Ocultar Relación de Actividades');
+
+document.getElementById('rc-guardar').addEventListener('click', async ()=>{
+  if(!REV_CUENTA?.cuenta){
+    Swal.fire({icon:'warning',title:'Sin cuenta cargada'}); return;
+  }
+  const documento=REV_CUENTA.contratista.documento;
+  const nombre=REV_CUENTA.contratista.nombre;
+  const informe=REV_CUENTA.cuenta.informe;
+  const supervisor=REV_CUENTA.contratista.supervisor;
+  const telSupervisor=REV_CUENTA.contratista.contacto;
+  const telContratista=REV_CUENTA.contratista.telefono;
+  const observ=(document.getElementById('rc-observaciones').value||'').trim();
+
+  const rs=await Swal.fire({
+    icon:'success',
+    title:'Has revisado la cuenta de '+nombre,
+    text:'Toma una de las opciones.',
+    showCancelButton:true,
+    showDenyButton:true,
+    confirmButtonText:'Aprobar',
+    denyButtonText:'Devolver',
+    cancelButtonText:'Cancelar'
+  });
+
+  if(rs.isConfirmed){
+    try{
+      await apiPost('aprobarCuenta',{documento,informe});
+      if(telContratista){
+        sendBuilderbotMessage(telContratista,
+          'Estimado(a) *'+nombre+'*\nTu *Cuenta N° '+informe+'* ha sido aprobada, ya puedes subir los documentos al *Plan de Pagos en el Secop II*\nUno vez los subas, toma la opción *Reportar Plan de Pagos* en la App.\n> Recuerda que, desde la segunda cuenta; debes relacionar la fecha en que la entidad te canceló los honorarios de la cuenta inmediatamente anterior.\nCordialmente,\n*Equipo de Contratación*'
+        );
+      }
+      Swal.fire({icon:'success',title:'Cuenta Aprobada',timer:1800,showConfirmButton:false});
+      await cargarCuentasPendientes();
+      showView('view-revision');
+    }catch(e){
+      Swal.fire({icon:'error',title:'Error',text:e.message});
+    }
+  }else if(rs.isDenied){
+    try{
+      await apiPost('devolverCuenta',{documento,informe,observaciones:observ});
+      if(telSupervisor){
+        sendBuilderbotMessage(telSupervisor,
+          'Estimado(a) *'+supervisor+'*\nSe ha devuelto la *Cuenta N° '+informe+'* de *'+nombre+'* por esta inconsistencia:\n*'+(observ||'Sin observaciones')+'*\nEl(la) Contratista ya ha sido notificado(a).\nCordialmente,\n*Equipo de Contratación*'
+        );
+      }
+      if(telContratista){
+        sendBuilderbotMessage(telContratista,
+          'Estimado(a) *'+nombre+'*\nSe ha devuelto tu *Cuenta N° '+informe+'* por esta inconsistencia:\n*'+(observ||'Sin observaciones')+'*\nHaz la corrección desde la App teniendo en cuenta las observaciones anteriores.\nCordialmente,\n*Equipo de Contratación*'
+        );
+      }
+      Swal.fire({icon:'success',title:'Cuenta Devuelta',timer:1800,showConfirmButton:false});
+      await cargarCuentasPendientes();
+      showView('view-revision');
+    }catch(e){
+      Swal.fire({icon:'error',title:'Error',text:e.message});
+    }
+  }
+});
+
+/* ================== REQUERIMIENTOS ================== */
+let REQ_DATA=[];
+async function cargarRequerimientosBase(){
+  try{
+    const list=await apiGet('listContratistas');
+    REQ_DATA=Array.isArray(list)?list:[];
+    pintarRequerimientos(REQ_DATA);
+    actualizarResumenReq(REQ_DATA);
+  }catch(e){
+    REQ_DATA=[];
+    pintarRequerimientos(REQ_DATA);
+    actualizarResumenReq(REQ_DATA);
+    Swal.fire({icon:'error',title:'Error',text:e.message});
+  }
+}
+function actualizarResumenReq(list){
+  const box=document.getElementById('req-count');
+  if(!box) return;
+  if(!list.length){ box.style.display='none'; box.textContent=''; return; }
+  box.textContent=String(list.length);
+  box.style.display='inline-block';
+}
+function pintarRequerimientos(list){
+  const wrap=document.getElementById('req-list');
+  wrap.innerHTML='';
+  if(!list.length){
+    wrap.innerHTML='<p class="muted center">No hay contratistas.</p>';
+    return;
+  }
+  for(const c of list){
+    const div=document.createElement('div');
+    div.className='item-card';
+
+    const header=document.createElement('div');
+    header.className='item-header';
+
+    const title=document.createElement('p');
+    title.className='item-title';
+    title.textContent='NOMBRE: '+(c.nombre||'');
+
+    header.appendChild(title);
+    div.appendChild(header);
+
+    const btnRow=document.createElement('div');
+    btnRow.className='btn-row';
+
+    const btnRedact=document.createElement('button');
+    btnRedact.textContent='REDACTAR';
+    btnRedact.addEventListener('click',()=> abrirModalRequerimiento(c));
+
+    btnRow.appendChild(btnRedact);
+    div.appendChild(btnRow);
+
+    wrap.appendChild(div);
+  }
+}
+document.getElementById('req-filter').addEventListener('input',()=>{
+  const q=document.getElementById('req-filter').value.trim().toLowerCase();
+  const filtered=REQ_DATA.filter(c=>{
+    return [c.nombre,c.documento,c.secretaria,c.supervisor,c.telefono]
+      .some(v=>String(v||'').toLowerCase().includes(q));
+  });
+  pintarRequerimientos(filtered);
+  actualizarResumenReq(filtered);
+});
+document.getElementById('req-volver').addEventListener('click',()=> showView('view-inicio'));
+
+/* ================== MODAL REQUERIMIENTO ================== */
+let MODAL_TARGET=null;
+function abrirModalRequerimiento(c){
+  MODAL_TARGET=c;
+  document.getElementById('modal-req-text').value='';
+  document.getElementById('modal-requerimiento').classList.remove('hidden');
+}
+document.getElementById('modal-req-cancelar').addEventListener('click',()=>{
+  document.getElementById('modal-requerimiento').classList.add('hidden');
+});
+document.getElementById('modal-req-enviar').addEventListener('click',()=>{
+  const txt=(document.getElementById('modal-req-text').value||'').trim();
+  if(!MODAL_TARGET){ return; }
+  if(!txt){
+    Swal.fire({icon:'warning',title:'Texto requerido'}); return;
+  }
+  const tel=MODAL_TARGET.telefono;
+  if(tel){
+    sendBuilderbotMessage(tel,
+      'Estimado(a) *'+MODAL_TARGET.nombre+'*\nPor favor tener en cuenta el siguiente requerimiento:\n*'+txt+'*\nCordialmente,\n*Equipo de Contratación*'
+    );
+  }
+  document.getElementById('modal-requerimiento').classList.add('hidden');
+  Swal.fire({icon:'success',title:'Requerimiento enviado',timer:1800,showConfirmButton:false});
+});
+
+/* ================== COMUNICADOS ================== */
+document.getElementById('comunicado-enviar').addEventListener('click',async()=>{
+  const txt=(document.getElementById('comunicado-text').value||'').trim();
+  if(!txt){ Swal.fire({icon:'warning',title:'Texto requerido'}); return; }
+  try{
+    await apiPost('guardarComunicado',{
+      profesional: currentUser?.profesional || '',
+      noticia: txt
+    });
+    Swal.fire({icon:'success',title:'COMUNICADO CARGADO CON ÉXITO',timer:4000,showConfirmButton:false});
+    document.getElementById('comunicado-text').value='';
+    renderInicio();
+    showView('view-inicio');
+  }catch(e){
+    Swal.fire({icon:'error',title:'Error',text:e.message});
+  }
+});
+document.getElementById('comunicado-volver').addEventListener('click',()=> showView('view-inicio'));
+
+/* ================== SOPORTE ================== */
+document.getElementById('soporte-enviar').addEventListener('click',async()=>{
+  const txt=(document.getElementById('soporte-text').value||'').trim();
+  if(!txt){ Swal.fire({icon:'warning',title:'Texto requerido'}); return; }
+  try{
+    await apiPost('guardarSoporte',{
+      profesional: currentUser?.profesional || '',
+      soporte: txt,
+      celular: currentUser?.celular || ''
+    });
+    Swal.fire({icon:'success',title:'SOLICITUD CARGADA CON ÉXITO',timer:4000,showConfirmButton:false});
+    document.getElementById('soporte-text').value='';
+    renderInicio();
+    showView('view-inicio');
+  }catch(e){
+    Swal.fire({icon:'error',title:'Error',text:e.message});
+  }
+});
+document.getElementById('soporte-volver').addEventListener('click',()=> showView('view-inicio'));
+
+/* ================== PWA AVANZADO ================== */
+let deferredPrompt = null;
+function isStandalone(){
+  const dmStandalone = window.matchMedia('(display-mode: standalone)').matches;
+  const dmInstalled = window.matchMedia('(display-mode: installed)').matches;
+  const iosStandalone = (window.navigator.standalone === true);
+  return dmStandalone || dmInstalled || iosStandalone;
+}
+function isIOS(){
+  return /(iphone|ipad|ipod)/i.test(navigator.userAgent || '');
+}
+function isMarkedInstalled(){
+  try{ return localStorage.getItem('pwaInstalledFlag') === '1'; }catch(_){ return false; }
+}
+function markInstalled(){
+  try{ localStorage.setItem('pwaInstalledFlag', '1'); }catch(_){}
+}
+function clearInstalledMark(){
+  try{ localStorage.removeItem('pwaInstalledFlag'); }catch(_){}
+}
+async function detectInstalled(){
+  if (isStandalone()) return true;
+  if (typeof navigator.getInstalledRelatedApps === 'function'){
+    try{
+      const apps = await navigator.getInstalledRelatedApps();
+      const found = apps.some(a =>
+        a.platform === 'webapp' &&
+        typeof a.url === 'string' &&
+        /manifest\.webmanifest$/.test(a.url)
+      );
+      if (found){
+        markInstalled();
+        return true;
+      } else {
+        clearInstalledMark();
+      }
+    }catch(_){}
+  }
+  return isMarkedInstalled();
+}
+function updateInstallButtonsVisibility(){
+  const btn1 = document.getElementById('btn-instalar');
+  const canPrompt = !!deferredPrompt;
+  const installed = isMarkedInstalled() || isStandalone();
+  const shouldShow = !installed && (canPrompt || isIOS());
+  if(btn1) btn1.style.display = shouldShow ? '' : 'none';
+}
+window.addEventListener('beforeinstallprompt', (e)=>{
+  e.preventDefault();
+  deferredPrompt = e;
+  updateInstallButtonsVisibility();
+});
+window.addEventListener('appinstalled', ()=>{
+  markInstalled();
+  deferredPrompt = null;
+  updateInstallButtonsVisibility();
+  Swal.fire({
+    icon:'success',
+    title:'¡Instalación exitosa!',
+    html:'La App se instaló. Puedes abrirla desde tu pantalla principal.',
+    timer:5000,
+    showConfirmButton:false
+  });
+});
+document.getElementById('btn-instalar').addEventListener('click', async ()=>{
+  if(isIOS()){
+    Swal.fire({
+      icon:'info',
+      title:'Instalar en iOS',
+      html:'1) Toca Compartir (cuadro con flecha).<br>2) Elige "Agregar a pantalla de inicio".<br>3) Confirma "Agregar".'
+    });
+    return;
+  }
+  if(!deferredPrompt){
+    Swal.fire({icon:'info',title:'Instalación no disponible todavía'});
+    return;
+  }
+  deferredPrompt.prompt();
+  const choice = await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  if (choice.outcome === 'accepted'){
+    markInstalled();
+    Swal.fire({
+      icon: 'success',
+      title: '¡App instalándose!',
+      html: 'Debes esperar 1 minuto.<br><br>Al terminar este tiempo, refresca la página o busca el icono de la aplicación en la pantalla de tu dispositivo.',
+      timer: 8000,
+      showConfirmButton: false
+    });
+  } else {
+    Swal.fire({icon:'info',title:'Instalación cancelada'});
+  }
+  updateInstallButtonsVisibility();
+});
+async function initPWAVista(){
+  const installed = await detectInstalled();
+  if (installed){
+    showView('view-login');
+  } else {
+    showView('view-instalar');
+    updateInstallButtonsVisibility();
+  }
+}
+if ('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  });
+}
+window.addEventListener('load', initPWAVista);
+
+/* ================== FIN ================== */
+</script>
+</body>
+</html>
