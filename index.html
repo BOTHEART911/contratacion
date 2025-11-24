@@ -163,6 +163,48 @@
   flex-direction:column;
   gap:6px;
 }
+
+    /* Fila de acciones en cada contratista */
+.contr-actions{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-top:8px;
+}
+.contr-actions .left-group{
+  display:flex;
+  gap:12px;
+}
+.contr-actions .right-group{
+  margin-left:auto;
+  display:flex;
+  gap:8px;
+}
+.contr-actions .btn-icon{
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+  padding:6px !important;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.contr-actions .btn-icon img{
+  width:28px; height:28px; display:block;
+  background:transparent;
+  border:0;
+  pointer-events:none;
+}
+.contr-actions .btn-icon:focus-visible{
+  outline:none;
+  box-shadow:0 0 0 3px rgba(4,64,43,.35);
+  border-radius:8px;
+}
+@media (max-width:700px){
+  .contr-actions{ flex-wrap:wrap; }
+  .contr-actions .right-group{ margin-left:0; }
+}
+    
     .item-header{
       display:flex; flex-wrap:wrap;
       gap:8px; align-items:center; justify-content:space-between;
@@ -695,19 +737,28 @@ btnLogin.addEventListener('click', async () => {
   try {
     const res = await apiGet('login', { cedula });
     if (!res || !res.encontrado){
-      // Envío de mensaje de soporte vía Builderbot
-      sendBuilderbotMessage('573103230712',
-        'Buen día *Oscar*\n\nNo tengo acceso a la app de Contratación\n\nCordialmente,\n*' + (res?.profesional || 'Usuario') + '*'
-      );
-      await Swal.fire({
-        icon:'error',
-        title:'NO TIENES ACCESO',
-        html:'Comunícate con soporte para validar.',
-        timer:8000,
-        showConfirmButton:false
-      });
-      return;
-    }
+  // Abrir WhatsApp al número de soporte con mensaje armado
+  const soporte = '573103230712';
+  const mensaje = 
+    'Buen día *Oscar*%0A%0ANo tengo acceso a la app de Contratación.%0A' +
+    'Mi cédula: *' + cedula + '*%0A' +
+    'Por favor validar.%0A%0AGracias.';
+  const esMovil = /android|iphone|ipad|mobile/i.test(navigator.userAgent);
+  // En móviles se puede usar el esquema whatsapp://; en desktop la URL web
+  const urlWA = esMovil 
+    ? 'whatsapp://send?phone=' + soporte + '&text=' + mensaje
+    : 'https://api.whatsapp.com/send?phone=' + soporte + '&text=' + mensaje;
+  window.open(urlWA, '_blank');
+
+  await Swal.fire({
+    icon:'error',
+    title:'SIN ACCESO',
+    html:'Se abrió WhatsApp para que solicites la habilitación.',
+    timer:6000,
+    showConfirmButton:false
+  });
+  return;
+}
     currentUser = {
       cedula,
       profesional: res.profesional || '',
@@ -850,44 +901,29 @@ header.appendChild(estadoSpan);
     pTermino.className='item-sub';
     pTermino.textContent='FECHA TERMINO: '+(c.fechaTermino||'');
 
-    const btnRow=document.createElement('div');
-    btnRow.className='btn-row';
+/* ===== Fila de acciones reestructurada ===== */
+const actionsRow = document.createElement('div');
+actionsRow.className = 'contr-actions';
 
-    const btnDetalles=document.createElement('button');
-    btnDetalles.textContent='MOSTRAR DETALLES';
-    btnDetalles.addEventListener('click',()=> mostrarDetallesContratista(c.documento));
+const leftGroup = document.createElement('div');
+leftGroup.className = 'left-group';
 
-    const btnWhatsapp = document.createElement('button');
-btnWhatsapp.className = 'btn-icon';
-btnWhatsapp.innerHTML = '<img src="https://res.cloudinary.com/dqqeavica/image/upload/v1759166341/WhatsApp_mljaqm.webp" alt="WhatsApp">';
-btnWhatsapp.setAttribute('aria-label','Abrir chat de WhatsApp');
-btnWhatsapp.addEventListener('click',()=>{
-  const tel = c.telefono || '';
-  if(!tel){ Swal.fire({icon:'info',title:'Sin teléfono'}); return; }
-  window.open('https://wa.me/'+tel,'_blank');
-});
+const rightGroup = document.createElement('div');
+rightGroup.className = 'right-group';
 
-    const btnDrive = document.createElement('button');
-btnDrive.className = 'btn-icon';
-btnDrive.innerHTML = '<img src="https://res.cloudinary.com/dqqeavica/image/upload/v1763997280/DRIVE_bycgsc.webp" alt="Drive">';
-btnDrive.setAttribute('aria-label','Abrir carpeta Drive');
-btnDrive.addEventListener('click',()=>{
-  if(c.carpetaContratista){
-    window.open('https://drive.google.com/drive/folders/'+c.carpetaContratista,'_blank');
-  }else{
-    Swal.fire({icon:'info',title:'Sin carpeta',text:'No hay carpeta asociada.'});
-  }
-});
+/* Botón MOSTRAR DETALLES */
+const btnDetalles = document.createElement('button');
+btnDetalles.textContent = 'MOSTRAR DETALLES';
+btnDetalles.addEventListener('click', ()=> mostrarDetallesContratista(c.documento));
 
-    
-
-    const btnGuardarEstado=document.createElement('button');
-btnGuardarEstado.textContent='GUARDAR ESTADO';
+/* Botón GUARDAR ESTADO */
+const btnGuardarEstado = document.createElement('button');
+btnGuardarEstado.textContent = 'GUARDAR ESTADO';
 btnGuardarEstado.addEventListener('click', async ()=>{
   try{
     await apiPost('guardarEstadoContratista',{
-      documento:c.documento,
-      estado:nuevoEstado
+      documento: c.documento,
+      estado: nuevoEstado    // usa la variable que definiste junto al badge
     });
     Swal.fire({icon:'success',title:'Estado actualizado',timer:1600,showConfirmButton:false});
     await cargarContratistas();
@@ -896,19 +932,48 @@ btnGuardarEstado.addEventListener('click', async ()=>{
   }
 });
 
-    btnRow.appendChild(btnDetalles);
-    btnRow.appendChild(btnWhatsapp);
-    btnRow.appendChild(btnDrive);
-    btnRow.appendChild(btnGuardarEstado);
+/* Ícono WhatsApp (derecha) */
+const btnWhatsapp = document.createElement('button');
+btnWhatsapp.className = 'btn-icon';
+btnWhatsapp.innerHTML = '<img src="https://res.cloudinary.com/dqqeavica/image/upload/v1759166341/WhatsApp_mljaqm.webp" alt="WhatsApp">';
+btnWhatsapp.setAttribute('aria-label','Abrir chat de WhatsApp');
+btnWhatsapp.addEventListener('click', ()=>{
+  let tel = (c.telefono || '').replace(/\D/g,'');
+if (tel.length === 10 && tel.startsWith('3')) tel = '57' + tel;
+  // Si viniera ya con 57 y luego el 3 (ej: 57310...), no lo duplicamos
+  if (tel && !/^57\d{10}$/.test(tel) && tel.length === 12 && tel.startsWith('57')) {
+    // se asume correcto; no haces nada
+  }
+  if(!tel){
+    Swal.fire({icon:'info',title:'Sin teléfono'}); return;
+  }
+  window.open('https://wa.me/' + tel, '_blank');
+});
 
-    div.appendChild(header);
-    div.appendChild(pDoc);
-    div.appendChild(pSec);
-    div.appendChild(pSup);
-    div.appendChild(pContrato);
-    div.appendChild(pInicio);
-    div.appendChild(pTermino);
-    div.appendChild(btnRow);
+/* Ícono Drive (derecha) */
+const btnDrive = document.createElement('button');
+btnDrive.className = 'btn-icon';
+btnDrive.innerHTML = '<img src="https://res.cloudinary.com/dqqeavica/image/upload/v1763997280/DRIVE_bycgsc.webp" alt="Drive">';
+btnDrive.setAttribute('aria-label','Abrir carpeta Drive');
+btnDrive.addEventListener('click', ()=>{
+  if (c.carpetaContratista){
+    window.open('https://drive.google.com/drive/folders/' + c.carpetaContratista, '_blank');
+  }else{
+    Swal.fire({icon:'info',title:'Sin carpeta',text:'No hay carpeta asociada.'});
+  }
+});
+
+/* Ensamblar grupos */
+leftGroup.appendChild(btnDetalles);
+leftGroup.appendChild(btnGuardarEstado);
+
+rightGroup.appendChild(btnWhatsapp);
+rightGroup.appendChild(btnDrive);
+
+actionsRow.appendChild(leftGroup);
+actionsRow.appendChild(rightGroup);
+
+div.appendChild(actionsRow);
 
     wrap.appendChild(div);
   }
