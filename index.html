@@ -332,23 +332,29 @@
     /* === Toggle mostrar/ocultar cédula (login) === */
 .pwd-wrapper{
   position:relative;
+  width:100%;
 }
 .pwd-wrapper input#login-cedula{
-  padding-right:60px; /* espacio para el botón */
+  display:block;
+  width:100%;
+  box-sizing:border-box;
+  padding-right:40px;          /* reduce un poco el campo para el icono */
 }
 .toggle-cedula{
   position:absolute;
   top:50%;
-  right:8px;
+  right:10px;                  /* bien a la derecha */
   transform:translateY(-50%);
   background:transparent !important;
   border:0 !important;
-  padding:4px;
+  padding:0;
+  width:28px;                  /* botón pequeño */
+  height:28px;
   display:flex;
   align-items:center;
   justify-content:center;
   cursor:pointer;
-  border-radius:8px;
+  border-radius:6px;
 }
 .toggle-cedula:hover{
   background:rgba(0,0,0,.06);
@@ -361,71 +367,16 @@
   box-shadow:0 0 0 3px rgba(6,64,43,.35);
 }
 .toggle-cedula img{
-  width:32px;
-  height:32px;
+  width:22px;                  /* icono pequeño */
+  height:22px;
   display:block;
-  pointer-events:none;
-}
-@media (max-width:480px){
-  .toggle-cedula img{
-    width:28px;
-    height:28px;
-  }
-}
-
-    .cedula-row{
-  display:flex;
-  align-items:center;
-  width:100%;
-  gap:6px;              /* separación mínima */
-}
-.cedula-row input#login-cedula{
-  flex:1;
-  width:auto;
-  box-sizing:border-box;
-  /* Reducimos un poco visualmente el campo (optional):
-     Puedes comentar la siguiente línea si no quieres reducción perceptible */
-  padding-right:14px;
-}
-.toggle-cedula{
-  flex:0 0 40px;
-  height:40px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:#fff !important;
-  border:1.5px solid #ccc !important;
-  border-radius:8px;
-  cursor:pointer;
-  padding:0;
-  transition:background .25s, transform .12s;
-}
-.toggle-cedula:hover{
-  background:#f3f3f3 !important;
-}
-.toggle-cedula:active{
-  transform:scale(.92);
-}
-.toggle-cedula:focus-visible{
-  outline:none;
-  box-shadow:0 0 0 3px rgba(6,64,43,.35);
-}
-.toggle-cedula img{
-  width:26px;
-  height:26px;
-  display:block;
-  pointer-events:none;
+  pointer-events:none;         /* que el click siempre sea del botón */
 }
 
 @media (max-width:480px){
-  .toggle-cedula{
-    flex:0 0 36px;
-    height:36px;
-  }
-  .toggle-cedula img{
-    width:22px;
-    height:22px;
-  }
+  .pwd-wrapper input#login-cedula{ padding-right:36px; }
+  .toggle-cedula{ right:8px; width:26px; height:26px; }
+  .toggle-cedula img{ width:20px; height:20px; }
 }
   </style>
 </head>
@@ -460,7 +411,7 @@
         <p class="helper"><b>Solo el personal del área de contratación de la Alcaldía de Flandes está autorizado para hacer uso de esta App.</b></p>
 
         <label>Cédula</label>
-        <div class="cedula-row">
+       <div class="pwd-wrapper">
   <input
     id="login-cedula"
     type="password"
@@ -480,7 +431,7 @@
     >
   </button>
 </div>
-
+        
         <div class="btn-row spaced">
           <button class="btn-primary" id="btn-login">Iniciar Sesión</button>
         </div>
