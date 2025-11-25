@@ -328,6 +328,50 @@
       .btn-row{ flex-direction:column; }
       .item-header{ flex-direction:column; align-items:flex-start; }
     }
+
+    /* === Toggle mostrar/ocultar cédula (login) === */
+.pwd-wrapper{
+  position:relative;
+}
+.pwd-wrapper input#login-cedula{
+  padding-right:60px; /* espacio para el botón */
+}
+.toggle-cedula{
+  position:absolute;
+  top:50%;
+  right:8px;
+  transform:translateY(-50%);
+  background:transparent !important;
+  border:0 !important;
+  padding:4px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  border-radius:8px;
+}
+.toggle-cedula:hover{
+  background:rgba(0,0,0,.06);
+}
+.toggle-cedula:active{
+  transform:translateY(-50%) scale(.92);
+}
+.toggle-cedula:focus-visible{
+  outline:none;
+  box-shadow:0 0 0 3px rgba(6,64,43,.35);
+}
+.toggle-cedula img{
+  width:32px;
+  height:32px;
+  display:block;
+  pointer-events:none;
+}
+@media (max-width:480px){
+  .toggle-cedula img{
+    width:28px;
+    height:28px;
+  }
+}
   </style>
 </head>
 <body>
@@ -361,7 +405,12 @@
         <p class="helper"><b>Solo el personal del área de contratación de la Alcaldía de Flandes está autorizado para hacer uso de esta App.</b></p>
 
         <label>Cédula</label>
-        <input id="login-cedula" type="password" inputmode="numeric" autocomplete="off" placeholder="Sin puntos ni espacios" />
+        <div class="pwd-wrapper">
+  <input id="login-cedula" type="password" inputmode="numeric" autocomplete="off" placeholder="Sin puntos ni espacios" />
+  <button type="button" id="toggle-cedula" aria-label="Mostrar cédula" class="toggle-cedula">
+    <img src="https://res.cloudinary.com/dqqeavica/image/upload/v1764084782/Mostrar_yymceh.png" alt="Mostrar">
+  </button>
+</div>
 
         <div class="btn-row spaced">
           <button class="btn-primary" id="btn-login">Iniciar Sesión</button>
@@ -734,6 +783,19 @@ function showView(id){
 /* ================== LOGIN ================== */
 const btnLogin = document.getElementById('btn-login');
 const loginCedula = document.getElementById('login-cedula');
+  
+/* ================== BOTÓN OCULTAR - MOSTRAR ================== */
+  const toggleCedulaBtn = document.getElementById('toggle-cedula');
+toggleCedulaBtn.addEventListener('click', ()=>{
+  const oculto = loginCedula.type === 'password';
+  loginCedula.type = oculto ? 'text' : 'password';
+  const nuevoIcono = oculto
+    ? 'https://res.cloudinary.com/dqqeavica/image/upload/v1764084782/Ocultar_lgdxpd.png'
+    : 'https://res.cloudinary.com/dqqeavica/image/upload/v1764084782/Mostrar_yymceh.png';
+  const accion = oculto ? 'Ocultar' : 'Mostrar';
+  toggleCedulaBtn.setAttribute('aria-label', accion + ' cédula');
+  toggleCedulaBtn.innerHTML = '<img src="'+nuevoIcono+'" alt="'+accion+'">';
+});
 
 btnLogin.addEventListener('click', async () => {
   const cedula = (loginCedula.value || '').trim();
