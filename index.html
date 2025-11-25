@@ -166,61 +166,36 @@
 
     /* Fila de acciones en cada contratista */
 .contr-actions .right-group .btn-icon{
-  background:#fff !important;
-  border:2px solid var(--primary) !important;
-  border-radius:12px !important;
-  box-shadow:0 6px 14px rgba(0,0,0,.12);
-  padding:12px 20px !important;
-  height:58px;               /* Altura comparable a botones de texto */
-  min-width:140px;            /* Les da cuerpo como los de la izquierda */
-  display:flex !important;
+  padding:10px !important;          /* Más área clic sin romper layout */
+  border:0 !important;
+  background:transparent !important;
+  box-shadow:none !important;
+  display:flex;
   align-items:center;
   justify-content:center;
-  gap:10px;
   cursor:pointer;
-  transition:background .25s, color .25s, transform .08s;
-  font-weight:700;
-  color:#06402B;
+  transition:transform .12s ease;
 }
-
 .contr-actions .right-group .btn-icon:hover{
-  background:var(--primary-2) !important;
-  color:#fff;
-  border-color:var(--primary-2) !important;
+  transform:scale(1.08);
 }
-
 .contr-actions .right-group .btn-icon:active{
-  transform:scale(.96);
+  transform:scale(.94);
 }
-
-.contr-actions .right-group .btn-icon:focus-visible{
-  outline:none;
-  box-shadow:0 0 0 3px rgba(4,64,43,.35);
-}
-
 .contr-actions .right-group .btn-icon img{
-  width:40px !important;
-  height:40px !important;
+  width:44px !important;
+  height:44px !important;
   display:block;
-  flex-shrink:0;
-  border-radius:8px;
   object-fit:contain;
-  filter:drop-shadow(0 2px 4px rgba(0,0,0,.25));
-  background:transparent;
   pointer-events:none;
+  /* Si quieres quitar la ligera sombra, elimina la línea siguiente */
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,.25));
 }
-
-/* Versión responsive: si la fila se envuelve, mantener consistencia */
 @media (max-width:700px){
-  .contr-actions .right-group{
-    width:100%;
-    display:flex;
-    gap:12px;
-    justify-content:stretch;
-  }
-  .contr-actions .right-group .btn-icon{
-    flex:1;
-    min-width:0;
+  /* En móviles puedes reducir un poco si lo deseas */
+  .contr-actions .right-group .btn-icon img{
+    width:40px !important;
+    height:40px !important;
   }
 }
     
