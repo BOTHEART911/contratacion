@@ -417,6 +417,24 @@
     margin-left:0;
   }
 }
+    /* Botón "CUENTA" en vista Revisar (mismo estilo del Drive en Contratistas) */
+#btn-abrir-carpeta-cuenta.btn-icon{
+  padding:6px !important;
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+  transition:transform .12s ease;
+}
+#btn-abrir-carpeta-cuenta.btn-icon:hover{ transform:scale(1.08); }
+#btn-abrir-carpeta-cuenta.btn-icon:active{ transform:scale(.94); }
+#btn-abrir-carpeta-cuenta.btn-icon img{
+  width:44px !important;
+  height:44px !important;
+  display:block;
+  object-fit:contain;
+  pointer-events:none;
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,.25));
+}
   </style>
 </head>
 <body>
@@ -636,10 +654,26 @@
         <div class="section-toggle">
           <button id="btn-toggle-actividades" class="chip">Ver Relación de Actividades</button>
         </div>
+
+        <div class="center" style="margin-top:6px;">
+  <button
+    id="btn-abrir-carpeta-cuenta"
+    class="btn-icon hidden"
+    aria-label="Abrir carpeta de CUENTA en Drive"
+    title="Abrir carpeta de CUENTA en Drive"
+  >
+    <img
+      src="https://res.cloudinary.com/dqqeavica/image/upload/v1764111247/carpeta_drive_epbrhp.webp"
+      alt="CUENTA"
+    >
+  </button>
+</div>
+        
         <div id="sec-actividades" class="section-content hidden">
           <div id="actividades-blocks"></div>
           <!-- Se han retirado los botones Mostrar más/menos según requerimiento -->
         </div>
+        
 
         <h3 style="color:var(--primary); margin-top:18px;">TUS OBSERVACIONES</h3>
         <textarea id="rc-observaciones" rows="4" placeholder="Edita solo si vas a devolver la cuenta…"></textarea>
@@ -1607,11 +1641,47 @@ function abrirZoomEvidencia(src, titulo){
     blocksWrap.appendChild(block);
   }
 }
+
+    // === Mostrar/ocultar y parametrizar botón "CUENTA" ===
+  const cuentaBtn = document.getElementById('btn-abrir-carpeta-cuenta');
+  if (cu?.informe && c?.carpetaContratista){
+    cuentaBtn.classList.remove('hidden');
+    cuentaBtn.dataset.parent = c.carpetaContratista;
+    cuentaBtn.dataset.informe = cu.informe;
+  } else {
+    cuentaBtn.classList.add('hidden');
+    delete cuentaBtn.dataset.parent;
+    delete cuentaBtn.dataset.informe;
+  }
+  
 document.getElementById('rc-volver').addEventListener('click', ()=>{
   playSoundOnce(SOUNDS.back);
   showView('view-revision');
 });
 
+  // Abrir carpeta "CUENTA <informe>" dentro de la carpeta del contratista
+const btnAbrirCarpetaCuenta = document.getElementById('btn-abrir-carpeta-cuenta');
+btnAbrirCarpetaCuenta.addEventListener('click', ()=>{
+  playSoundOnce(SOUNDS.login);
+
+  // Prioriza dataset que se carga en renderRevisionCuenta()
+  const parentId = btnAbrirCarpetaCuenta.dataset.parent || REV_CUENTA?.contratista?.carpetaContratista || '';
+  const informe  = (btnAbrirCarpetaCuenta.dataset.informe || REV_CUENTA?.cuenta?.informe || '').toString().trim();
+
+  if (!parentId){
+    Swal.fire({ icon:'info', title:'Sin carpeta', text:'Este contratista no tiene "carpetaContratista" asociada.' });
+    return;
+  }
+
+  // Intento de abrir directamente dentro de la carpeta del contratista y filtrar por "CUENTA <n>"
+  // Nota: La búsqueda dentro de la carpeta depende de cómo el navegador/Drive interprete el parámetro.
+  const queryNombre = informe ? ('CUENTA ' + informe) : '';
+  const urlBase = 'https://drive.google.com/drive/folders/' + parentId;
+  const url = queryNombre ? (urlBase + '?q=' + encodeURIComponent(queryNombre)) : urlBase;
+
+  window.open(url, '_blank');
+});
+  
 function toggleSection(btnId, secId, txtShow, txtHide){
   const btn=document.getElementById(btnId);
   const sec=document.getElementById(secId);
