@@ -1157,7 +1157,7 @@ function pintarCuentas(list){
 
     const title=document.createElement('p');
     title.className='item-title';
-    title.textContent='NOMBRE: '+(c.nombre||'');
+    title.textContent= +(c.nombre||'');
     header.appendChild(title);
 
     const pDoc=document.createElement('p');
