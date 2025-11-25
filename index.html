@@ -1640,21 +1640,29 @@ function abrirZoomEvidencia(src, titulo){
       evDiv.appendChild(img);
       block.appendChild(evDiv);
     }
-        blocksWrap.appendChild(block);
+            blocksWrap.appendChild(block);
   }
 
   // === Mostrar/ocultar y parametrizar botón "CUENTA" (debajo de Actividades) ===
   const cuentaBtn = document.getElementById('btn-abrir-carpeta-cuenta');
   if (cu?.informe && c?.carpetaContratista){
     cuentaBtn.classList.remove('hidden');
-    cuentaBtn.dataset.parent = c.carpetaContratista;
-    cuentaBtn.dataset.informe = cu.informe;
+    cuentaBtn.dataset.parent  = c.carpetaContratista;           // carpetaContratista (padre)
+    cuentaBtn.dataset.informe = String(cu.informe);              // número de informe
+    if (cu?.carpetaCuenta) {
+      // Si el backend entrega el ID de la subcarpeta "CUENTA <informe>"
+      cuentaBtn.dataset.subId = cu.carpetaCuenta;                // ID de subcarpeta CUENTA <informe>
+    } else {
+      delete cuentaBtn.dataset.subId;
+    }
   } else {
     cuentaBtn.classList.add('hidden');
     delete cuentaBtn.dataset.parent;
     delete cuentaBtn.dataset.informe;
+    delete cuentaBtn.dataset.subId;
   }
 }
+  
 document.getElementById('rc-volver').addEventListener('click', ()=>{
   playSoundOnce(SOUNDS.back);
   showView('view-revision');
@@ -1686,28 +1694,38 @@ toggleSection('btn-toggle-planilla','sec-planilla','Ver Relación de Planilla','
 toggleSection('btn-toggle-planilla2','sec-planilla2','Ver Relación de Planilla Anexa','Ocultar Relación de Planilla Anexa');
 toggleSection('btn-toggle-actividades','sec-actividades','Ver Relación de Actividades','Ocultar Relación de Actividades');
 
-// Abrir carpeta "CUENTA <informe>" dentro de la carpeta del contratista
+// Abrir subcarpeta "CUENTA <informe>" dentro de la carpeta del contratista
 const btnAbrirCarpetaCuenta = document.getElementById('btn-abrir-carpeta-cuenta');
 btnAbrirCarpetaCuenta.addEventListener('click', ()=>{
   playSoundOnce(SOUNDS.login);
 
-  // dataset se define en renderRevisionCuenta()
   const parentId = btnAbrirCarpetaCuenta.dataset.parent || REV_CUENTA?.contratista?.carpetaContratista || '';
   const informe  = (btnAbrirCarpetaCuenta.dataset.informe || REV_CUENTA?.cuenta?.informe || '').toString().trim();
+  const subId    = btnAbrirCarpetaCuenta.dataset.subId || '';   // ID de "CUENTA <informe>" si el backend lo entrega
 
   if (!parentId){
     Swal.fire({ icon:'info', title:'Sin carpeta', text:'Este contratista no tiene "carpetaContratista" asociada.' });
     return;
   }
 
-  // Abre la carpeta del contratista y filtra por "CUENTA <n>" (si el navegador/Drive lo respeta)
-  const queryNombre = informe ? ('CUENTA ' + informe) : '';
-  const urlBase = 'https://drive.google.com/drive/folders/' + parentId;
-  const url = queryNombre ? (urlBase + '?q=' + encodeURIComponent(queryNombre)) : urlBase;
+  // 1) Si tenemos el ID de la subcarpeta "CUENTA <informe>", abrimos DIRECTO esa carpeta
+  if (subId){
+    window.open('https://drive.google.com/drive/folders/' + subId, '_blank');
+    return;
+  }
 
-  window.open(url, '_blank');
+  // 2) Si no tenemos el ID, abrimos una búsqueda de Drive para "CUENTA <informe>" (tipo carpeta)
+  //    Esto ya NO abre la misma carpeta del botón Drive; abre la vista de búsqueda.
+  const nombre = informe ? ('CUENTA ' + informe) : '';
+  if (nombre){
+    // Búsqueda global de carpetas con ese nombre (puedes añadir comillas para exacto)
+    const searchUrl = 'https://drive.google.com/drive/search?q=' + encodeURIComponent('title:"' + nombre + '" type:folder');
+    window.open(searchUrl, '_blank');
+  } else {
+    // Si no hay informe, cae de nuevo a la carpeta padre
+    window.open('https://drive.google.com/drive/folders/' + parentId, '_blank');
+  }
 });
-
 document.getElementById('rc-guardar').addEventListener('click', async ()=>{
   if(!REV_CUENTA?.cuenta){
     Swal.fire({icon:'warning',title:'Sin cuenta cargada'}); return;
