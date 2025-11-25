@@ -692,26 +692,24 @@ async function apiPost(action, body = {}){
 }
 
 /* ================== BUILDERBOT ================== */
-function formatBuilderbotNumber(raw, force57 = false){
-  let num = String(raw || '').replace(/\D/g,''); // quitar todo lo no numérico
+function normalizeContratistaNumber(raw){
+  let num = String(raw || '').replace(/\D/g,'');
   if(!num) return '';
-  // Si se fuerza 57 (contratista) y tiene 10 dígitos sin prefijo
-  if(force57){
-    if(num.length === 10 && !num.startsWith('57')) num = '57' + num;
-    // Si por alguna razón trae más de 12 dígitos, descartamos
-    if(num.length !== 12) return '';
-  } else {
-    // Supervisor: aceptamos 10 o 12 (ya con 57). Si es 10 no se agrega prefijo.
-    if(!(num.length === 10 || (num.length === 12 && num.startsWith('57')))){
-      return '';
-    }
+  // Si tiene 10 dígitos y no comienza con 57, agregamos prefijo.
+  if(num.length === 10 && !num.startsWith('57')){
+    num = '57' + num;
+  }
+  // Formato válido esperado: 12 dígitos iniciando en 57
+  if(!(num.length === 12 && num.startsWith('57'))){
+    return '';
   }
   return num;
 }
+
 function sendBuilderbotMessage(destino, mensaje){
-  const number = destino;
-  if(!number){
-    console.warn('Número vacío/no válido, no se envía BuilderBot');
+  const numberField = String(destino || '').trim();
+  if(!numberField){
+    console.warn('Destino vacío, no se envía BuilderBot');
     return;
   }
   fetch(BUILDERBOT_ENDPOINT, {
@@ -720,12 +718,12 @@ function sendBuilderbotMessage(destino, mensaje){
       'Content-Type':'application/json',
       'x-api-builderbot':BUILDERBOT_API_KEY
     },
-    body:JSON.stringify({
-      messages:{ content: mensaje },
-      number,
-      checkIfExists:false
+    body: JSON.stringify({
+      messages: { content: mensaje },
+      number: numberField,       // Puede ser número normalizado o ID de grupo
+      checkIfExists: false
     })
-  }).catch(err=> console.warn('Error enviando BuilderBot', err));
+  }).catch(err => console.warn('Error enviando BuilderBot', err));
 }
 
 /* ================== ESTADO GLOBAL ================== */
@@ -999,7 +997,10 @@ document.getElementById('contr-filter').addEventListener('input',()=>{
   pintarContratistas(filtered);
   actualizarResumenContratistas(filtered);
 });
-document.getElementById('contr-volver').addEventListener('click',()=> showView('view-inicio'));
+document.getElementById('contr-volver').addEventListener('click', ()=>{
+  playSoundOnce(SOUNDS.back);
+  showView('view-inicio');
+});
 
 /* ================== AGREGAR CONTRATISTA ================== */
 const MAP_SECRETARIA_CARPETA={
@@ -1033,7 +1034,10 @@ document.getElementById('add-supervisor').addEventListener('change',()=>{
   const val=document.getElementById('add-supervisor').value;
   document.getElementById('add-contactoSupervisor').value=MAP_SUPERVISOR_CONTACTO[val]||'';
 });
-document.getElementById('btn-add-volver').addEventListener('click',()=> showView('view-contratistas'));
+document.getElementById('btn-add-volver').addEventListener('click', ()=>{
+  playSoundOnce(SOUNDS.back);
+  showView('view-contratistas');
+});
 
 document.getElementById('btn-add-guardar').addEventListener('click',async()=>{
   const documento=(document.getElementById('add-documento').value||'').trim();
@@ -1116,7 +1120,10 @@ async function mostrarDetallesContratista(documento){
     Swal.fire({icon:'error',title:'Error',text:e.message});
   }
 }
-document.getElementById('detalles-ocultar').addEventListener('click',()=> showView('view-contratistas'));
+document.getElementById('detalles-ocultar').addEventListener('click', ()=>{
+  playSoundOnce(SOUNDS.back);
+  showView('view-contratistas');
+});
 
 /* ================== REVISIÓN DE CUENTAS (Listado) ================== */
 let CUENTAS_DATA=[];
@@ -1208,7 +1215,10 @@ document.getElementById('cuentas-filter').addEventListener('input',()=>{
   pintarCuentas(filtered);
   actualizarResumenCuentas(filtered);
 });
-document.getElementById('revision-volver').addEventListener('click',()=> showView('view-inicio'));
+document.getElementById('revision-volver').addEventListener('click', ()=>{
+  playSoundOnce(SOUNDS.back);
+  showView('view-inicio');
+});
 
 /* ================== REVISAR CUENTA (Detalle) ================== */
 let REV_CUENTA=null;
@@ -1466,7 +1476,10 @@ function abrirZoomEvidencia(src, titulo){
     blocksWrap.appendChild(block);
   }
 }
-document.getElementById('rc-volver').addEventListener('click',()=> showView('view-revision'));
+document.getElementById('rc-volver').addEventListener('click', ()=>{
+  playSoundOnce(SOUNDS.back);
+  showView('view-revision');
+});
 
 function toggleSection(btnId, secId, txtShow, txtHide){
   const btn=document.getElementById(btnId);
@@ -1495,47 +1508,45 @@ document.getElementById('rc-guardar').addEventListener('click', async ()=>{
   const documento = REV_CUENTA.contratista.documento;
   const nombre    = REV_CUENTA.contratista.nombre;
   const informe   = REV_CUENTA.cuenta.informe;
-  const supervisor      = REV_CUENTA.contratista.supervisor;
-  let telSupervisorRaw  = REV_CUENTA.contratista.contacto;
-  let telContratistaRaw = REV_CUENTA.contratista.telefono;
+  const supervisor        = REV_CUENTA.contratista.supervisor;
+  const supervisorGrupoId = (REV_CUENTA.contratista.contacto || '').trim(); // ahora es grupo
+  const telContratistaRaw = REV_CUENTA.contratista.telefono;
   const observ = (document.getElementById('rc-observaciones').value || '').trim();
 
-  const telContratista = formatBuilderbotNumber(telContratistaRaw, true);
-  const telSupervisor  = formatBuilderbotNumber(telSupervisorRaw, false);
+  const telContratista = normalizeContratistaNumber(telContratistaRaw);
 
- const rs = await Swal.fire({
-  icon:'success',
-  title: `Has revisado la cuenta N° ${informe} de ${nombre}`,
-  text:'Toma una de las opciones.',
-  showCancelButton:true,
-  showDenyButton:true,
-  confirmButtonText:'Aprobar',
-  denyButtonText:'Devolver',
-  cancelButtonText:'Cancelar'
-});
-  
-  // Saltos reales con \n
+  const rs = await Swal.fire({
+    icon:'success',
+    title:`Haz revisado la cuenta N° ${informe} de ${nombre}`,
+    text:'Toma una de las opciones.',
+    showCancelButton:true,
+    showDenyButton:true,
+    confirmButtonText:'Aprobar',
+    denyButtonText:'Devolver',
+    cancelButtonText:'Cancelar'
+  });
+
   function msgAprobado(){
     return (
       'Estimado(a) *'+nombre+'*\n' +
-      'Tu *Cuenta N° '+informe+'* ha sido aprobada, ya puedes subir los documentos al *Plan de Pagos en el Secop II*\n\n' +
-      'Una vez los subas, toma la opción *Reportar Plan de Pagos* en la App Contratistas.\n' +
-      '> Recuerda que, desde la segunda cuenta; debes relacionar la fecha en que la entidad te canceló los honorarios de la cuenta inmediatamente anterior.\n' +
-      'Cordialmente,\n**Equipo de Contratación**'
+      'Tu *Cuenta N° '+informe+'* ha sido *Aprobada*, ya puedes subir los documentos al *Plan de Pagos en el Secop II*\n\n' +
+      'Una vez los subas, toma la opción *Reportar Plan de Pagos* en la *App Contratista*.\n' +
+      '> Recuerda que, desde la segunda cuenta; debes relacionar la fecha en que la entidad te canceló los honorarios de la cuenta inmediatamente anterior.\n\n' +
+      'Cordialmente,\n\n*Equipo de Contratación*\n> Alcaldía de Flandes'
     );
   }
   function msgDevueltaContratista(){
     return (
       'Estimado(a) *'+nombre+'*\n' +
       'Se ha devuelto tu *Cuenta N° '+informe+'* por esta inconsistencia:\n\n*'+(observ || 'Sin observaciones')+'*\n\n' +
-      'Haz la corrección desde la App Contratistas teniendo en cuenta las observaciones anteriores.\n\n' +
-      'Cordialmente,\n\n*Equipo de Contratación*'
+      'Haz la corrección desde la *App Contratista* teniendo en cuenta las observaciones anteriores.\n\n' +
+      'Cordialmente,\n\n*Equipo de Contratación*\n> Alcaldía de Flandes'
     );
   }
   function msgDevueltaSupervisor(){
     return (
-      'Estimado(a) *'+supervisor+'*\n\n' +
-      'Se ha devuelto la *Cuenta N° '+informe+'* de *'+nombre+'* por esta inconsistencia:\n*'+(observ || 'Sin observaciones')+'*\n\n' +
+      '❌ Estimado(a) *'+supervisor+'* ❌\n' +
+      'Se ha devuelto la *Cuenta N° '+informe+'* de *'+nombre+'* por esta inconsistencia:\n\n*'+(observ || 'Sin observaciones')+'*\n\n' +
       'El(la) Contratista ya ha sido notificado(a).\n\n' +
       'Cordialmente,\n\n*Equipo de Contratación*'
     );
@@ -1546,6 +1557,8 @@ document.getElementById('rc-guardar').addEventListener('click', async ()=>{
       await apiPost('aprobarCuenta',{documento,informe});
       if(telContratista){
         sendBuilderbotMessage(telContratista, msgAprobado());
+      } else {
+        console.warn('Teléfono contratista inválido/no disponible');
       }
       Swal.fire({icon:'success',title:'Cuenta Aprobada',timer:1800,showConfirmButton:false});
       await cargarCuentasPendientes();
@@ -1556,8 +1569,11 @@ document.getElementById('rc-guardar').addEventListener('click', async ()=>{
   } else if(rs.isDenied){
     try{
       await apiPost('devolverCuenta',{documento,informe,observaciones:observ});
-      if(telSupervisor){
-        sendBuilderbotMessage(telSupervisor, msgDevueltaSupervisor());
+      if(supervisorGrupoId){
+        // Se envía tal cual como "number" porque el backend acepta grupo también
+        sendBuilderbotMessage(supervisorGrupoId, msgDevueltaSupervisor());
+      } else {
+        console.warn('ID grupo supervisor vacío');
       }
       if(telContratista){
         sendBuilderbotMessage(telContratista, msgDevueltaContratista());
@@ -1636,7 +1652,10 @@ document.getElementById('req-filter').addEventListener('input',()=>{
   pintarRequerimientos(filtered);
   actualizarResumenReq(filtered);
 });
-document.getElementById('req-volver').addEventListener('click',()=> showView('view-inicio'));
+document.getElementById('req-volver').addEventListener('click', ()=>{
+  playSoundOnce(SOUNDS.back);
+  showView('view-inicio');
+});
 
 /* ================== MODAL REQUERIMIENTO ================== */
 let MODAL_TARGET=null;
@@ -1681,7 +1700,10 @@ document.getElementById('comunicado-enviar').addEventListener('click',async()=>{
     Swal.fire({icon:'error',title:'Error',text:e.message});
   }
 });
-document.getElementById('comunicado-volver').addEventListener('click',()=> showView('view-inicio'));
+document.getElementById('comunicado-volver').addEventListener('click', ()=>{
+  playSoundOnce(SOUNDS.back);
+  showView('view-inicio');
+});
 
 /* ================== SOPORTE ================== */
 document.getElementById('soporte-enviar').addEventListener('click',async()=>{
@@ -1701,7 +1723,10 @@ document.getElementById('soporte-enviar').addEventListener('click',async()=>{
     Swal.fire({icon:'error',title:'Error',text:e.message});
   }
 });
-document.getElementById('soporte-volver').addEventListener('click',()=> showView('view-inicio'));
+document.getElementById('soporte-volver').addEventListener('click', ()=>{
+  playSoundOnce(SOUNDS.back);
+  showView('view-inicio');
+});
 
 /* ================== PWA AVANZADO ================== */
 let deferredPrompt = null;
