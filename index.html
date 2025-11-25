@@ -1300,10 +1300,108 @@ function renderRevisionCuenta(){
     const id=extraerDriveId(url);
     return id ? 'https://drive.google.com/thumbnail?sz=w1000&id='+id : url;
   }
-  function evidenciaFull(url){
-    const id=extraerDriveId(url);
-    return id ? 'https://drive.google.com/uc?export=view&id='+id : url;
+  function evidenciaThumb(url){
+  const id=extraerDriveId(url);
+  return id ? 'https://drive.google.com/thumbnail?sz=w1000&id='+id : url;
+}
+function evidenciaFull(url){
+  if(!url) return '';
+  const primera = String(url).trim().split(/\s+/)[0];
+  const patrones = [
+    /\/d\/([A-Za-z0-9_-]{10,})/,
+    /id=([A-Za-z0-9_-]{10,})/,
+    /\/file\/d\/([A-Za-z0-9_-]{10,})/,
+    /open\?[^#]*id=([A-Za-z0-9_-]{10,})/
+  ];
+  let id = '';
+  for(const rx of patrones){
+    const m = primera.match(rx);
+    if(m){ id = m[1]; break; }
   }
+  return id
+    ? 'https://drive.google.com/uc?export=view&id='+id
+    : primera;
+}
+
+  // Helper de zoom con fallback
+function abrirZoomEvidencia(src, titulo){
+  const overlay = document.createElement('div');
+  overlay.style.position='fixed';
+  overlay.style.inset='0';
+  overlay.style.background='rgba(0,0,0,.75)';
+  overlay.style.zIndex='10000';
+  overlay.style.display='flex';
+  overlay.style.alignItems='center';
+  overlay.style.justifyContent='center';
+  overlay.style.padding='24px';
+
+  const box = document.createElement('div');
+  box.style.maxWidth='90%';
+  box.style.maxHeight='90%';
+  box.style.position='relative';
+  box.style.background='#fff';
+  box.style.borderRadius='14px';
+  box.style.padding='12px';
+  box.style.boxShadow='0 8px 24px rgba(0,0,0,.4)';
+  box.style.display='flex';
+  box.style.flexDirection='column';
+  box.style.alignItems='center';
+  box.style.gap='12px';
+
+  const titleEl = document.createElement('h3');
+  titleEl.textContent = titulo;
+  titleEl.style.margin='0';
+  titleEl.style.color='var(--primary)';
+  titleEl.style.textAlign='center';
+
+  const img = document.createElement('img');
+  img.style.maxWidth='100%';
+  img.style.maxHeight='70vh';
+  img.style.borderRadius='10px';
+  img.style.objectFit='contain';
+  img.style.background='#f0f0f0';
+  img.alt = titulo;
+
+  const loaderMsg = document.createElement('p');
+  loaderMsg.textContent='Cargando imagen…';
+  loaderMsg.style.margin='0';
+  loaderMsg.style.fontSize='.85rem';
+  loaderMsg.style.color='#333';
+
+  img.addEventListener('error', ()=>{
+    if(src.includes('uc?export=view&id=')){
+      const idMatch = src.match(/id=([A-Za-z0-9_-]{10,})/);
+      if(idMatch){
+        img.src = 'https://drive.google.com/thumbnail?sz=w1000&id='+idMatch[1];
+        loaderMsg.textContent='(Vista alternativa)';
+      }
+    } else {
+      loaderMsg.textContent='No se pudo cargar la evidencia.';
+    }
+  });
+  img.addEventListener('load', ()=> loaderMsg.textContent='');
+
+  img.src = src;
+
+  const cerrarBtn = document.createElement('button');
+  cerrarBtn.textContent='Cerrar';
+  cerrarBtn.className='btn-primary';
+  cerrarBtn.style.maxWidth='160px';
+  cerrarBtn.addEventListener('click', ()=> document.body.removeChild(overlay));
+
+  overlay.addEventListener('click', (e)=>{
+    if(e.target === overlay){
+      document.body.removeChild(overlay);
+    }
+  });
+
+  box.appendChild(titleEl);
+  box.appendChild(img);
+  box.appendChild(loaderMsg);
+  box.appendChild(cerrarBtn);
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+}
 
   for(let i=1;i<=total;i++){
     const oblig=obligaciones[i-1];
@@ -1339,14 +1437,10 @@ function renderRevisionCuenta(){
       img.className='evidence-thumb';
       img.src=evidenciaThumb(evid);
       img.alt='Evidencia '+i;
-      img.addEventListener('click',()=>{
-        const full=evidenciaFull(evid);
-        Swal.fire({
-          title:'Evidencia '+i,
-          html:`<div style="text-align:center"><img src="${full}" style="max-width:100%;border-radius:12px;"></div>`,
-          width:'80%'
-        });
-      });
+      img.addEventListener('click', ()=>{
+  const full = evidenciaFull(evid);
+  abrirZoomEvidencia(full, 'Evidencia '+i);
+});
       evDiv.appendChild(img);
       block.appendChild(evDiv);
     }
