@@ -802,35 +802,6 @@ function formatoFechaHoraCorta(date){
   return `${dd}/${mm}/${yyyy} ${h}:${min} ${ampm}`;
 }
 
-  function formatFechaDDMMYYYY(value){
-  if(!value) return '';
-  const iso = String(value).replace(' ', 'T');
-  const d = new Date(iso);
-  if(isNaN(d.getTime())) return value;
-  const dd = ('0'+d.getDate()).slice(-2);
-  const mm = ('0'+(d.getMonth()+1)).slice(-2);
-  const yyyy = d.getFullYear();
-  return `${dd}/${mm}/${yyyy}`;
-}
-
-  function formatCOP(value){
-  if(value === null || value === undefined || value === '') return '';
-  const n = Number(String(value).replace(/[^\d.-]/g,'')); // limpia por si viene con símbolos
-  if(!isFinite(n)) return value;
-  return n.toLocaleString('es-CO', { style:'currency', currency:'COP', maximumFractionDigits:0 });
-}
-
-  function formatFechaVista(value){
-  if(!value) return '';
-  // Si ya viene en formato humano (contiene coma y mes en español) lo dejamos
-  if(/(Lunes|Martes|Miércoles|Jueves|Viernes|Sábado|Domingo), \d{2} de /.test(value)) return value;
-  // Normalizar separador si viene como "2025-02-12 05:00:00"
-  const iso = String(value).replace(' ', 'T');
-  const d = new Date(iso);
-  if(isNaN(d.getTime())) return value; // si no parsea, devolver original
-  return formatoFechaHumana(d);
-}
-
 /* ================== NAVEGACIÓN PRINCIPAL ================== */
 document.getElementById('go-contratistas').addEventListener('click', async ()=>{
   await cargarContratistas();
@@ -921,15 +892,18 @@ function pintarContratistas(list){
 
     const pContrato=document.createElement('p');
     pContrato.className='item-sub';
-    pContrato.textContent='CONTRATO: '+(c.contrato||'')+' de: '+formatFechaVista(c.fechaContrato);
+    pContrato.textContent='CONTRATO: '+(c.contrato||'')+' de: '+(c.fechaContrato||'');
+    div.appendChild(pContrato);
 
     const pInicio=document.createElement('p');
     pInicio.className='item-sub';
-    pInicio.textContent='FECHA INICIO: '+formatFechaVista(c.fechaInicio);
+    pInicio.textContent='FECHA INICIO: '+(c.fechaInicio||'');
+    div.appendChild(pInicio);
 
     const pTermino=document.createElement('p');
     pTermino.className='item-sub';
-    pTermino.textContent='FECHA TERMINO: '+formatFechaVista(c.fechaTermino);
+    pTermino.textContent='FECHA TERMINO: '+(c.fechaTermino||'');
+    div.appendChild(pTermino);
 
     const actionsRow=document.createElement('div');
     actionsRow.className='contr-actions';
@@ -1098,12 +1072,12 @@ async function mostrarDetallesContratista(documento){
         `<b>ARL:</b> ${d.arl||''}`,
         `<b>SECRETARÍA:</b> ${d.secretaria||''}`,
         `<b>SUPERVISOR:</b> ${d.supervisor||''}`,
-        `<b>CONTRATO:</b> ${d.contrato||''} de: ${formatFechaVista(c?.fechaContrato)||''}`, 
+        `<b>CONTRATO:</b> ${d.contrato||''} de: ${d.fechaContrato||''}`,
         `<b>OBJETO:</b> ${d.objeto||''}`,
-        `<b>FECHA DE INICIO:</b> ${formatFechaVista(c?.fechaInicio)||''}`,
-        `<b>FECHA DE TERMINO:</b> ${formatFechaVista(c?.fechaTermino)||''}`,
-        `<b>MRA:</b> ${formatCOP(d.mra)}`,
-        `<b>VALOR:</b> ${formatCOP(d.valorFinal)}`,
+        `<b>FECHA DE INICIO:</b> ${d.fechaInicio||''}`,
+        `<b>FECHA DE TERMINO:</b> ${d.fechaTermino||''}`,
+        `<b>MRA:</b> ${d.mra||''}`,
+        `<b>VALOR:</b> ${d.valorFinal||''}`,
         `<b>CDP:</b> ${d.cdp||''}`,
         `<b>RP:</b> ${d.rp||''}`,
         `<b>CDP ADICIÓN:</b> ${d.cdpAdicion||''}`,
@@ -1249,12 +1223,12 @@ function renderRevisionCuenta(){
   const sContrato=document.getElementById('sec-contrato');
   sContrato.innerHTML=[
     `<b>CONTRATO N°:</b> ${c?.contrato||''}`,
-    `<b>FECHA DE CONTRATO:</b> ${formatFechaDDMMYYYY(c?.fechaContrato)||''}`,
-    `<b>FECHA DE INICIO:</b> ${formatFechaDDMMYYYY(c?.fechaInicio)||''}`,
-    `<b>FECHA DE TERMINO:</b> ${formatFechaDDMMYYYY(c?.fechaTermino)||''}`,
-    `<b>VALOR INICIAL:</b> ${formatCOP(c?.valor)||''}`,
-    `<b>MRA:</b> ${formatCOP(c?.mra)||''}`,
-    `<b>VALOR FINAL:</b> ${formatCOP(c?.valorFinal)||''}`,
+    `<b>FECHA DE CONTRATO:</b> ${c?.fechaContrato||''}`,
+    `<b>FECHA DE INICIO:</b> ${c?.fechaInicio||''}`,
+    `<b>FECHA DE TERMINO:</b> ${c?.fechaTermino||''}`,
+    `<b>VALOR INICIAL:</b> ${c?.valor||''||'-'}`,
+    `<b>MRA:</b> ${c?.mra||''}`,
+    `<b>VALOR FINAL:</b> ${c?.valorFinal||''}`,
     `<b>CDP:</b> ${c?.cdp||''}`,
     `<b>RP:</b> ${c?.rp||''}`,
     `<b>CDP ADICIÓN:</b> ${c?.cdpAdicion||''}`,
@@ -1268,12 +1242,12 @@ function renderRevisionCuenta(){
   sInforme.innerHTML=[
     `<h4 style="margin:4px 0;color:var(--primary)">RELACIÓN DE INFORME</h4>`,
     `<p><b>INFORME:</b> ${cu?.informe||''} de ${cu?.totalInformes||''}</p>`,
-    `<p><b>INICIO DE PERIODO RATIFICADO:</b> ${formatFechaDDMMYYYY(cu?.inicioRatificar)||''}</p>`,
-    `<p><b>FIN DE PERIODO RATIFICADO:</b> ${formatFechaDDMMYYYY(cu?.finRatificar)||''}</p>`,
+    `<p><b>INICIO DE PERIODO RATIFICADO:</b> ${cu?.inicioRatificar||''}</p>`,
+    `<p><b>FIN DE PERIODO RATIFICADO:</b> ${cu?.finRatificar||''}</p>`,
     `<h4 style="margin:14px 0 4px;color:var(--primary)">RELACIÓN DE PAGO</h4>`,
-   `<p><b>SALDO ACTUAL:</b> ${formatCOP(cu?.saldoActual)||''}</p>`,
-   `<p><b>VALOR COBRADO:</b> ${formatCOP(cu?.menos)||''}</p>`,
-   `<p><b>NUEVO SALDO:</b> ${formatCOP(cu?.nuevoSaldo)||''}</p>`,
+    `<p><b>SALDO ACTUAL:</b> ${cu?.saldoActual||''}</p>`,
+    `<p><b>VALOR COBRADO:</b> ${cu?.menos||''}</p>`,
+    `<p><b>NUEVO SALDO:</b> ${cu?.nuevoSaldo||''}</p>`
   ].join('');
 
   const sPlanilla=document.getElementById('sec-planilla');
