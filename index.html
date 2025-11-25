@@ -815,19 +815,29 @@ function formatoFechaHoraCorta(date){
 
 /* ================== NAVEGACIÓN PRINCIPAL ================== */
 document.getElementById('go-contratistas').addEventListener('click', async ()=>{
+  playSoundOnce(SOUNDS.login);
   await cargarContratistas();
   showView('view-contratistas');
 });
 document.getElementById('go-revision').addEventListener('click', async ()=>{
+  playSoundOnce(SOUNDS.login);
   await cargarCuentasPendientes();
   showView('view-revision');
 });
 document.getElementById('go-requerimientos').addEventListener('click', async ()=>{
+  playSoundOnce(SOUNDS.login);
   await cargarRequerimientosBase();
   showView('view-requerimientos');
 });
-document.getElementById('go-comunicados').addEventListener('click', ()=> showView('view-comunicados'));
-document.getElementById('go-soporte').addEventListener('click', ()=> showView('view-soporte'));
+document.getElementById('go-comunicados').addEventListener('click', ()=>{
+  playSoundOnce(SOUNDS.login);
+  showView('view-comunicados');
+});
+  
+document.getElementById('go-soporte').addEventListener('click', ()=>{
+  playSoundOnce(SOUNDS.login);
+  showView('view-soporte');
+});
 
 /* ================== CONTRATISTAS ================== */
 let CONTR_DATA=[];
@@ -926,23 +936,24 @@ function pintarContratistas(list){
     rightGroup.className='right-group';
 
     const btnDetalles=document.createElement('button');
-    btnDetalles.textContent='MOSTRAR DETALLES';
-    btnDetalles.addEventListener('click', ()=> mostrarDetallesContratista(c.documento));
+btnDetalles.textContent='MOSTRAR DETALLES';
+btnDetalles.addEventListener('click', ()=>{
+  playSoundOnce(SOUNDS.login);
+  mostrarDetallesContratista(c.documento);
+});
 
     const btnGuardarEstado=document.createElement('button');
     btnGuardarEstado.textContent='GUARDAR ESTADO';
     btnGuardarEstado.addEventListener('click', async ()=>{
-      try{
-        await apiPost('guardarEstadoContratista',{
-          documento:c.documento,
-          estado:nuevoEstado
-        });
-        Swal.fire({icon:'success',title:'Estado actualizado',timer:1600,showConfirmButton:false});
-        await cargarContratistas();
-      }catch(e){
-        Swal.fire({icon:'error',title:'Error',text:e.message});
-      }
-    });
+  playSoundOnce(SOUNDS.login);
+  try{
+    await apiPost('guardarEstadoContratista',{ documento:c.documento, estado:nuevoEstado });
+    Swal.fire({icon:'success',title:'Estado actualizado',timer:1600,showConfirmButton:false});
+    await cargarContratistas();
+  }catch(e){
+    Swal.fire({icon:'error',title:'Error',text:e.message});
+  }
+});
 
     const btnWhatsapp=document.createElement('button');
     btnWhatsapp.className='btn-icon';
@@ -1019,7 +1030,10 @@ const MAP_SUPERVISOR_CONTACTO={
   'LIDA ERIKA SANCHEZ PEÑA':'573133641048'
 };
 
-document.getElementById('btn-add-contratista').addEventListener('click',()=> showView('view-agregar'));
+document.getElementById('btn-add-contratista').addEventListener('click', ()=>{
+  playSoundOnce(SOUNDS.login);
+  showView('view-agregar');
+});
 document.getElementById('add-secretaria').addEventListener('change',()=>{
   const val=document.getElementById('add-secretaria').value;
   document.getElementById('add-carpetaSecretaria').value=MAP_SECRETARIA_CARPETA[val]||'';
@@ -1172,8 +1186,11 @@ function pintarCuentas(list){
     btnRow.className='btn-row';
 
     const btnRevisar=document.createElement('button');
-    btnRevisar.textContent='REVISAR';
-    btnRevisar.addEventListener('click',()=> abrirRevisionCuenta(c.documento));
+btnRevisar.textContent='REVISAR';
+btnRevisar.addEventListener('click', ()=>{
+  playSoundOnce(SOUNDS.login);
+  abrirRevisionCuenta(c.documento);
+});
     btnRow.appendChild(btnRevisar);
 
     if (c.telefono){
@@ -1627,8 +1644,11 @@ function pintarRequerimientos(list){
     btnRow.className='btn-row';
 
     const btnRedact=document.createElement('button');
-    btnRedact.textContent='REDACTAR';
-    btnRedact.addEventListener('click',()=> abrirModalRequerimiento(c));
+btnRedact.textContent='REDACTAR';
+btnRedact.addEventListener('click', ()=>{
+  playSoundOnce(SOUNDS.login);
+  abrirModalRequerimiento(c);
+});
 
     btnRow.appendChild(btnRedact);
     div.appendChild(btnRow);
