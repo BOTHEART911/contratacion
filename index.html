@@ -742,7 +742,7 @@ btnLogin.addEventListener('click', async () => {
   const mensaje = 
     'Buen día *Oscar*%0A%0ANo tengo acceso a la app de Contratación.%0A' +
     'Mi cédula: *' + cedula + '*%0A' +
-    'Por favor validar.%0A%0AGracias.';
+    'Te dejo mis datos a continuación:%0A*Nombre Completo:*%0A*Celular:*';
   const esMovil = /android|iphone|ipad|mobile/i.test(navigator.userAgent);
   // En móviles se puede usar el esquema whatsapp://; en desktop la URL web
   const urlWA = esMovil 
@@ -1063,7 +1063,7 @@ async function mostrarDetallesContratista(documento){
     }else{
       const lines=[
         `<b>NOMBRE:</b> ${d.nombre||''}`,
-        `<b>CC:</b> ${d.documento||''} de ${d.expedida||''}`,
+        `<b>CC:</b> ${d.documento||''} <b>de:</b> ${d.expedida||''}`,
         `<b>TELEFONO:</b> ${d.telefono||'SIN REGISTRO'}`,
         `<b>CORREO:</b> ${d.correo||'SIN REGISTRO'}`,
         `<b>CUENTA:</b> ${d.cuenta||''} ${d.tipoCuenta||''} ${d.banco||''}`,
@@ -1241,6 +1241,7 @@ function renderRevisionCuenta(){
   const sInforme=document.getElementById('sec-informe');
   sInforme.innerHTML=[
     `<h4 style="margin:4px 0;color:var(--primary)">RELACIÓN DE INFORME</h4>`,
+    `<p><b>FECHA DE RADICACIÓN:</b> ${cu?.fechaRadicacion||''}</p>`,
     `<p><b>INFORME:</b> ${cu?.informe||''} de ${cu?.totalInformes||''}</p>`,
     `<p><b>INICIO DE PERIODO RATIFICADO:</b> ${cu?.inicioRatificar||''}</p>`,
     `<p><b>FIN DE PERIODO RATIFICADO:</b> ${cu?.finRatificar||''}</p>`,
