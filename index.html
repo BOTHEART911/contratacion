@@ -1148,6 +1148,14 @@ function pintarCuentas(list){
     pInf.className='item-sub';
     pInf.textContent='INFORME: '+(c.informe||'')+' de: '+(c.totalInformes||'');
 
+    const pDoc=document.createElement('p');
+    pInf.className='item-sub';
+    pInf.textContent='SECRETARÍA: '+(c.secretaria||'');
+
+    const pDoc=document.createElement('p');
+    pInf.className='item-sub';
+    pInf.textContent='SUPERVISOR: '+(c.supervisor||'');
+
     const btnRow=document.createElement('div');
     btnRow.className='btn-row';
 
@@ -1211,7 +1219,7 @@ function renderRevisionCuenta(){
   const cu=REV_CUENTA?.cuenta;
   const rcTitle=document.getElementById('rc-title');
   const rcBody=document.getElementById('rc-body');
-  rcTitle.textContent='REVISIÓN DE CUENTA DE '+(c?.nombre||'')+' CC: '+(c?.documento||'');
+  rcTitle.textContent='REVISIÓN DE CUENTA DE '+(c?.nombre||'');
   rcBody.innerHTML='';
   const baseInfo=[
     `<b>DOCUMENTO:</b> ${c?.documento||''}`,
