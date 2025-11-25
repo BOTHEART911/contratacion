@@ -1219,7 +1219,7 @@ function renderRevisionCuenta(){
   const cu=REV_CUENTA?.cuenta;
   const rcTitle=document.getElementById('rc-title');
   const rcBody=document.getElementById('rc-body');
-  rcTitle.textContent='REVISIÓN DE CUENTA DE '+(c?.nombre||'');
+  rcTitle.textContent='REVISIÓN DE CUENTA N° '+(c?.informe||'')+' de '+(c?.nombre||'');
   rcBody.innerHTML='';
   const baseInfo=[
     `<b>DOCUMENTO:</b> ${c?.documento||''}`,
