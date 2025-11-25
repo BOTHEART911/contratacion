@@ -378,6 +378,45 @@
   .toggle-cedula{ right:8px; width:26px; height:26px; }
   .toggle-cedula img{ width:20px; height:20px; }
 }
+
+    /* === Alinear íconos WhatsApp y Drive en UNA MISMA LÍNEA dentro de cada contratista === */
+.contr-actions{
+  display:flex;
+  flex-wrap:nowrap;              /* evita que el grupo de iconos salte a otra línea */
+}
+.contr-actions .left-group{
+  display:flex;
+  gap:12px;
+  flex:1 1 auto;                 /* botones grandes ocupan el espacio principal */
+}
+.contr-actions .right-group{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:12px;
+  margin-left:12px;              /* pequeño espacio respecto a los botones de la izquierda */
+  flex:0 0 auto;
+  min-width:auto;
+}
+.contr-actions .right-group .btn-icon{
+  flex:0 0 auto;
+  width:auto;                    /* evita que se estiren verticalmente */
+  display:inline-flex !important;
+  padding:6px !important;
+}
+
+/* Si en pantallas muy pequeñas quieres permitir que se apilen, puedes comentar flex-wrap:nowrap arriba
+   y usar este media query para permitir el wrap */
+@media (max-width:700px){
+  .contr-actions{
+    flex-wrap:wrap;
+  }
+  .contr-actions .right-group{
+    width:100%;
+    justify-content:center;
+    margin-left:0;
+  }
+}
   </style>
 </head>
 <body>
