@@ -1503,17 +1503,17 @@ document.getElementById('rc-guardar').addEventListener('click', async ()=>{
   const telContratista = formatBuilderbotNumber(telContratistaRaw, true);
   const telSupervisor  = formatBuilderbotNumber(telSupervisorRaw, false);
 
-  const rs = await Swal.fire({
-    icon:'success',
-    title:'Haz revisado la cuenta de N° '+informe 'de '+nombre,
-    text:'Toma una de las opciones.',
-    showCancelButton:true,
-    showDenyButton:true,
-    confirmButtonText:'Aprobar',
-    denyButtonText:'Devolver',
-    cancelButtonText:'Cancelar'
-  });
-
+ const rs = await Swal.fire({
+  icon:'success',
+  title: `Has revisado la cuenta N° ${informe} de ${nombre}`,
+  text:'Toma una de las opciones.',
+  showCancelButton:true,
+  showDenyButton:true,
+  confirmButtonText:'Aprobar',
+  denyButtonText:'Devolver',
+  cancelButtonText:'Cancelar'
+});
+  
   // Saltos reales con \n
   function msgAprobado(){
     return (
