@@ -692,21 +692,40 @@ async function apiPost(action, body = {}){
 }
 
 /* ================== BUILDERBOT ================== */
+function formatBuilderbotNumber(raw, force57 = false){
+  let num = String(raw || '').replace(/\D/g,''); // quitar todo lo no numérico
+  if(!num) return '';
+  // Si se fuerza 57 (contratista) y tiene 10 dígitos sin prefijo
+  if(force57){
+    if(num.length === 10 && !num.startsWith('57')) num = '57' + num;
+    // Si por alguna razón trae más de 12 dígitos, descartamos
+    if(num.length !== 12) return '';
+  } else {
+    // Supervisor: aceptamos 10 o 12 (ya con 57). Si es 10 no se agrega prefijo.
+    if(!(num.length === 10 || (num.length === 12 && num.startsWith('57')))){
+      return '';
+    }
+  }
+  return num;
+}
 function sendBuilderbotMessage(destino, mensaje){
-  try {
-    fetch(BUILDERBOT_ENDPOINT, {
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'x-api-builderbot':BUILDERBOT_API_KEY
-      },
-      body:JSON.stringify({
-        messages:{ content: mensaje },
-        number:String(destino),
-        checkIfExists:false
-      })
-    }).catch(()=>{});
-  }catch(_){}
+  const number = destino;
+  if(!number){
+    console.warn('Número vacío/no válido, no se envía BuilderBot');
+    return;
+  }
+  fetch(BUILDERBOT_ENDPOINT, {
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'x-api-builderbot':BUILDERBOT_API_KEY
+    },
+    body:JSON.stringify({
+      messages:{ content: mensaje },
+      number,
+      checkIfExists:false
+    })
+  }).catch(err=> console.warn('Error enviando BuilderBot', err));
 }
 
 /* ================== ESTADO GLOBAL ================== */
@@ -1473,15 +1492,19 @@ document.getElementById('rc-guardar').addEventListener('click', async ()=>{
   if(!REV_CUENTA?.cuenta){
     Swal.fire({icon:'warning',title:'Sin cuenta cargada'}); return;
   }
-  const documento=REV_CUENTA.contratista.documento;
-  const nombre=REV_CUENTA.contratista.nombre;
-  const informe=REV_CUENTA.cuenta.informe;
-  const supervisor=REV_CUENTA.contratista.supervisor;
-  const telSupervisor=REV_CUENTA.contratista.contacto;
-  const telContratista=REV_CUENTA.contratista.telefono;
-  const observ=(document.getElementById('rc-observaciones').value||'').trim();
+  const documento = REV_CUENTA.contratista.documento;
+  const nombre    = REV_CUENTA.contratista.nombre;
+  const informe   = REV_CUENTA.cuenta.informe;
+  const supervisor      = REV_CUENTA.contratista.supervisor;
+  let telSupervisorRaw  = REV_CUENTA.contratista.contacto;
+  let telContratistaRaw = REV_CUENTA.contratista.telefono;
+  const observ = (document.getElementById('rc-observaciones').value || '').trim();
 
-  const rs=await Swal.fire({
+  // Normalizaciones
+  const telContratista = formatBuilderbotNumber(telContratistaRaw, true);
+  const telSupervisor  = formatBuilderbotNumber(telSupervisorRaw, false);
+
+  const rs = await Swal.fire({
     icon:'success',
     title:'HaZ revisado la cuenta de '+nombre,
     text:'Toma una de las opciones.',
@@ -1492,13 +1515,40 @@ document.getElementById('rc-guardar').addEventListener('click', async ()=>{
     cancelButtonText:'Cancelar'
   });
 
+  // Helper mensajes con ** para negrilla
+  function msgAprobado(){
+    return (
+      'Estimado(a) **'+nombre+'**\\n' +
+      'Tu **Cuenta N° '+informe+'** ha sido aprobada, ya puedes subir los documentos al **Plan de Pagos en el Secop II**\\n' +
+      'Uno vez los subas, toma la opción **Reportar Plan de Pagos** en la App.\\n' +
+      '> Recuerda que, desde la segunda cuenta; debes relacionar la fecha en que la entidad te canceló los honorarios de la cuenta inmediatamente anterior.\\n' +
+      'Cordialmente,\\n**Equipo de Contratación**'
+    );
+  }
+  function msgDevueltaContratista(){
+    return (
+      'Estimado(a) **'+nombre+'**\\n' +
+      'Se ha devuelto tu **Cuenta N° '+informe+'** por esta inconsistencia:\\n**'+(observ || 'Sin observaciones')+'**\\n' +
+      'Haz la corrección desde la App teniendo en cuenta las observaciones anteriores.\\n' +
+      'Cordialmente,\\n**Equipo de Contratación**'
+    );
+  }
+  function msgDevueltaSupervisor(){
+    return (
+      'Estimado(a) **'+supervisor+'**\\n' +
+      'Se ha devuelto la **Cuenta N° '+informe+'** de **'+nombre+'** por esta inconsistencia:\\n**'+(observ || 'Sin observaciones')+'**\\n' +
+      'El(la) Contratista ya ha sido notificado(a).\\n' +
+      'Cordialmente,\\n**Equipo de Contratación**'
+    );
+  }
+
   if(rs.isConfirmed){
     try{
       await apiPost('aprobarCuenta',{documento,informe});
       if(telContratista){
-        sendBuilderbotMessage(telContratista,
-          'Estimado(a) *'+nombre+'*\nTu *Cuenta N° '+informe+'* ha sido aprobada, ya puedes subir los documentos al *Plan de Pagos en el Secop II*\nUno vez los subas, toma la opción *Reportar Plan de Pagos* en la App.\n> Recuerda que, desde la segunda cuenta; debes relacionar la fecha en que la entidad te canceló los honorarios de la cuenta inmediatamente anterior.\nCordialmente,\n*Equipo de Contratación*'
-        );
+        sendBuilderbotMessage(telContratista, msgAprobado());
+      } else {
+        console.warn('Teléfono contratista inválido/no disponible para aprobación');
       }
       Swal.fire({icon:'success',title:'Cuenta Aprobada',timer:1800,showConfirmButton:false});
       await cargarCuentasPendientes();
@@ -1506,18 +1556,18 @@ document.getElementById('rc-guardar').addEventListener('click', async ()=>{
     }catch(e){
       Swal.fire({icon:'error',title:'Error',text:e.message});
     }
-  }else if(rs.isDenied){
+  } else if(rs.isDenied){
     try{
       await apiPost('devolverCuenta',{documento,informe,observaciones:observ});
       if(telSupervisor){
-        sendBuilderbotMessage(telSupervisor,
-          'Estimado(a) *'+supervisor+'*\nSe ha devuelto la *Cuenta N° '+informe+'* de *'+nombre+'* por esta inconsistencia:\n*'+(observ||'Sin observaciones')+'*\nEl(la) Contratista ya ha sido notificado(a).\nCordialmente,\n*Equipo de Contratación*'
-        );
+        sendBuilderbotMessage(telSupervisor, msgDevueltaSupervisor());
+      } else {
+        console.warn('Teléfono supervisor inválido/no disponible');
       }
       if(telContratista){
-        sendBuilderbotMessage(telContratista,
-          'Estimado(a) *'+nombre+'*\nSe ha devuelto tu *Cuenta N° '+informe+'* por esta inconsistencia:\n*'+(observ||'Sin observaciones')+'*\nHaz la corrección desde la App teniendo en cuenta las observaciones anteriores.\nCordialmente,\n*Equipo de Contratación*'
-        );
+        sendBuilderbotMessage(telContratista, msgDevueltaContratista());
+      } else {
+        console.warn('Teléfono contratista inválido/no disponible para devolución');
       }
       Swal.fire({icon:'success',title:'Cuenta Devuelta',timer:1800,showConfirmButton:false});
       await cargarCuentasPendientes();
