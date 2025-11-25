@@ -1640,18 +1640,19 @@ function abrirZoomEvidencia(src, titulo){
       evDiv.appendChild(img);
       block.appendChild(evDiv);
     }
-            blocksWrap.appendChild(block);
+               blocksWrap.appendChild(block);
   }
 
   // === Mostrar/ocultar y parametrizar botón "CUENTA" (debajo de Actividades) ===
   const cuentaBtn = document.getElementById('btn-abrir-carpeta-cuenta');
   if (cu?.informe && c?.carpetaContratista){
+    const subName = 'CUENTA ' + String(cu.informe).trim(); // nombre exacto de la subcarpeta
     cuentaBtn.classList.remove('hidden');
-    cuentaBtn.dataset.parent  = c.carpetaContratista;           // carpetaContratista (padre)
-    cuentaBtn.dataset.informe = String(cu.informe);              // número de informe
-    if (cu?.carpetaCuenta) {
-      // Si el backend entrega el ID de la subcarpeta "CUENTA <informe>"
-      cuentaBtn.dataset.subId = cu.carpetaCuenta;                // ID de subcarpeta CUENTA <informe>
+    cuentaBtn.dataset.parent  = c.carpetaContratista;      // carpeta padre (carpetaContratista)
+    cuentaBtn.dataset.informe = String(cu.informe).trim(); // número de informe
+    cuentaBtn.dataset.subname = subName;                   // "CUENTA <informe>"
+    if (cu?.carpetaCuenta){                                // si el backend ya entrega el ID de la subcarpeta
+      cuentaBtn.dataset.subId = cu.carpetaCuenta;
     } else {
       delete cuentaBtn.dataset.subId;
     }
@@ -1659,6 +1660,7 @@ function abrirZoomEvidencia(src, titulo){
     cuentaBtn.classList.add('hidden');
     delete cuentaBtn.dataset.parent;
     delete cuentaBtn.dataset.informe;
+    delete cuentaBtn.dataset.subname;
     delete cuentaBtn.dataset.subId;
   }
 }
@@ -1694,38 +1696,46 @@ toggleSection('btn-toggle-planilla','sec-planilla','Ver Relación de Planilla','
 toggleSection('btn-toggle-planilla2','sec-planilla2','Ver Relación de Planilla Anexa','Ocultar Relación de Planilla Anexa');
 toggleSection('btn-toggle-actividades','sec-actividades','Ver Relación de Actividades','Ocultar Relación de Actividades');
 
-// Abrir subcarpeta "CUENTA <informe>" dentro de la carpeta del contratista
+// Abrir exactamente la subcarpeta "CUENTA <informe>" que está DENTRO de carpetaContratista
 const btnAbrirCarpetaCuenta = document.getElementById('btn-abrir-carpeta-cuenta');
-btnAbrirCarpetaCuenta.addEventListener('click', ()=>{
+btnAbrirCarpetaCuenta.addEventListener('click', async ()=>{
   playSoundOnce(SOUNDS.login);
 
   const parentId = btnAbrirCarpetaCuenta.dataset.parent || REV_CUENTA?.contratista?.carpetaContratista || '';
-  const informe  = (btnAbrirCarpetaCuenta.dataset.informe || REV_CUENTA?.cuenta?.informe || '').toString().trim();
-  const subId    = btnAbrirCarpetaCuenta.dataset.subId || '';   // ID de "CUENTA <informe>" si el backend lo entrega
+  const subId    = btnAbrirCarpetaCuenta.dataset.subId || '';   // si el backend ya lo envía
+  const subName  = btnAbrirCarpetaCuenta.dataset.subname || ('CUENTA ' + (REV_CUENTA?.cuenta?.informe || '')).trim();
 
   if (!parentId){
     Swal.fire({ icon:'info', title:'Sin carpeta', text:'Este contratista no tiene "carpetaContratista" asociada.' });
     return;
   }
 
-  // 1) Si tenemos el ID de la subcarpeta "CUENTA <informe>", abrimos DIRECTO esa carpeta
+  // 1) Si ya tenemos el ID de la subcarpeta, abrir directo la subcarpeta (dentro del padre).
   if (subId){
     window.open('https://drive.google.com/drive/folders/' + subId, '_blank');
     return;
   }
 
-  // 2) Si no tenemos el ID, abrimos una búsqueda de Drive para "CUENTA <informe>" (tipo carpeta)
-  //    Esto ya NO abre la misma carpeta del botón Drive; abre la vista de búsqueda.
-  const nombre = informe ? ('CUENTA ' + informe) : '';
-  if (nombre){
-    // Búsqueda global de carpetas con ese nombre (puedes añadir comillas para exacto)
-    const searchUrl = 'https://drive.google.com/drive/search?q=' + encodeURIComponent('title:"' + nombre + '" type:folder');
-    window.open(searchUrl, '_blank');
-  } else {
-    // Si no hay informe, cae de nuevo a la carpeta padre
+  // 2) Resolver el ID de "CUENTA <informe>" dentro del padre mediante el backend (SIN usar buscador global).
+  //    Endpoint esperado (Apps Script): action=getSubCarpetaPorNombre
+  //    Parámetros: parentId (ID de carpetaContratista), nombre (p.ej. "CUENTA 1")
+  //    Debe responder: { id: 'xxxxxxxxxxxxxxxxx' } cuando existe, o null/'' si no existe.
+  try{
+    const res = await apiGet('getSubCarpetaPorNombre', { parentId, nombre: subName });
+    const foundId = (res && (res.id || res.folderId || res.carpetaId)) ? (res.id || res.folderId || res.carpetaId) : (typeof res === 'string' ? res : '');
+    if (foundId){
+      window.open('https://drive.google.com/drive/folders/' + foundId, '_blank');
+      return;
+    }
+    // Si no existe la subcarpeta, te dejamos en el padre para que lo verifiques.
+    Swal.fire({ icon:'info', title:'Subcarpeta no encontrada', text:'No se encontró "' + subName + '" dentro de la carpeta del contratista.' });
+    window.open('https://drive.google.com/drive/folders/' + parentId, '_blank');
+  }catch(e){
+    Swal.fire({ icon:'error', title:'Error al localizar la subcarpeta', text:e.message || 'Intenta nuevamente.' });
     window.open('https://drive.google.com/drive/folders/' + parentId, '_blank');
   }
 });
+  
 document.getElementById('rc-guardar').addEventListener('click', async ()=>{
   if(!REV_CUENTA?.cuenta){
     Swal.fire({icon:'warning',title:'Sin cuenta cargada'}); return;
