@@ -1089,7 +1089,7 @@ async function mostrarDetallesContratista(documento){
         `<b>ARL:</b> ${d.arl||''}`,
         `<b>SECRETARÍA:</b> ${d.secretaria||''}`,
         `<b>SUPERVISOR:</b> ${d.supervisor||''}`,
-        `<b>CONTRATO:</b> ${d.contrato||''} de: ${d.fechaContrato||''}`,
+        `<b>CONTRATO:</b> ${d.contrato||''} <b>de:</b> ${d.fechaContrato||''}`,
         `<b>OBJETO:</b> ${d.objeto||''}`,
         `<b>FECHA DE INICIO:</b> ${d.fechaInicio||''}`,
         `<b>FECHA DE TERMINO:</b> ${d.fechaTermino||''}`,
@@ -1258,7 +1258,6 @@ function renderRevisionCuenta(){
     `<b>RP ADICIÓN:</b> ${c?.rpAdicion||''}`,
     `<b>SECRETARÍA:</b> ${c?.secretaria||''}`,
     `<b>SUPERVISOR:</b> ${c?.supervisor||''}`,
-    `<b>CONTACTO SUPERVISOR:</b> ${c?.contacto||''}`
   ].map(x=>`<p>${x}</p>`).join('');
 
   const sInforme=document.getElementById('sec-informe');
