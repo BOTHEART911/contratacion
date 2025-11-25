@@ -297,6 +297,7 @@
 
     .evidence-grid{
       display:flex; flex-wrap:wrap; gap:10px;
+      justify-content:center; /* centrado */
     }
     .evidence-thumb{
       width:100%; max-width:320px;
@@ -306,6 +307,8 @@
       border:2px solid #ddd;
       background:#eee;
       cursor:zoom-in;
+      display:block;
+      margin:0 auto;
     }
 
     /* Modal Requerimiento */
@@ -533,10 +536,7 @@
         </div>
         <div id="sec-actividades" class="section-content hidden">
           <div id="actividades-blocks"></div>
-          <div class="btn-row" id="actividades-mas-menor" style="display:none; margin-top:10px;">
-            <button id="act-mostrar-mas" class="btn-primary">Mostrar más</button>
-            <button id="act-mostrar-menos" class="danger hidden">Mostrar menos</button>
-          </div>
+          <!-- Se han retirado los botones Mostrar más/menos según requerimiento -->
         </div>
 
         <h3 style="color:var(--primary); margin-top:18px;">TUS OBSERVACIONES</h3>
@@ -1273,6 +1273,7 @@ function renderRevisionCuenta(){
     `<p><b>APORTES FPS:</b> ${cu?.solidario2||''} ${cu?.aporte2||''}</p>`
   ].join('');
 
+  // === Actividades sin paginación, mostrando solo las con contenido ===
   const blocksWrap=document.getElementById('actividades-blocks');
   blocksWrap.innerHTML='';
   const actividades=REV_CUENTA?.actividades||[];
@@ -1280,103 +1281,77 @@ function renderRevisionCuenta(){
   const obligaciones=REV_CUENTA?.obligaciones||[];
   const total=obligaciones.length;
 
+  function extraerDriveId(url){
+    if(!url) return '';
+    const primera=String(url).trim().split(/\s+/)[0];
+    const patrones=[
+      /\/d\/([A-Za-z0-9_-]{10,})/,
+      /id=([A-Za-z0-9_-]{10,})/,
+      /\/file\/d\/([A-Za-z0-9_-]{10,})/,
+      /open\?[^#]*id=([A-Za-z0-9_-]{10,})/
+    ];
+    for(const rx of patrones){
+      const m=primera.match(rx);
+      if(m) return m[1];
+    }
+    return '';
+  }
   function evidenciaThumb(url){
-    if(!url) return null;
-    const m=String(url).match(/\/d\/([A-Za-z0-9_-]{10,})\//);
-    const id=m?m[1]:'';
-    if(!id) return url;
-    return 'https://drive.google.com/thumbnail?sz=w1000&id='+id;
+    const id=extraerDriveId(url);
+    return id ? 'https://drive.google.com/thumbnail?sz=w1000&id='+id : url;
   }
   function evidenciaFull(url){
-    if(!url) return null;
-    const m=String(url).match(/\/d\/([A-Za-z0-9_-]{10,})\//);
-    const id=m?m[1]:'';
-    if(!id) return url;
-    return 'https://drive.google.com/uc?export=view&id='+id;
+    const id=extraerDriveId(url);
+    return id ? 'https://drive.google.com/uc?export=view&id='+id : url;
   }
 
-  function renderActividadRango(from,to){
-    blocksWrap.innerHTML='';
-    for(let i=from;i<=to && i<=total;i++){
-      const oblig=obligaciones[i-1];
-      const act=actividades[i-1];
-      const evid=evidencias[i-1];
+  for(let i=1;i<=total;i++){
+    const oblig=obligaciones[i-1];
+    const act=actividades[i-1];
+    const evid=evidencias[i-1];
 
-      if(
-        (!oblig || oblig==='-') &&
-        (!act || act==='-') &&
-        (!evid || evid==='-')
-      ) continue;
+    if(![oblig,act,evid].some(v=>v && v!=='-')) continue;
 
-      const block=document.createElement('div');
-      block.className='oblig-block';
+    const block=document.createElement('div');
+    block.className='oblig-block';
 
-      const titulo=document.createElement('p');
-      titulo.className='oblig-title';
-      titulo.textContent='OBLIGACIÓN N° '+i;
-      block.appendChild(titulo);
+    const titulo=document.createElement('p');
+    titulo.className='oblig-title';
+    titulo.textContent='OBLIGACIÓN N° '+i;
+    block.appendChild(titulo);
 
-      if(oblig && oblig!=='-'){
-        const ob=document.createElement('p');
-        ob.className='oblig-sub';
-        ob.innerHTML='<b>Obligación:</b> '+oblig;
-        block.appendChild(ob);
-      }
-      if(act && act!=='-'){
-        const ac=document.createElement('p');
-        ac.className='oblig-sub';
-        ac.innerHTML='<b>Actividades:</b> '+act;
-        block.appendChild(ac);
-      }
-      if(evid && evid!=='-'){
-        const evDiv=document.createElement('div');
-        evDiv.className='evidence-grid';
-        const img=document.createElement('img');
-        img.className='evidence-thumb';
-        img.src=evidenciaThumb(evid)||evid;
-        img.alt='Evidencia '+i;
-        img.addEventListener('click',()=>{
-          const full=evidenciaFull(evid)||evid;
-          Swal.fire({
-            title:'Evidencia '+i,
-            html:`<img src="${full}" style="max-width:100%;border-radius:12px;">`,
-            width:'80%'
-          });
+    if(oblig && oblig!=='-'){
+      const ob=document.createElement('p');
+      ob.className='oblig-sub';
+      ob.textContent=oblig; // sin prefijo "Obligación:"
+      block.appendChild(ob);
+    }
+    if(act && act!=='-'){
+      const ac=document.createElement('p');
+      ac.className='oblig-sub';
+      ac.innerHTML='<b>Actividades:</b> '+act;
+      block.appendChild(ac);
+    }
+    if(evid && evid!=='-'){
+      const evDiv=document.createElement('div');
+      evDiv.className='evidence-grid';
+      const img=document.createElement('img');
+      img.className='evidence-thumb';
+      img.src=evidenciaThumb(evid);
+      img.alt='Evidencia '+i;
+      img.addEventListener('click',()=>{
+        const full=evidenciaFull(evid);
+        Swal.fire({
+          title:'Evidencia '+i,
+          html:`<div style="text-align:center"><img src="${full}" style="max-width:100%;border-radius:12px;"></div>`,
+          width:'80%'
         });
-        evDiv.appendChild(img);
-        block.appendChild(evDiv);
-      }
-      blocksWrap.appendChild(block);
+      });
+      evDiv.appendChild(img);
+      block.appendChild(evDiv);
     }
+    blocksWrap.appendChild(block);
   }
-
-  const masMenos=document.getElementById('actividades-mas-menor');
-  let rangoEstado=1;
-  function actualizarRango(){
-    if(rangoEstado===1){
-      renderActividadRango(1,10);
-      masMenos.style.display=(total>10)?'flex':'none';
-      document.getElementById('act-mostrar-mas').classList.remove('hidden');
-      document.getElementById('act-mostrar-menos').classList.add('hidden');
-    }else if(rangoEstado===2){
-      renderActividadRango(11,20);
-      document.getElementById('act-mostrar-mas').classList.remove('hidden');
-      document.getElementById('act-mostrar-menos').classList.remove('hidden');
-    }else{
-      renderActividadRango(21,26);
-      document.getElementById('act-mostrar-mas').classList.add('hidden');
-      document.getElementById('act-mostrar-menos').classList.remove('hidden');
-    }
-  }
-  actualizarRango();
-  document.getElementById('act-mostrar-mas').onclick=()=>{
-    if(rangoEstado===1 && total>10){ rangoEstado=2; actualizarRango(); }
-    else if(rangoEstado===2 && total>20){ rangoEstado=3; actualizarRango(); }
-  };
-  document.getElementById('act-mostrar-menos').onclick=()=>{
-    if(rangoEstado===3){ rangoEstado=2; actualizarRango(); }
-    else if(rangoEstado===2){ rangoEstado=1; actualizarRango(); }
-  };
 }
 document.getElementById('rc-volver').addEventListener('click',()=> showView('view-revision'));
 
