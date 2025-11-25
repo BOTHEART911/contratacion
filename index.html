@@ -372,6 +372,61 @@
     height:28px;
   }
 }
+
+    .cedula-row{
+  display:flex;
+  align-items:center;
+  width:100%;
+  gap:6px;              /* separación mínima */
+}
+.cedula-row input#login-cedula{
+  flex:1;
+  width:auto;
+  box-sizing:border-box;
+  /* Reducimos un poco visualmente el campo (optional):
+     Puedes comentar la siguiente línea si no quieres reducción perceptible */
+  padding-right:14px;
+}
+.toggle-cedula{
+  flex:0 0 40px;
+  height:40px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#fff !important;
+  border:1.5px solid #ccc !important;
+  border-radius:8px;
+  cursor:pointer;
+  padding:0;
+  transition:background .25s, transform .12s;
+}
+.toggle-cedula:hover{
+  background:#f3f3f3 !important;
+}
+.toggle-cedula:active{
+  transform:scale(.92);
+}
+.toggle-cedula:focus-visible{
+  outline:none;
+  box-shadow:0 0 0 3px rgba(6,64,43,.35);
+}
+.toggle-cedula img{
+  width:26px;
+  height:26px;
+  display:block;
+  pointer-events:none;
+}
+
+@media (max-width:480px){
+  .toggle-cedula{
+    flex:0 0 36px;
+    height:36px;
+  }
+  .toggle-cedula img{
+    width:22px;
+    height:22px;
+  }
+}
   </style>
 </head>
 <body>
@@ -405,10 +460,24 @@
         <p class="helper"><b>Solo el personal del área de contratación de la Alcaldía de Flandes está autorizado para hacer uso de esta App.</b></p>
 
         <label>Cédula</label>
-        <div class="pwd-wrapper">
-  <input id="login-cedula" type="password" inputmode="numeric" autocomplete="off" placeholder="Sin puntos ni espacios" />
-  <button type="button" id="toggle-cedula" aria-label="Mostrar cédula" class="toggle-cedula">
-    <img src="https://res.cloudinary.com/dqqeavica/image/upload/v1764084782/Mostrar_yymceh.png" alt="Mostrar">
+        <div class="cedula-row">
+  <input
+    id="login-cedula"
+    type="password"
+    inputmode="numeric"
+    autocomplete="off"
+    placeholder="Sin puntos ni espacios"
+  />
+  <button
+    type="button"
+    id="toggle-cedula"
+    aria-label="Mostrar cédula"
+    class="toggle-cedula"
+  >
+    <img
+      src="https://res.cloudinary.com/dqqeavica/image/upload/v1764084782/Mostrar_yymceh.png"
+      alt="Mostrar"
+    >
   </button>
 </div>
 
