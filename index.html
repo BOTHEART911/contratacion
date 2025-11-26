@@ -2103,8 +2103,8 @@ document.getElementById('soporte-volver').addEventListener('click', ()=>{
 
 /* ================== PWA AVANZADO ================== */
 let deferredPrompt = null;
-let __installStartShown = false;    // bandera global
-let __installSuccessShown = false;  // bandera global
+let __installStartShown = false;    // bandera: ya mostramos "App instalándose"
+let __installSuccessShown = false;  // bandera: ya mostramos "Instalación exitosa"
 
 function isStandalone(){
   const dmStandalone = window.matchMedia('(display-mode: standalone)').matches;
@@ -2159,28 +2159,24 @@ window.addEventListener('beforeinstallprompt', (e)=>{
 });
 
 window.addEventListener('appinstalled', ()=>{
-  // Evita ejecutar dos veces por cualquier motivo
+  // Mostrar "Instalación exitosa" SOLO cuando la instalación real termine (Android)
   if (__installSuccessShown) return;
-
   markInstalled();
   deferredPrompt = null;
   updateInstallButtonsVisibility();
 
-  // Si acabamos de mostrar la alerta de “instalándose”, espera un poco
-  const delay = __installStartShown ? 600 : 0;
-  setTimeout(()=>{
-    __installSuccessShown = true;
-    Swal.fire({
-      icon:'success',
-      title:'¡Instalación exitosa!',
-      html:'La App se instaló. Puedes abrirla desde tu pantalla principal.',
-      timer:5000,
-      showConfirmButton:false
-    });
-  }, delay);
+  __installSuccessShown = true;
+  Swal.fire({
+    icon:'success',
+    title:'¡Instalación exitosa!',
+    html:'La App se instaló. Puedes abrirla desde tu pantalla principal.',
+    timer:5000,
+    showConfirmButton:false
+  });
 });
 
 document.getElementById('btn-instalar').addEventListener('click', async ()=>{
+  // Flujo iOS: se respeta exactamente tu alerta e instrucciones
   if(isIOS()){
     Swal.fire({
       icon:'info',
@@ -2189,24 +2185,26 @@ document.getElementById('btn-instalar').addEventListener('click', async ()=>{
     });
     return;
   }
+  // Android: requiere beforeinstallprompt (deferredPrompt)
   if(!deferredPrompt){
     Swal.fire({icon:'info',title:'Instalación no disponible todavía'});
     return;
   }
 
-  const dp = deferredPrompt;     // guarda referencia actual
-  dp.prompt();                   // muestra el diálogo nativo
-  const choice = await dp.userChoice;
-  deferredPrompt = null;         // limpia tras resolver
+  const dp = deferredPrompt;
+  dp.prompt();                           // muestra diálogo nativo de instalación
+  const choice = await dp.userChoice;    // espera la elección del usuario
+  deferredPrompt = null;                 // limpia el prompt (solo se usa una vez)
 
   if (choice.outcome === 'accepted'){
-    markInstalled();             // mantiene tu marca local
+    // Primera alerta (Android): confirma inicio de instalación por 6 segundos
+    markInstalled();
     __installStartShown = true;
     Swal.fire({
       icon: 'success',
       title: '¡App instalándose!',
-      html: 'Debes esperar 1 minuto.<br><br>Al terminar este tiempo, refresca la página o busca el icono de la aplicación en la pantalla de tu dispositivo.',
-      timer: 8000,
+      html: 'Debes esperar unos segundos mientras el sistema instala la App.',
+      timer: 6000,              // 6 segundos visibles
       showConfirmButton: false
     });
   } else {
