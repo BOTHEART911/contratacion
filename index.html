@@ -2159,25 +2159,9 @@ window.addEventListener('beforeinstallprompt', (e)=>{
 });
 
 window.addEventListener('appinstalled', ()=>{
-  // Evita duplicados
-  if (__installSuccessShown) return;
-
   markInstalled();
   deferredPrompt = null;
   updateInstallButtonsVisibility();
-
-  // Si se mostró la de "App instalándose", espera 10 segundos antes de mostrar la de éxito
-  const delay = __installStartShown ? 10000 : 0; // 10,000 ms
-  setTimeout(()=>{
-    __installSuccessShown = true;
-    Swal.fire({
-      icon:'success',
-      title:'¡Instalación exitosa!',
-      html:'La App se instaló. Sal de esta vista y búscala en tu pantalla principal.',
-      timer:5000,
-      showConfirmButton:false
-    });
-  }, delay);
 });
 
 document.getElementById('btn-instalar').addEventListener('click', async ()=>{
@@ -2206,12 +2190,12 @@ document.getElementById('btn-instalar').addEventListener('click', async ()=>{
     markInstalled();
     __installStartShown = true;
     Swal.fire({
-      icon: 'success',
-      title: '¡App instalándose!',
-      html: 'Debes esperar unos segundos mientras el sistema instala la App.',
-      timer: 6000,              // 6 segundos visibles
-      showConfirmButton: false
-    });
+  icon: 'success',
+  title: '¡App instalándose!',
+  html: 'Debes esperar unos segundos mientras el sistema instala la App.<br><b>Ya puedes salir de esta vista, aparecerá en tu pantalla principal del dispositivo</b>',
+  timer: 10000,
+  showConfirmButton: false
+});
   } else {
     Swal.fire({icon:'info',title:'Instalación cancelada'});
   }
