@@ -2103,9 +2103,12 @@ document.getElementById('soporte-volver').addEventListener('click', ()=>{
 
 /* ================== PWA AVANZADO ================== */
 let deferredPrompt = null;
+let __installStartShown = false;    // bandera global
+let __installSuccessShown = false;  // bandera global
+
 function isStandalone(){
   const dmStandalone = window.matchMedia('(display-mode: standalone)').matches;
-  const dmInstalled = window.matchMedia('(display-mode: installed)').matches;
+  const dmInstalled  = window.matchMedia('(display-mode: installed)').matches;
   const iosStandalone = (window.navigator.standalone === true);
   return dmStandalone || dmInstalled || iosStandalone;
 }
@@ -2148,11 +2151,13 @@ function updateInstallButtonsVisibility(){
   const shouldShow = !installed && (canPrompt || isIOS());
   if(btn1) btn1.style.display = shouldShow ? '' : 'none';
 }
+
 window.addEventListener('beforeinstallprompt', (e)=>{
   e.preventDefault();
   deferredPrompt = e;
   updateInstallButtonsVisibility();
 });
+
 window.addEventListener('appinstalled', ()=>{
   // Evita ejecutar dos veces por cualquier motivo
   if (__installSuccessShown) return;
@@ -2174,6 +2179,7 @@ window.addEventListener('appinstalled', ()=>{
     });
   }, delay);
 });
+
 document.getElementById('btn-instalar').addEventListener('click', async ()=>{
   if(isIOS()){
     Swal.fire({
@@ -2187,28 +2193,29 @@ document.getElementById('btn-instalar').addEventListener('click', async ()=>{
     Swal.fire({icon:'info',title:'Instalación no disponible todavía'});
     return;
   }
-  let __installStartShown = false;   // bandera global (declárala arriba del handler si prefieres)
-let __installSuccessShown = false; // bandera global
 
-const choice = await deferredPrompt.userChoice;
-deferredPrompt = null;
+  const dp = deferredPrompt;     // guarda referencia actual
+  dp.prompt();                   // muestra el diálogo nativo
+  const choice = await dp.userChoice;
+  deferredPrompt = null;         // limpia tras resolver
 
-if (choice.outcome === 'accepted'){
-  markInstalled();   // mantiene tu marca local
-  __installStartShown = true;
-  Swal.fire({
-    icon: 'success',
-    title: '¡App instalándose!',
-    html: 'Debes esperar 1 minuto.<br><br>Al terminar este tiempo, refresca la página o busca el icono de la aplicación en la pantalla de tu dispositivo.',
-    timer: 8000,
-    showConfirmButton: false
-  });
-} else {
-  Swal.fire({icon:'info',title:'Instalación cancelada'});
-}
+  if (choice.outcome === 'accepted'){
+    markInstalled();             // mantiene tu marca local
+    __installStartShown = true;
+    Swal.fire({
+      icon: 'success',
+      title: '¡App instalándose!',
+      html: 'Debes esperar 1 minuto.<br><br>Al terminar este tiempo, refresca la página o busca el icono de la aplicación en la pantalla de tu dispositivo.',
+      timer: 8000,
+      showConfirmButton: false
+    });
+  } else {
+    Swal.fire({icon:'info',title:'Instalación cancelada'});
+  }
 
-updateInstallButtonsVisibility();
+  updateInstallButtonsVisibility();
 });
+
 async function initPWAVista(){
   const installed = await detectInstalled();
   if (installed){
