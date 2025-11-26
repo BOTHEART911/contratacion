@@ -587,37 +587,40 @@
 
         <input id="add-contactoSupervisor" type="hidden">
 
-        <label for="contrato"><p style="color: green;"><big><b>N° de Contrato:</b></big></p></label>
-<input
-  type="text"
-  id="contrato"
-  name="contrato"
-  placeholder="Ej: 002"
-  required
-  inputmode="numeric"
-  pattern="^\d{3}$"
-  maxlength="3" />
+   <label>contrato</label>
+<input id="add-contrato" type="tel" inputmode="numeric" placeholder="Ej: 002" maxlength="3">
 
-        <!-- Tipo de Contrato -->
-<label for="tipoContrato"><p style="color: green;"><big><b>Tipo de Contrato:</b></big></p></label>
-<select id="tipoContrato" name="tipoContrato" required>
-  <option value="" disabled selected>Selecciona Tipo de Contrato</option>
+<label>tipoContrato</label>
+<select id="add-tipoContrato" required>
+  <option value="" disabled selected>Selecciona</option>
   <option value="PRESTACIÓN DE SERVICIOS PROFESIONALES">PRESTACIÓN DE SERVICIOS PROFESIONALES</option>
   <option value="PRESTACIÓN DE SERVICIOS DE APOYO A LA GESTIÓN">PRESTACIÓN DE SERVICIOS DE APOYO A LA GESTIÓN</option>
 </select>
 
-        <!-- Fecha de Contrato con “ruleta” (3 columnas) -->
-<label for="fechaContrato"><p style="color: green;"><big><b>Fecha del Contrato:</b></big></p></label>
+<label>fechaContrato</label>
 <input
+  id="add-fechaContrato"
   type="text"
-  id="fechaContrato"
-  name="fechaContrato"
   placeholder="dd/mm/2026"
   required
   readonly
   onclick="abrirPickerFecha()" />
 
-        <!-- Modal Picker -->
+<!-- ocultos requeridos -->
+<input id="add-diaContrato" type="text" style="display:none;">
+<input id="add-mesContrato" type="text" style="display:none;">
+<input id="add-mra" type="number" value="0" style="display:none;">
+
+<label>valor</label>
+<input id="add-valor" type="tel" inputmode="numeric" placeholder="Sin puntos ni espacios" maxlength="8">
+
+<label>valorTexto</label>
+<input id="add-valorTexto" type="text" placeholder="Campo Automático" readonly>
+
+<label>cdp</label>
+<input id="add-cdp" type="tel" inputmode="numeric" placeholder="10 dígitos" maxlength="10">
+
+<!-- Modal Picker (mantienes tu modal y lógica) -->
 <div id="fechaModal" class="picker-modal" aria-hidden="true">
   <div class="picker-box">
     <h3 style="margin:0 0 8px 0;">Selecciona la fecha</h3>
@@ -643,33 +646,6 @@
     </div>
   </div>
 </div>
-
-<!-- Ocultos: día y mes de contrato, y MRA -->
-<input type="text" id="diaContrato" name="diaContrato" style="display:none;">
-<input type="text" id="mesContrato" name="mesContrato" style="display:none;">
-<input type="number" id="mra" name="mra" style="display:none;" value="0">
-
-        <!-- Valor del Contrato -->
-<label for="valor"><p style="color: green;"><big><b>Valor del Contrato:</b></big></p></label>
-<input type="number" id="valor" name="valor" placeholder="Sin puntos ni espacios" required min="1" max="99999999">
-
-        <!-- Valor en Texto (automático + borde según validación) -->
-<label for="valorTexto"><p style="color: grey;"><big><b>Valor Total del Contrato en Texto:</b></big></p></label>
-<input type="text" id="valorTexto" name="valorTexto" placeholder="Campo Automático" required readonly>
-
-<!-- CDP N° (10 dígitos; borde verde si inicia por 2026) -->
-<label for="cdp"><p style="color: green;"><big><b>CDP N°:</b></big></p></label>
-<input
-  type="text"
-  id="cdp"
-  name="cdp"
-  placeholder="10 dígitos"
-  required
-  inputmode="numeric"
-  pattern="^\d{10}$"
-  maxlength="10" />
-
-        
 
         <div class="btn-row spaced">
           <button id="btn-add-guardar" class="btn-primary">Guardar</button>
