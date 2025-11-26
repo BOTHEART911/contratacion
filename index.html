@@ -419,6 +419,24 @@
     pointer-events:none;
     filter:drop-shadow(0 2px 4px rgba(0,0,0,.25));
   }
+
+    .border-green { border: 2px solid #22c55e !important; }
+  .border-red   { border: 2px solid #ef4444 !important; }
+  .picker-modal {
+    position: fixed; inset: 0; background: rgba(0,0,0,.5);
+    display: none; align-items: center; justify-content: center; z-index: 9999;
+  }
+  .picker-box {
+    width: 90%; max-width: 520px; background: #fff; border-radius: 8px; padding: 16px;
+  }
+  .picker-grid {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 12px 0;
+  }
+  .picker-grid select { width: 100%; height: 180px; font-size: 16px; }
+  .picker-actions { display:flex; gap: 8px; justify-content: flex-end; }
+  .btn { padding: 8px 14px; border-radius: 6px; border: 1px solid #ddd; cursor: pointer; }
+  .btn-ok { background: #16a34a; color: #fff; border-color: #16a34a; }
+  .btn-cancel { background: #fff; color: #111; }
 </style>
 </head>
 <body>
@@ -568,6 +586,90 @@
         </select>
 
         <input id="add-contactoSupervisor" type="hidden">
+
+        <label for="contrato"><p style="color: green;"><big><b>N° de Contrato:</b></big></p></label>
+<input
+  type="text"
+  id="contrato"
+  name="contrato"
+  placeholder="Ej: 002"
+  required
+  inputmode="numeric"
+  pattern="^\d{3}$"
+  maxlength="3" />
+
+        <!-- Tipo de Contrato -->
+<label for="tipoContrato"><p style="color: green;"><big><b>Tipo de Contrato:</b></big></p></label>
+<select id="tipoContrato" name="tipoContrato" required>
+  <option value="" disabled selected>Selecciona Tipo de Contrato</option>
+  <option value="PRESTACIÓN DE SERVICIOS PROFESIONALES">PRESTACIÓN DE SERVICIOS PROFESIONALES</option>
+  <option value="PRESTACIÓN DE SERVICIOS DE APOYO A LA GESTIÓN">PRESTACIÓN DE SERVICIOS DE APOYO A LA GESTIÓN</option>
+</select>
+
+        <!-- Fecha de Contrato con “ruleta” (3 columnas) -->
+<label for="fechaContrato"><p style="color: green;"><big><b>Fecha del Contrato:</b></big></p></label>
+<input
+  type="text"
+  id="fechaContrato"
+  name="fechaContrato"
+  placeholder="dd/mm/2026"
+  required
+  readonly
+  onclick="abrirPickerFecha()" />
+
+        <!-- Modal Picker -->
+<div id="fechaModal" class="picker-modal" aria-hidden="true">
+  <div class="picker-box">
+    <h3 style="margin:0 0 8px 0;">Selecciona la fecha</h3>
+    <div class="picker-grid">
+      <div>
+        <small>Día</small>
+        <select id="pickerDia" size="10"></select>
+      </div>
+      <div>
+        <small>Mes</small>
+        <select id="pickerMes" size="12"></select>
+      </div>
+      <div>
+        <small>Año</small>
+        <select id="pickerAnio" size="3" disabled>
+          <option selected>2026</option>
+        </select>
+      </div>
+    </div>
+    <div class="picker-actions">
+      <button type="button" class="btn btn-cancel" onclick="cancelarPickerFecha()">Cancelar</button>
+      <button type="button" class="btn btn-ok" onclick="confirmarPickerFecha()">Ok</button>
+    </div>
+  </div>
+</div>
+
+<!-- Ocultos: día y mes de contrato, y MRA -->
+<input type="text" id="diaContrato" name="diaContrato" style="display:none;">
+<input type="text" id="mesContrato" name="mesContrato" style="display:none;">
+<input type="number" id="mra" name="mra" style="display:none;" value="0">
+
+        <!-- Valor del Contrato -->
+<label for="valor"><p style="color: green;"><big><b>Valor del Contrato:</b></big></p></label>
+<input type="number" id="valor" name="valor" placeholder="Sin puntos ni espacios" required min="1" max="99999999">
+
+        <!-- Valor en Texto (automático + borde según validación) -->
+<label for="valorTexto"><p style="color: grey;"><big><b>Valor Total del Contrato en Texto:</b></big></p></label>
+<input type="text" id="valorTexto" name="valorTexto" placeholder="Campo Automático" required readonly>
+
+<!-- CDP N° (10 dígitos; borde verde si inicia por 2026) -->
+<label for="cdp"><p style="color: green;"><big><b>CDP N°:</b></big></p></label>
+<input
+  type="text"
+  id="cdp"
+  name="cdp"
+  placeholder="10 dígitos"
+  required
+  inputmode="numeric"
+  pattern="^\d{10}$"
+  maxlength="10" />
+
+        
 
         <div class="btn-row spaced">
           <button id="btn-add-guardar" class="btn-primary">Guardar</button>
@@ -2028,6 +2130,157 @@ if ('serviceWorker' in navigator){
   });
 }
 window.addEventListener('load', initPWAVista);
+  
+
+  // Inicializa las listas del picker de fecha (ruleta)
+(function initPickerFecha() {
+  const dias = document.getElementById('pickerDia');
+  const meses = document.getElementById('pickerMes');
+  if (!dias || !meses) return;
+
+  // Días 01..31
+  for (let d=1; d<=31; d++){
+    const opt = document.createElement('option');
+    opt.value = String(d).padStart(2,'0');
+    opt.textContent = String(d).padStart(2,'0');
+    dias.appendChild(opt);
+  }
+
+  const mesesNombres = [
+    'Enero','Febrero','Marzo','Abril','Mayo','Junio',
+    'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'
+  ];
+  // Meses 01..12
+  for (let i=0; i<12; i++){
+    const opt = document.createElement('option');
+    opt.value = String(i+1).padStart(2,'0');
+    opt.textContent = mesesNombres[i];
+    meses.appendChild(opt);
+  }
+})();
+
+function abrirPickerFecha(){
+  const modal = document.getElementById('fechaModal');
+  modal.style.display = 'flex';
+}
+function cancelarPickerFecha(){
+  // Limpia selección y campo
+  const modal = document.getElementById('fechaModal');
+  modal.style.display = 'none';
+  document.getElementById('fechaContrato').value = '';
+  document.getElementById('diaContrato').value   = '';
+  document.getElementById('mesContrato').value   = '';
+}
+function confirmarPickerFecha(){
+  const modal = document.getElementById('fechaModal');
+  const dSel  = document.getElementById('pickerDia').value || '01';
+  const mSel  = document.getElementById('pickerMes').value || '01';
+  const anio  = '2026';
+
+  // Asignar a campos visibles/ocultos
+  document.getElementById('fechaContrato').value = `${dSel}/${mSel}/${anio}`;
+
+  // Ocultos
+  document.getElementById('diaContrato').value = dSel;
+
+  // Nombre de mes con la primera en mayúscula
+  const mesesNombres = [
+    'Enero','Febrero','Marzo','Abril','Mayo','Junio',
+    'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'
+  ];
+  const mesIdx = Math.max(1, Math.min(12, parseInt(mSel,10))) - 1;
+  document.getElementById('mesContrato').value = mesesNombres[mesIdx];
+
+  modal.style.display = 'none';
+}
+
+// Conversor número a texto (ligero)
+function convertirNumeroATexto(numero) {
+  const unidades = ["", "un", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve"];
+  const decenas = ["", "diez", "veinte", "treinta", "cuarenta", "cincuenta", "sesenta", "setenta", "ochenta", "noventa"];
+  const centenas = ["", "ciento", "doscientos", "trescientos", "cuatrocientos", "quinientos", "seiscientos", "setecientos", "ochocientos", "novecientos"];
+  const especiales = ["diez", "once", "doce", "trece", "catorce", "quince", "dieciséis", "diecisiete", "dieciocho", "diecinueve"];
+
+  function convertirCentenas(num) {
+    if (num === 100) return "cien";
+    if (num > 100) return `${centenas[Math.floor(num/100)]} ${convertirDecenas(num%100)}`.trim();
+    return convertirDecenas(num);
+  }
+  function convertirDecenas(num) {
+    if (num < 10) return unidades[num];
+    if (num >= 10 && num < 20) return especiales[num - 10];
+    if (num === 20) return "veinte";
+    if (num >= 21 && num < 30) return "veinti" + unidades[num % 10];
+    if (num >= 30) return `${decenas[Math.floor(num/10)]}${(num%10>0 ? " y " + unidades[num%10] : "")}`;
+    return "";
+  }
+  function convertirMiles(num) {
+    if (num < 1000) return convertirCentenas(num);
+    if (num < 1000000) {
+      const miles = Math.floor(num/1000);
+      const resto = num%1000;
+      if (miles === 1) return `mil ${resto>0 ? convertirCentenas(resto) : ""}`.trim();
+      return `${convertirCentenas(miles)} mil ${resto>0 ? convertirCentenas(resto) : ""}`.trim();
+    }
+    if (num >= 1000000) {
+      const millones = Math.floor(num/1000000);
+      const resto = num%1000000;
+      if (millones === 1) return `un millón ${resto>0 ? convertirMiles(resto) : "de"}`.trim();
+      return `${convertirCentenas(millones)} millones ${resto>0 ? convertirMiles(resto) : "de"}`.trim();
+    }
+    return "";
+  }
+  let texto = convertirMiles(parseInt(numero||0,10));
+  if (texto.endsWith(" uno")) texto = texto.slice(0, -4) + " un";
+  return texto;
+}
+
+// Valor -> ValorTexto + bordes
+(function initValorTexto(){
+  const valor      = document.getElementById('valor');
+  const valorTexto = document.getElementById('valorTexto');
+  if (!valor || !valorTexto) return;
+
+  valor.addEventListener('input', () => {
+    // Normaliza a dígitos
+    let raw = (valor.value || '').replace(/\D/g,'');
+    valor.value = raw;
+
+    const len = raw.length;
+
+    // Borde según condición
+    valorTexto.classList.remove('border-green','border-red');
+    if ((len >= 1 && len <= 5) || len > 8) {
+      valorTexto.classList.add('border-red');
+    } else if (len === 8) {
+      valorTexto.classList.add('border-green');
+    }
+
+    const n = parseInt(raw||'0',10);
+    const texto = convertirNumeroATexto(n);
+    // Mayúsculas + terminación M/CTE
+    valorTexto.value = (texto ? (texto + ' PESOS M/CTE') : '');
+  });
+})();
+
+// CDP -> borde verde si empieza por 2026
+(function initCDP(){
+  const cdp = document.getElementById('cdp');
+  if (!cdp) return;
+  cdp.addEventListener('input', () => {
+    let raw = (cdp.value || '').replace(/\D/g,'').slice(0,10);
+    cdp.value = raw;
+    cdp.classList.remove('border-green','border-red');
+
+    if (raw.length === 10) {
+      if (raw.startsWith('2026')) {
+        cdp.classList.add('border-green');
+      }
+    } else if (raw.length > 0 && raw.length < 10) {
+      cdp.classList.add('border-red');
+    }
+  });
+})();
 
 /* ================== FIN ================== */
 </script>
