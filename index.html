@@ -437,6 +437,44 @@
   .btn { padding: 8px 14px; border-radius: 6px; border: 1px solid #ddd; cursor: pointer; }
   .btn-ok { background: #16a34a; color: #fff; border-color: #16a34a; }
   .btn-cancel { background: #fff; color: #111; }
+
+    /* Objetivo: en pantallas pequeñas
+   1) Los iconos (WhatsApp/Drive) quedan en la primera fila (visibles).
+   2) Los dos botones grandes (“MOSTRAR DETALLES” y “GUARDAR ESTADO”) pasan a una segunda fila.
+   3) Si la pantalla es muy angosta, los botones se apilan. */
+@media (max-width:700px){
+  .contr-actions{
+    flex-wrap: wrap !important;
+    align-items: center;
+  }
+  /* Fila 1: iconos a la derecha */
+  .contr-actions .right-group{
+    order: 1 !important;
+    flex: 0 0 100% !important;   /* ocupa toda la fila 1 */
+    justify-content: flex-end !important;
+    margin-left: 0 !important;
+    margin-top: 0 !important;
+  }
+  /* Fila 2: los dos botones */
+  .contr-actions .left-group{
+    order: 2 !important;
+    flex: 0 0 100% !important;   /* toda la fila 2 */
+    min-width: 0;
+    margin-top: 8px;
+    display: flex;
+    gap: 12px;
+  }
+  /* Dos botones lado a lado en la segunda fila */
+  .contr-actions .left-group > button{
+    flex: 1 1 48%;
+  }
+}
+/* Extra: si la pantalla es MUY estrecha, apila los botones verticalmente */
+@media (max-width:400px){
+  .contr-actions .left-group > button{
+    flex: 1 1 100%;
+  }
+}
 </style>
 </head>
 <body>
