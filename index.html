@@ -191,13 +191,6 @@
   /* Si quieres quitar la ligera sombra, elimina la línea siguiente */
   filter:drop-shadow(0 2px 4px rgba(0,0,0,.25));
 }
-@media (max-width:700px){
-  /* En móviles puedes reducir un poco si lo deseas */
-  .contr-actions .right-group .btn-icon img{
-    width:40px !important;
-    height:40px !important;
-  }
-}
     
     .item-header{
       display:flex; flex-wrap:wrap;
@@ -674,9 +667,9 @@
 
 <div id="sec-actividades" class="section-content hidden">
   <div id="actividades-blocks"></div>
-  <!-- Se han retirado los botones Mostrar más/menos según requerimiento -->
-</div>
 
+</div>
+        
         <h3 style="color:var(--primary); margin-top:18px;">TUS OBSERVACIONES</h3>
         <textarea id="rc-observaciones" rows="4" placeholder="Edita solo si vas a devolver la cuenta…"></textarea>
 
@@ -1492,11 +1485,14 @@ function renderRevisionCuenta(){
     }
     return '';
   }
-    function evidenciaThumb(url){
+  function evidenciaThumb(url){
     const id=extraerDriveId(url);
     return id ? 'https://drive.google.com/thumbnail?sz=w1000&id='+id : url;
   }
-  
+  function evidenciaThumb(url){
+  const id=extraerDriveId(url);
+  return id ? 'https://drive.google.com/thumbnail?sz=w1000&id='+id : url;
+}
 function evidenciaFull(url){
   if(!url) return '';
   const primera = String(url).trim().split(/\s+/)[0];
@@ -1640,30 +1636,29 @@ function abrirZoomEvidencia(src, titulo){
                blocksWrap.appendChild(block);
   }
 
-      // === Mostrar/ocultar y parametrizar botón "CUENTA" (debajo de Actividades) ===
-  const cuentaBtn = document.getElementById('btn-abrir-carpeta-cuenta');
-  if (cu?.informe && c?.carpetaContratista){
-    cuentaBtn.classList.remove('hidden');
-    cuentaBtn.dataset.parent  = c.carpetaContratista;          // carpeta del contratista (padre)
-    cuentaBtn.dataset.informe = String(cu.informe).trim();      // número de informe
-    if (cu?.idCuenta){                                         // ID directo de la subcarpeta (BH)
-      cuentaBtn.dataset.subId = String(cu.idCuenta).trim();
-    } else {
-      delete cuentaBtn.dataset.subId;
-    }
+    // === Mostrar/ocultar y parametrizar botón "CUENTA" (debajo de Actividades) ===
+const cuentaBtn = document.getElementById('btn-abrir-carpeta-cuenta');
+if (cu?.informe && c?.carpetaContratista){
+  cuentaBtn.classList.remove('hidden');
+  cuentaBtn.dataset.parent  = c.carpetaContratista;          // carpeta del contratista (padre)
+  cuentaBtn.dataset.informe = String(cu.informe).trim();      // número de informe
+  if (cu?.idCuenta){                                         // ID directo de la subcarpeta (BH)
+    cuentaBtn.dataset.subId = String(cu.idCuenta).trim();
   } else {
-    cuentaBtn.classList.add('hidden');
-    delete cuentaBtn.dataset.parent;
-    delete cuentaBtn.dataset.informe;
     delete cuentaBtn.dataset.subId;
   }
-} 
-
+} else {
+  cuentaBtn.classList.add('hidden');
+  delete cuentaBtn.dataset.parent;
+  delete cuentaBtn.dataset.informe;
+  delete cuentaBtn.dataset.subId;
+}
+  
 document.getElementById('rc-volver').addEventListener('click', ()=>{
   playSoundOnce(SOUNDS.back);
   showView('view-revision');
 });
-  
+
 function toggleSection(btnId, secId, txtShow, txtHide){
   const btn=document.getElementById(btnId);
   const sec=document.getElementById(secId);
@@ -1678,7 +1673,6 @@ function toggleSection(btnId, secId, txtShow, txtHide){
     }
   });
 }
-  
 toggleSection('btn-toggle-contrato','sec-contrato','Ver Información del Contrato','Ocultar Información del Contrato');
 toggleSection('btn-toggle-informe','sec-informe','Ver Relación de Informe y Pago','Ocultar Relación de Informe y Pago');
 toggleSection('btn-toggle-planilla','sec-planilla','Ver Relación de Planilla','Ocultar Relación de Planilla');
