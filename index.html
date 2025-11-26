@@ -1534,6 +1534,23 @@ document.getElementById('revision-volver').addEventListener('click', ()=>{
 });
 
 /* ================== REVISAR CUENTA (Detalle) ================== */
+
+  function resetSeccionesRevision(){
+  const parts = [
+    { sec:'sec-contrato',   btn:'btn-toggle-contrato',  label:'Ver Información del Contrato' },
+    { sec:'sec-informe',    btn:'btn-toggle-informe',   label:'Ver Relación de Informe y Pago' },
+    { sec:'sec-planilla',   btn:'btn-toggle-planilla',  label:'Ver Relación de Planilla' },
+    { sec:'sec-planilla2',  btn:'btn-toggle-planilla2', label:'Ver Relación de Planilla Anexa' },
+    { sec:'sec-actividades',btn:'btn-toggle-actividades',label:'Ver Relación de Actividades' }
+  ];
+  parts.forEach(({sec, btn, label})=>{
+    const s = document.getElementById(sec);
+    const b = document.getElementById(btn);
+    if (s) s.classList.add('hidden');   // asegura cerrado
+    if (b) b.textContent = label;       // restaura el texto "Ver ..."
+  });
+}
+  
 let REV_CUENTA=null;
 async function abrirRevisionCuenta(documento){
   try{
@@ -1542,6 +1559,7 @@ async function abrirRevisionCuenta(documento){
       Swal.fire({icon:'info',title:'No encontrado'}); return;
     }
     REV_CUENTA=data;
+    resetSeccionesRevision();
     renderRevisionCuenta();
     showView('view-revisar-cuenta');
   }catch(e){
@@ -1805,7 +1823,8 @@ if (cu?.informe && c?.carpetaContratista){
   
 document.getElementById('rc-volver').addEventListener('click', ()=>{
   playSoundOnce(SOUNDS.back);
-  showView('view-revision');
+  resetSeccionesRevision();     // cierra cualquier sección abierta
+  showView('view-revision');    // vuelve a la lista
 });
 
 function toggleSection(btnId, secId, txtShow, txtHide){
