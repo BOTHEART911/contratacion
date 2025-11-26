@@ -491,7 +491,7 @@
     <!-- VISTA INSTALAR -->
     <section id="view-instalar" class="view">
       <div class="card narrow" style="text-align:center;">
-        <h2 style="color:var(--primary);">App de Contratación</h2>
+        <h2 style="color:var(--primary);">APP CONTRATACIÓN</h2>
         <img class="brand" alt="Instalar" src="https://res.cloudinary.com/dqqeavica/image/upload/v1763930524/menu_t9xli7.gif" />
         <p style="font-weight:600;">Herramienta de uso exclusivo para el equipo de Contratación de la Alcaldía de Flandes</p>
         <div class="btn-row" style="justify-content:center; margin-top:12px;">
@@ -2169,8 +2169,8 @@ document.getElementById('btn-instalar').addEventListener('click', async ()=>{
   if(isIOS()){
     Swal.fire({
       icon:'info',
-      title:'Instalar en iOS',
-      html:'1) Toca Compartir (cuadro con flecha).<br>2) Elige "Agregar a pantalla de inicio".<br>3) Confirma "Agregar".'
+      title:'Para Instalar en tu Iphone',
+      html:'1) Toca Compartir (cuadro con flecha en la parte inferior).<br>2) Elige "Agregar a pantalla de inicio".<br>3) Confirma "Agregar".'
     });
     return;
   }
@@ -2192,7 +2192,7 @@ document.getElementById('btn-instalar').addEventListener('click', async ()=>{
     Swal.fire({
   icon: 'success',
   title: '¡App instalándose!',
-  html: 'Debes esperar unos segundos mientras el sistema instala la App.<br><b>Ya puedes salir de esta vista, aparecerá en tu pantalla principal del dispositivo</b>',
+  html: 'Debes esperar unos segundos mientras el sistema instala la App.<br><br><b>Ya puedes salir de esta vista, aparecerá en la pantalla principal de este dispositivo</b>',
   timer: 10000,
   showConfirmButton: false
 });
