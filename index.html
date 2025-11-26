@@ -2108,17 +2108,21 @@ if ('serviceWorker' in navigator){
 window.addEventListener('load', initPWAVista);
   
 
-  // Inicializa las listas del picker de fecha (ruleta)
+// Helper para IDs con prefijo "add-"
+function $id(base) {
+  return document.getElementById('add-' + base) || document.getElementById(base);
+}
+
+/* ========= FECHA CONTRATO (ruleta) ========= */
 (function initPickerFecha() {
   const dias = document.getElementById('pickerDia');
   const meses = document.getElementById('pickerMes');
   if (!dias || !meses) return;
 
-  // Días 01..31
-  for (let d=1; d<=31; d++){
+  for (let d = 1; d <= 31; d++) {
     const opt = document.createElement('option');
-    opt.value = String(d).padStart(2,'0');
-    opt.textContent = String(d).padStart(2,'0');
+    opt.value = String(d).padStart(2, '0');
+    opt.textContent = String(d).padStart(2, '0');
     dias.appendChild(opt);
   }
 
@@ -2126,137 +2130,145 @@ window.addEventListener('load', initPWAVista);
     'Enero','Febrero','Marzo','Abril','Mayo','Junio',
     'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'
   ];
-  // Meses 01..12
-  for (let i=0; i<12; i++){
+  for (let i = 0; i < 12; i++) {
     const opt = document.createElement('option');
-    opt.value = String(i+1).padStart(2,'0');
+    opt.value = String(i + 1).padStart(2, '0');
     opt.textContent = mesesNombres[i];
     meses.appendChild(opt);
   }
 })();
 
-function abrirPickerFecha(){
+function abrirPickerFecha() {
   const modal = document.getElementById('fechaModal');
-  modal.style.display = 'flex';
+  if (modal) modal.style.display = 'flex';
 }
-function cancelarPickerFecha(){
-  // Limpia selección y campo
+function cancelarPickerFecha() {
   const modal = document.getElementById('fechaModal');
-  modal.style.display = 'none';
-  document.getElementById('fechaContrato').value = '';
-  document.getElementById('diaContrato').value   = '';
-  document.getElementById('mesContrato').value   = '';
+  if (modal) modal.style.display = 'none';
+  const fc = $id('fechaContrato'); if (fc) fc.value = '';
+  const d  = $id('diaContrato');   if (d)  d.value = '';
+  const m  = $id('mesContrato');   if (m)  m.value = '';
 }
-function confirmarPickerFecha(){
+function confirmarPickerFecha() {
   const modal = document.getElementById('fechaModal');
-  const dSel  = document.getElementById('pickerDia').value || '01';
-  const mSel  = document.getElementById('pickerMes').value || '01';
-  const anio  = '2026';
+  const dSel = (document.getElementById('pickerDia')?.value) || '01';
+  const mSel = (document.getElementById('pickerMes')?.value) || '01';
+  const anio = '2026';
 
-  // Asignar a campos visibles/ocultos
-  document.getElementById('fechaContrato').value = `${dSel}/${mSel}/${anio}`;
+  const fc = $id('fechaContrato'); if (fc) fc.value = `${dSel}/${mSel}/${anio}`;
+  const d  = $id('diaContrato');   if (d)  d.value = dSel;
 
-  // Ocultos
-  document.getElementById('diaContrato').value = dSel;
-
-  // Nombre de mes con la primera en mayúscula
   const mesesNombres = [
     'Enero','Febrero','Marzo','Abril','Mayo','Junio',
     'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'
   ];
-  const mesIdx = Math.max(1, Math.min(12, parseInt(mSel,10))) - 1;
-  document.getElementById('mesContrato').value = mesesNombres[mesIdx];
+  const idx = Math.max(1, Math.min(12, parseInt(mSel, 10))) - 1;
+  const m   = $id('mesContrato');   if (m)  m.value = mesesNombres[idx];
 
-  modal.style.display = 'none';
+  if (modal) modal.style.display = 'none';
 }
 
-// Conversor número a texto (ligero)
-function convertirNumeroATexto(numero) {
-  const unidades = ["", "un", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve"];
-  const decenas = ["", "diez", "veinte", "treinta", "cuarenta", "cincuenta", "sesenta", "setenta", "ochenta", "noventa"];
-  const centenas = ["", "ciento", "doscientos", "trescientos", "cuatrocientos", "quinientos", "seiscientos", "setecientos", "ochocientos", "novecientos"];
-  const especiales = ["diez", "once", "doce", "trece", "catorce", "quince", "dieciséis", "diecisiete", "dieciocho", "diecinueve"];
+(function bindFechaContratoChange(){
+  const fc = $id('fechaContrato');
+  if (!fc) return;
+  fc.addEventListener('change', function () {
+    actualizarCamposFecha(this.value, 'diaContrato', 'mesContrato');
+  });
+})();
+function actualizarCamposFecha(fechaISO, idDiaBase, idMesBase) {
+  if (!fechaISO) {
+    const d = $id(idDiaBase); if (d) d.value = '';
+    const m = $id(idMesBase); if (m) m.value = '';
+    return;
+  }
+  const dObj = new Date(fechaISO + 'T00:00:00');
+  if (isNaN(dObj)) {
+    const d = $id(idDiaBase); if (d) d.value = '';
+    const m = $id(idMesBase); if (m) m.value = '';
+    return;
+  }
+  const dd = String(dObj.getUTCDate()).padStart(2, '0');
+  const mm = dObj.getUTCMonth();
+  const meses = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 
-  function convertirCentenas(num) {
-    if (num === 100) return "cien";
-    if (num > 100) return `${centenas[Math.floor(num/100)]} ${convertirDecenas(num%100)}`.trim();
-    return convertirDecenas(num);
-  }
-  function convertirDecenas(num) {
-    if (num < 10) return unidades[num];
-    if (num >= 10 && num < 20) return especiales[num - 10];
-    if (num === 20) return "veinte";
-    if (num >= 21 && num < 30) return "veinti" + unidades[num % 10];
-    if (num >= 30) return `${decenas[Math.floor(num/10)]}${(num%10>0 ? " y " + unidades[num%10] : "")}`;
-    return "";
-  }
-  function convertirMiles(num) {
-    if (num < 1000) return convertirCentenas(num);
-    if (num < 1000000) {
-      const miles = Math.floor(num/1000);
-      const resto = num%1000;
-      if (miles === 1) return `mil ${resto>0 ? convertirCentenas(resto) : ""}`.trim();
-      return `${convertirCentenas(miles)} mil ${resto>0 ? convertirCentenas(resto) : ""}`.trim();
-    }
-    if (num >= 1000000) {
-      const millones = Math.floor(num/1000000);
-      const resto = num%1000000;
-      if (millones === 1) return `un millón ${resto>0 ? convertirMiles(resto) : "de"}`.trim();
-      return `${convertirCentenas(millones)} millones ${resto>0 ? convertirMiles(resto) : "de"}`.trim();
-    }
-    return "";
-  }
-  let texto = convertirMiles(parseInt(numero||0,10));
-  if (texto.endsWith(" uno")) texto = texto.slice(0, -4) + " un";
-  return texto;
+  const d = $id(idDiaBase); if (d) d.value = dd;
+  const m = $id(idMesBase); if (m) m.value = meses[mm];
 }
 
-// Valor -> ValorTexto + bordes
+/* ========= VALOR -> VALOR TEXTO (MAYÚSCULA) ========= */
 (function initValorTexto(){
-  const valor      = document.getElementById('valor');
-  const valorTexto = document.getElementById('valorTexto');
+  const valor = $id('valor');
+  const valorTexto = $id('valorTexto');
   if (!valor || !valorTexto) return;
 
   valor.addEventListener('input', () => {
-    // Normaliza a dígitos
-    let raw = (valor.value || '').replace(/\D/g,'');
+    let raw = (valor.value || '').replace(/\D/g, '');
     valor.value = raw;
-
     const len = raw.length;
 
-    // Borde según condición
-    valorTexto.classList.remove('border-green','border-red');
+    valorTexto.style.border = '';
     if ((len >= 1 && len <= 5) || len > 8) {
-      valorTexto.classList.add('border-red');
+      valorTexto.style.border = '2px solid red';
     } else if (len === 8) {
-      valorTexto.classList.add('border-green');
+      valorTexto.style.border = '2px solid green';
     }
 
-    const n = parseInt(raw||'0',10);
-    const texto = convertirNumeroATexto(n);
-    // Mayúsculas + terminación M/CTE
-    valorTexto.value = (texto ? (texto + ' PESOS M/CTE') : '');
+    const n = parseInt(raw || '0', 10);
+    const texto = convertirNumeroATexto(n); // ya retorna en mayúsculas
+    valorTexto.value = texto ? (texto + ' PESOS M/CTE') : '';
+    // Garantizar mayúsculas siempre:
+    valorTexto.value = (valorTexto.value || '').toUpperCase();
   });
 })();
 
-// CDP -> borde verde si empieza por 2026
+/* ========= CDP (borde verde si empieza por 2026) ========= */
 (function initCDP(){
-  const cdp = document.getElementById('cdp');
+  const cdp = $id('cdp');
   if (!cdp) return;
   cdp.addEventListener('input', () => {
-    let raw = (cdp.value || '').replace(/\D/g,'').slice(0,10);
+    let raw = (cdp.value || '').replace(/\D/g, '').slice(0, 10);
     cdp.value = raw;
-    cdp.classList.remove('border-green','border-red');
-
-    if (raw.length === 10) {
-      if (raw.startsWith('2026')) {
-        cdp.classList.add('border-green');
-      }
-    } else if (raw.length > 0 && raw.length < 10) {
-      cdp.classList.add('border-red');
+    cdp.style.border = '';
+    if (raw.length === 10 && raw.startsWith('2026')) {
+      cdp.style.border = '2px solid green';
     }
   });
 })();
+
+/* ========= Conversor número->texto (MAYÚSCULAS) ========= */
+function convertirNumeroATexto(numero) {
+  const unidades = ["", "UN", "DOS", "TRES", "CUATRO", "CINCO", "SEIS", "SIETE", "OCHO", "NUEVE"];
+  const decenas  = ["", "DIEZ", "VEINTE", "TREINTA", "CUARENTA", "CINCUENTA", "SESENTA", "SETENTA", "OCHENTA", "NOVENTA"];
+  const centenas = ["", "CIENTO", "DOSCIENTOS", "TRESCIENTOS", "CUATROCIENTOS", "QUINIENTOS", "SEISCIENTOS", "SETECIENTOS", "OCHOCIENTOS", "NOVECIENTOS"];
+  const especiales = ["DIEZ", "ONCE", "DOCE", "TRECE", "CATORCE", "QUINCE", "DIECISEIS", "DIECISIETE", "DIECIOCHO", "DIECINUEVE"];
+
+  function convCentenas(n) {
+    if (n === 100) return "CIEN";
+    if (n > 100) return (centenas[Math.floor(n/100)] + " " + convDecenas(n%100)).trim();
+    return convDecenas(n);
+  }
+  function convDecenas(n) {
+    if (n < 10) return unidades[n];
+    if (n < 20) return especiales[n-10];
+    if (n === 20) return "VEINTE";
+    if (n < 30) return "VEINTI" + unidades[n%10];
+    return decenas[Math.floor(n/10)] + (n%10 ? " Y " + unidades[n%10] : "");
+  }
+  function convMiles(n) {
+    if (n < 1000) return convCentenas(n);
+    if (n < 1000000) {
+      const miles = Math.floor(n/1000), resto = n%1000;
+      if (miles === 1) return ("MIL " + (resto ? convCentenas(resto) : "")).trim();
+      return (convCentenas(miles) + " MIL " + (resto ? convCentenas(resto) : "")).trim();
+    }
+    const millones = Math.floor(n/1000000), resto = n%1000000;
+    if (millones === 1) return ("UN MILLÓN " + (resto ? convMiles(resto) : "DE")).trim();
+    return (convCentenas(millones) + " MILLONES " + (resto ? convMiles(resto) : "DE")).trim();
+  }
+  let t = convMiles(parseInt(numero || 0, 10));
+  if (t.endsWith(" UNO")) t = t.slice(0, -4) + " UN";
+  return t;
+}
 
 /* ================== FIN ================== */
 </script>
