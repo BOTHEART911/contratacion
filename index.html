@@ -2154,16 +2154,25 @@ window.addEventListener('beforeinstallprompt', (e)=>{
   updateInstallButtonsVisibility();
 });
 window.addEventListener('appinstalled', ()=>{
+  // Evita ejecutar dos veces por cualquier motivo
+  if (__installSuccessShown) return;
+
   markInstalled();
   deferredPrompt = null;
   updateInstallButtonsVisibility();
-  Swal.fire({
-    icon:'success',
-    title:'¡Instalación exitosa!',
-    html:'La App se instaló. Puedes abrirla desde tu pantalla principal.',
-    timer:5000,
-    showConfirmButton:false
-  });
+
+  // Si acabamos de mostrar la alerta de “instalándose”, espera un poco
+  const delay = __installStartShown ? 600 : 0;
+  setTimeout(()=>{
+    __installSuccessShown = true;
+    Swal.fire({
+      icon:'success',
+      title:'¡Instalación exitosa!',
+      html:'La App se instaló. Puedes abrirla desde tu pantalla principal.',
+      timer:5000,
+      showConfirmButton:false
+    });
+  }, delay);
 });
 document.getElementById('btn-instalar').addEventListener('click', async ()=>{
   if(isIOS()){
@@ -2178,22 +2187,27 @@ document.getElementById('btn-instalar').addEventListener('click', async ()=>{
     Swal.fire({icon:'info',title:'Instalación no disponible todavía'});
     return;
   }
-  deferredPrompt.prompt();
-  const choice = await deferredPrompt.userChoice;
-  deferredPrompt = null;
-  if (choice.outcome === 'accepted'){
-    markInstalled();
-    Swal.fire({
-      icon: 'success',
-      title: '¡App instalándose!',
-      html: 'Debes esperar 1 minuto.<br><br>Al terminar este tiempo, refresca la página o busca el icono de la aplicación en la pantalla de tu dispositivo.',
-      timer: 8000,
-      showConfirmButton: false
-    });
-  } else {
-    Swal.fire({icon:'info',title:'Instalación cancelada'});
-  }
-  updateInstallButtonsVisibility();
+  let __installStartShown = false;   // bandera global (declárala arriba del handler si prefieres)
+let __installSuccessShown = false; // bandera global
+
+const choice = await deferredPrompt.userChoice;
+deferredPrompt = null;
+
+if (choice.outcome === 'accepted'){
+  markInstalled();   // mantiene tu marca local
+  __installStartShown = true;
+  Swal.fire({
+    icon: 'success',
+    title: '¡App instalándose!',
+    html: 'Debes esperar 1 minuto.<br><br>Al terminar este tiempo, refresca la página o busca el icono de la aplicación en la pantalla de tu dispositivo.',
+    timer: 8000,
+    showConfirmButton: false
+  });
+} else {
+  Swal.fire({icon:'info',title:'Instalación cancelada'});
+}
+
+updateInstallButtonsVisibility();
 });
 async function initPWAVista(){
   const installed = await detectInstalled();
