@@ -1272,6 +1272,17 @@ document.getElementById('btn-add-guardar').addEventListener('click',async()=>{
   const supervisor=(document.getElementById('add-supervisor').value||'').trim();
   const contacto=(document.getElementById('add-contactoSupervisor').value||'').trim();
 
+  // NUEVOS CAMPOS
+  const contratoRaw=(document.getElementById('add-contrato').value||'').trim();
+  const tipoContrato=(document.getElementById('add-tipoContrato').value||'').trim();
+  const fechaContrato=(document.getElementById('add-fechaContrato').value||'').trim();   // dd/mm/2026 del picker
+  const diaContrato=(document.getElementById('add-diaContrato').value||'').trim();       // "01" del picker
+  const mesContrato=(document.getElementById('add-mesContrato').value||'').trim();       // "Enero" del picker
+  const valorRaw=(document.getElementById('add-valor').value||'').trim();                // ej: 15000000
+  const mraRaw=(document.getElementById('add-mra').value||'').trim();                    // 0
+  const valorTexto=(document.getElementById('add-valorTexto').value||'').trim();         // en mayúsculas
+  const cdp=(document.getElementById('add-cdp').value||'').trim();                       // 10 dígitos
+
   if(!/^\d{6,10}$/.test(documento)){
     Swal.fire({icon:'warning',title:'Documento inválido'}); return;
   }
@@ -1283,6 +1294,32 @@ document.getElementById('btn-add-guardar').addEventListener('click',async()=>{
     Swal.fire({icon:'warning',title:'Campos incompletos'}); return;
   }
 
+  // Validaciones básicas nuevas
+  if(!contratoRaw){ Swal.fire({icon:'warning',title:'Contrato requerido'}); return; }
+  if(!tipoContrato){ Swal.fire({icon:'warning',title:'Tipo de contrato requerido'}); return; }
+  if(!fechaContrato || !/^\d{2}\/\d{2}\/\d{4}$/.test(fechaContrato)){
+    Swal.fire({icon:'warning',title:'Fecha de contrato inválida',text:'Usa el picker'}); return;
+  }
+  if(!diaContrato || !/^\d{2}$/.test(diaContrato)){
+    Swal.fire({icon:'warning',title:'Día de contrato inválido'}); return;
+  }
+  if(!mesContrato){ Swal.fire({icon:'warning',title:'Mes de contrato requerido'}); return; }
+  if(!/^\d{1,8}$/.test(valorRaw)){ Swal.fire({icon:'warning',title:'Valor inválido'}); return; }
+  if(!valorTexto){ Swal.fire({icon:'warning',title:'Valor en texto faltante'}); return; }
+  if(!/^\d{10}$/.test(cdp)){ Swal.fire({icon:'warning',title:'CDP inválido'}); return; }
+
+  // Normalizaciones con ceros a la izquierda
+  let numeroContrato = contratoRaw.replace(/\D/g,'');
+  numeroContrato = ('000' + numeroContrato).slice(-3);   // 3 dígitos
+  const contratoCell = "'" + numeroContrato;             // fuerza texto en Sheets
+
+  let dia2 = diaContrato.replace(/\D/g,'');
+  dia2 = ('00' + dia2).slice(-2);                        // 2 dígitos
+  const diaContratoCell = "'" + dia2;                    // fuerza texto en Sheets
+
+  const valorNum = Number(valorRaw.replace(/\D/g,'')) || 0;
+  const mraNum   = Number(mraRaw.replace(/\D/g,'')) || 0;
+
   try{
     const res=await apiPost('agregarContratista',{
       documento,
@@ -1290,7 +1327,17 @@ document.getElementById('btn-add-guardar').addEventListener('click',async()=>{
       secretaria,
       carpetaSecretaria,
       supervisor,
-      contacto
+      contacto,
+      // ENVÍA AL BACKEND
+      contrato: numeroContrato,      // el backend pondrá el prefijo '
+      tipoContrato,
+      fechaContrato,                 // dd/mm/yyyy
+      diaContrato: dia2,             // "02"
+      mesContrato,                   // "Febrero"
+      valor: String(valorNum),
+      mra: String(mraNum),
+      valorTexto: valorTexto.toUpperCase(),
+      cdp
     });
     Swal.fire({icon:'success',title:'Contratista agregado',timer:2000,showConfirmButton:false});
     await cargarContratistas();
