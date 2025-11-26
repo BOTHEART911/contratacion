@@ -1492,14 +1492,11 @@ function renderRevisionCuenta(){
     }
     return '';
   }
-  function evidenciaThumb(url){
+    function evidenciaThumb(url){
     const id=extraerDriveId(url);
     return id ? 'https://drive.google.com/thumbnail?sz=w1000&id='+id : url;
   }
-  function evidenciaThumb(url){
-  const id=extraerDriveId(url);
-  return id ? 'https://drive.google.com/thumbnail?sz=w1000&id='+id : url;
-}
+  
 function evidenciaFull(url){
   if(!url) return '';
   const primera = String(url).trim().split(/\s+/)[0];
@@ -1643,7 +1640,7 @@ function abrirZoomEvidencia(src, titulo){
                blocksWrap.appendChild(block);
   }
 
-    // === Mostrar/ocultar y parametrizar botón "CUENTA" (debajo de Actividades) ===
+      // === Mostrar/ocultar y parametrizar botón "CUENTA" (debajo de Actividades) ===
   const cuentaBtn = document.getElementById('btn-abrir-carpeta-cuenta');
   if (cu?.informe && c?.carpetaContratista){
     cuentaBtn.classList.remove('hidden');
@@ -1660,12 +1657,13 @@ function abrirZoomEvidencia(src, titulo){
     delete cuentaBtn.dataset.informe;
     delete cuentaBtn.dataset.subId;
   }
-  
+} 
+
 document.getElementById('rc-volver').addEventListener('click', ()=>{
   playSoundOnce(SOUNDS.back);
   showView('view-revision');
 });
-
+  
 function toggleSection(btnId, secId, txtShow, txtHide){
   const btn=document.getElementById(btnId);
   const sec=document.getElementById(secId);
@@ -1680,12 +1678,7 @@ function toggleSection(btnId, secId, txtShow, txtHide){
     }
   });
 }
-toggleSection('btn-toggle-contrato','sec-contrato','Ver Información del Contrato','Ocultar Información del Contrato');
-toggleSection('btn-toggle-informe','sec-informe','Ver Relación de Informe y Pago','Ocultar Relación de Informe y Pago');
-toggleSection('btn-toggle-planilla','sec-planilla','Ver Relación de Planilla','Ocultar Relación de Planilla');
-toggleSection('btn-toggle-planilla2','sec-planilla2','Ver Relación de Planilla Anexa','Ocultar Relación de Planilla Anexa');
-toggleSection('btn-toggle-actividades','sec-actividades','Ver Relación de Actividades','Ocultar Relación de Actividades');
-
+  
 toggleSection('btn-toggle-contrato','sec-contrato','Ver Información del Contrato','Ocultar Información del Contrato');
 toggleSection('btn-toggle-informe','sec-informe','Ver Relación de Informe y Pago','Ocultar Relación de Informe y Pago');
 toggleSection('btn-toggle-planilla','sec-planilla','Ver Relación de Planilla','Ocultar Relación de Planilla');
