@@ -2159,20 +2159,25 @@ window.addEventListener('beforeinstallprompt', (e)=>{
 });
 
 window.addEventListener('appinstalled', ()=>{
-  // Mostrar "Instalación exitosa" SOLO cuando la instalación real termine (Android)
+  // Evita duplicados
   if (__installSuccessShown) return;
+
   markInstalled();
   deferredPrompt = null;
   updateInstallButtonsVisibility();
 
-  __installSuccessShown = true;
-  Swal.fire({
-    icon:'success',
-    title:'¡Instalación exitosa!',
-    html:'La App se instaló. Puedes abrirla desde tu pantalla principal.',
-    timer:5000,
-    showConfirmButton:false
-  });
+  // Si se mostró la de "App instalándose", espera 10 segundos antes de mostrar la de éxito
+  const delay = __installStartShown ? 10000 : 0; // 10,000 ms
+  setTimeout(()=>{
+    __installSuccessShown = true;
+    Swal.fire({
+      icon:'success',
+      title:'¡Instalación exitosa!',
+      html:'La App se instaló. Sal de esta vista y búscala en tu pantalla principal.',
+      timer:5000,
+      showConfirmButton:false
+    });
+  }, delay);
 });
 
 document.getElementById('btn-instalar').addEventListener('click', async ()=>{
