@@ -1826,25 +1826,6 @@ document.getElementById('rc-volver').addEventListener('click', ()=>{
   showView('view-revision');    // vuelve a la lista
 });
 
-function toggleSection(btnId, secId, txtShow, txtHide){
-  const btn=document.getElementById(btnId);
-  const sec=document.getElementById(secId);
-  btn.addEventListener('click',()=>{
-    const visible=!sec.classList.contains('hidden');
-    if(visible){
-      sec.classList.add('hidden');
-      btn.textContent=txtShow;
-    }else{
-      sec.classList.remove('hidden');
-      btn.textContent=txtHide;
-    }
-  });
-}
-toggleSection('btn-toggle-contrato','sec-contrato','Ver Información del Contrato','Ocultar Información del Contrato');
-toggleSection('btn-toggle-informe','sec-informe','Ver Relación de Informe y Pago','Ocultar Relación de Informe y Pago');
-toggleSection('btn-toggle-planilla','sec-planilla','Ver Relación de Planilla','Ocultar Relación de Planilla');
-toggleSection('btn-toggle-planilla2','sec-planilla2','Ver Relación de Planilla Anexa','Ocultar Relación de Planilla Anexa');
-toggleSection('btn-toggle-actividades','sec-actividades','Ver Relación de Actividades','Ocultar Relación de Actividades');
 
 // Abrir directamente la subcarpeta "CUENTA <informe>" usando su ID (BH->idCuenta)
 const btnAbrirCarpetaCuenta = document.getElementById('btn-abrir-carpeta-cuenta');
@@ -1953,8 +1934,36 @@ document.getElementById('rc-guardar').addEventListener('click', async ()=>{
     }
   }
 });
-
 }
+
+  function initRevisionToggleSections(){
+  const defs = [
+    ['btn-toggle-contrato','sec-contrato','Ver Información del Contrato','Ocultar Información del Contrato'],
+    ['btn-toggle-informe','sec-informe','Ver Relación de Informe y Pago','Ocultar Relación de Informe y Pago'],
+    ['btn-toggle-planilla','sec-planilla','Ver Relación de Planilla','Ocultar Relación de Planilla'],
+    ['btn-toggle-planilla2','sec-planilla2','Ver Relación de Planilla Anexa','Ocultar Relación de Planilla Anexa'],
+    ['btn-toggle-actividades','sec-actividades','Ver Relación de Actividades','Ocultar Relación de Actividades']
+  ];
+  defs.forEach(([btnId,secId,showTxt,hideTxt])=>{
+    const btn = document.getElementById(btnId);
+    const sec = document.getElementById(secId);
+    if(!btn || !sec) return;
+    if(btn.dataset.bound) return;  // evita duplicados
+    btn.dataset.bound = '1';
+    btn.addEventListener('click',()=>{
+      const visible = !sec.classList.contains('hidden');
+      if(visible){
+        sec.classList.add('hidden');
+        btn.textContent = showTxt;
+      }else{
+        sec.classList.remove('hidden');
+        btn.textContent = hideTxt;
+      }
+    });
+  });
+}
+initRevisionToggleSections();
+  
   
 /* ================== REQUERIMIENTOS ================== */
 let REQ_DATA=[];
