@@ -1877,7 +1877,11 @@ document.getElementById('rc-guardar').addEventListener('click', async ()=>{
   function msgAprobado(){
     return (
       'Estimado(a) *'+nombre+'*\n\n' +
-      '¡Tu *Cuenta N° '+informe+'* ha sido *Aprobada*! Descarga los documentos de la carpeta Drive correspondiente, unificalos en orden aquí: https://smallpdf.com/es/unir-pdf Guárdalos con nombre técnico CTA'+informe+' '+nombre+' y súbelos al *Plan de Pagos en el Secop II*\n\n' +
+      '¡Tu *Cuenta N° '+informe+'* ha sido *Aprobada*!, sigue estos pasos:\n' + 
+      '- Descarga los documentos de la carpeta *Cuenta '+informe+'* en tu Drive.\n' + 
+      '- Unificalos en orden aquí: https://smallpdf.com/es/unir-pdf \n' + 
+      '- Guárdalos en tu dispositivo o computador con nombre técnico *CTA'+informe+'-'+nombre+'*\n' + 
+      '- súbelos al *Plan de Pagos en el Secop II*, toma la opción "Enviar a la Entidad"\n\n' +
       'Una vez los subas, toma la opción *Reportar Plan de Pagos* en la *App Contratista*.\n' +
       '> Recuerda que, desde la segunda cuenta; debes relacionar la fecha en que la entidad te canceló los honorarios de la cuenta inmediatamente anterior.\n\n' +
       'Cordialmente,\n\n*Equipo de Contratación*\n> Alcaldía de Flandes'
