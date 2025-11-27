@@ -1877,7 +1877,7 @@ document.getElementById('rc-guardar').addEventListener('click', async ()=>{
   function msgAprobado(){
     return (
       'Estimado(a) *'+nombre+'*\n\n' +
-      '¡Tu *Cuenta N° '+informe+'* ha sido *Aprobada*! Descarga los documentos, unificalos en orden aquí: https://smallpdf.com/es/unir-pdf Guárdalos con nombre técnico y súbelos al *Plan de Pagos en el Secop II*\n\n' +
+      '¡Tu *Cuenta N° '+informe+'* ha sido *Aprobada*! Descarga los documentos de la carpeta Drive correspondiente, unificalos en orden aquí: https://smallpdf.com/es/unir-pdf Guárdalos con nombre técnico CTA'+informe+' '+nombre+' y súbelos al *Plan de Pagos en el Secop II*\n\n' +
       'Una vez los subas, toma la opción *Reportar Plan de Pagos* en la *App Contratista*.\n' +
       '> Recuerda que, desde la segunda cuenta; debes relacionar la fecha en que la entidad te canceló los honorarios de la cuenta inmediatamente anterior.\n\n' +
       'Cordialmente,\n\n*Equipo de Contratación*\n> Alcaldía de Flandes'
@@ -2054,12 +2054,22 @@ document.getElementById('modal-req-enviar').addEventListener('click',()=>{
   if(!txt){
     Swal.fire({icon:'warning',title:'Texto requerido'}); return;
   }
-  const tel=MODAL_TARGET.telefono;
-  if(tel){
-    sendBuilderbotMessage(tel,
-      'Estimado(a) *'+MODAL_TARGET.nombre+'*\nPor favor tener en cuenta el siguiente requerimiento:\n*'+txt+'*\nCordialmente,\n*Equipo de Contratación*'
-    );
-  }
+  // Normaliza el teléfono (agrega 57 si viene a 10 dígitos y valida)
+const telefonoNormalizado = normalizeContratistaNumber(MODAL_TARGET.telefono);
+const nombre = (MODAL_TARGET.nombre || '').trim();
+
+// Mensaje EXACTO solicitado
+const mensaje = 
+  'Estimado(a) *' + nombre + '*\n\n' +
+  'Tenemos el siguiente requerimiento:\n\n*' + txt + '*\n\n' +
+  'Cordialmente,\n\n*Equipo de Contratación*\n> Alcaldía de Flandes';
+
+if (telefonoNormalizado){
+  sendBuilderbotMessage(telefonoNormalizado, mensaje);
+} else {
+  // Si el número no es válido, avisa al usuario
+  Swal.fire({ icon:'warning', title:'Teléfono inválido', text:'No se pudo enviar el requerimiento por WhatsApp.' });
+}
   document.getElementById('modal-requerimiento').classList.add('hidden');
   Swal.fire({icon:'success',title:'Requerimiento enviado',timer:1800,showConfirmButton:false});
 });
