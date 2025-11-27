@@ -1376,7 +1376,7 @@ document.getElementById('btn-add-guardar').addEventListener('click',async()=>{
       valorTexto: valorTexto.toUpperCase(),
       cdp
     });
-    Swal.fire({icon:'success',title:'Contratista agregado',timer:2000,showConfirmButton:false});
+    Swal.fire({icon:'success',title:'Contratista Agregado',timer:3000,showConfirmButton:false});
     await cargarContratistas();
     showView('view-contratistas');
   }catch(e){
@@ -2191,8 +2191,20 @@ document.getElementById('btn-instalar').addEventListener('click', async ()=>{
     Swal.fire({
   icon: 'success',
   title: '¡App instalándose!',
-  html: 'Debes esperar unos segundos mientras el sistema instala la App.<br><br><b>Ya puedes salir de esta vista, aparecerá en la pantalla principal de este dispositivo</b>',
-  timer: 10000,
+  html: `
+    <div style="text-align:center; margin-top:8px;">
+      <img
+        src="https://res.cloudinary.com/dqqeavica/image/upload/v1764209976/Robot_c2vtua.gif"
+        alt="Instalando app"
+        style="width:180px; max-width:70vw; height:auto; display:block; margin:0 auto 12px;"
+      >
+      <div>Debes esperar unos segundos mientras el sistema instala la App.</div>
+      <div style="margin-top:10px;">
+        <b>Ya puedes salir de esta vista, aparecerá en la pantalla principal de este dispositivo</b>
+      </div>
+    </div>
+  `,
+  timer: 11000,
   showConfirmButton: false
 });
   } else {
