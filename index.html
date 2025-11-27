@@ -1876,8 +1876,8 @@ document.getElementById('rc-guardar').addEventListener('click', async ()=>{
 
   function msgAprobado(){
     return (
-      'Estimado(a) *'+nombre+'*\n' +
-      'Tu *Cuenta N° '+informe+'* ha sido *Aprobada*, ya puedes subir los documentos al *Plan de Pagos en el Secop II*\n\n' +
+      'Estimado(a) *'+nombre+'*\n\n' +
+      '¡Tu *Cuenta N° '+informe+'* ha sido *Aprobada*! Descarga los documentos, unificalos en orden aquí: https://smallpdf.com/es/unir-pdf Guárdalos con nombre técnico y súbelos al *Plan de Pagos en el Secop II*\n\n' +
       'Una vez los subas, toma la opción *Reportar Plan de Pagos* en la *App Contratista*.\n' +
       '> Recuerda que, desde la segunda cuenta; debes relacionar la fecha en que la entidad te canceló los honorarios de la cuenta inmediatamente anterior.\n\n' +
       'Cordialmente,\n\n*Equipo de Contratación*\n> Alcaldía de Flandes'
@@ -1885,15 +1885,15 @@ document.getElementById('rc-guardar').addEventListener('click', async ()=>{
   }
   function msgDevueltaContratista(){
     return (
-      'Estimado(a) *'+nombre+'*\n' +
-      'Se ha devuelto tu *Cuenta N° '+informe+'* por esta inconsistencia:\n\n*'+(observ || 'Sin observaciones')+'*\n\n' +
+      'Estimado(a) *'+nombre+'*\n\n' +
+      'Se ha devuelto tu *Cuenta N° '+informe+'* por esta inconsistencia que omitió tu:\n\n*'+(observ || 'Sin observaciones')+'*\n\n' +
       'Haz la corrección desde la *App Contratista* teniendo en cuenta las observaciones anteriores.\n\n' +
       'Cordialmente,\n\n*Equipo de Contratación*\n> Alcaldía de Flandes'
     );
   }
   function msgDevueltaSupervisor(){
     return (
-      '❌ Estimado(a) *'+supervisor+'* ❌\n' +
+      '❌ Estimado(a) *'+supervisor+'* ❌\n\n' +
       'Se ha devuelto la *Cuenta N° '+informe+'* de *'+nombre+'* por esta inconsistencia:\n\n*'+(observ || 'Sin observaciones')+'*\n\n' +
       'El(la) Contratista ya ha sido notificado(a).\n\n' +
       'Cordialmente,\n\n*Equipo de Contratación*'
