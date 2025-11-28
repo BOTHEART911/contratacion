@@ -657,6 +657,12 @@
 <label>CDP N°</label>
 <input id="add-cdp" type="tel" inputmode="numeric" placeholder="10 dígitos" maxlength="10">
 
+  <label>Objeto del Contrato</label>
+<textarea id="add-objeto" rows="3" placeholder="Describe el objeto del contrato" required></textarea>
+
+<label>Obligaciones</label>
+<textarea id="add-obligaciones" rows="6" placeholder="Una obligación por línea (puede iniciar con 1., 2., 3., ...)" required></textarea>
+
 <!-- Modal Picker (mantienes tu modal y lógica) -->
 <div id="fechaModal" class="picker-modal" aria-hidden="true">
   <div class="picker-box">
@@ -1320,6 +1326,35 @@ document.getElementById('btn-add-guardar').addEventListener('click',async()=>{
   const valorTexto=(document.getElementById('add-valorTexto').value||'').trim();         // en mayúsculas
   const cdp=(document.getElementById('add-cdp').value||'').trim();                       // 10 dígitos
 
+  const objetoRaw = (document.getElementById('add-objeto').value || '').trim();
+const obligacionesRaw = (document.getElementById('add-obligaciones').value || '').trim();
+
+// Validaciones requeridos
+if (!objetoRaw){
+  Swal.fire({icon:'warning',title:'Objeto del contrato requerido'}); return;
+}
+if (!obligacionesRaw){
+  Swal.fire({icon:'warning',title:'Obligaciones requeridas'}); return;
+}
+
+// Normalización Objeto: romper saltos de línea -> espacio, colapsar espacios y MAYÚSCULAS
+const objeto = objetoRaw
+  .replace(/\r?\n+/g, ' ')
+  .replace(/\s+/g, ' ')
+  .trim()
+  .toUpperCase();
+
+// Normalización Obligaciones: crear subcampos (máximo 26), limpiando número y punto inicial
+const obligaciones = obligacionesRaw
+  .split(/\r?\n+/)
+  .map(l => l.replace(/^\s*\d+\.\s*/, '').trim())  // limpia "1. ", "2. ", etc. al inicio
+  .filter(Boolean)
+  .slice(0, 26);
+
+if (obligaciones.length === 0){
+  Swal.fire({icon:'warning',title:'Debes ingresar al menos una obligación'}); return;
+}
+  
   if(!/^\d{6,10}$/.test(documento)){
     Swal.fire({icon:'warning',title:'Documento inválido'}); return;
   }
@@ -1374,7 +1409,9 @@ document.getElementById('btn-add-guardar').addEventListener('click',async()=>{
       valor: String(valorNum),
       mra: String(mraNum),
       valorTexto: valorTexto.toUpperCase(),
-      cdp
+      cdp,
+      objeto,                     // X (columna 24 en Sheets)
+      obligaciones                // arreglo de hasta 26
     });
     Swal.fire({icon:'success',title:'Contratista Agregado',timer:3000,showConfirmButton:false});
     await cargarContratistas();
@@ -2415,6 +2452,19 @@ function convertirNumeroATexto(numero) {
   if (t.endsWith(" UNO")) t = t.slice(0, -4) + " UN";
   return t;
 }
+
+  // Autogrow del textarea de Obligaciones
+(function autoGrowObligaciones(){
+  const ta = document.getElementById('add-obligaciones');
+  if (!ta) return;
+  const resize = ()=>{
+    ta.style.height = 'auto';
+    ta.style.height = (ta.scrollHeight + 4) + 'px';
+  };
+  ['input','change'].forEach(ev => ta.addEventListener(ev, resize));
+  // Primer ajuste si trae texto pegado
+  resize();
+})();
 
 /* ================== FIN ================== */
 </script>
