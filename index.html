@@ -2160,45 +2160,25 @@ document.getElementById('soporte-volver').addEventListener('click', ()=>{
   showView('view-inicio');
 });
 
-/* ================== PWA AVANZADO ================== */
+/* ================== PWA ================== */
 let deferredPrompt = null;
-let __installStartShown = false;    // bandera: ya mostramos "App instalándose"
-let __installSuccessShown = false;  // bandera: ya mostramos "Instalación exitosa"
-
 function isStandalone(){
   const dmStandalone = window.matchMedia('(display-mode: standalone)').matches;
   const dmInstalled  = window.matchMedia('(display-mode: installed)').matches;
   const iosStandalone = (window.navigator.standalone === true);
   return dmStandalone || dmInstalled || iosStandalone;
 }
-function isIOS(){
-  return /(iphone|ipad|ipod)/i.test(navigator.userAgent || '');
-}
-function isMarkedInstalled(){
-  try{ return localStorage.getItem('pwaInstalledFlag') === '1'; }catch(_){ return false; }
-}
-function markInstalled(){
-  try{ localStorage.setItem('pwaInstalledFlag', '1'); }catch(_){}
-}
-function clearInstalledMark(){
-  try{ localStorage.removeItem('pwaInstalledFlag'); }catch(_){}
-}
+function isIOS(){ return /(iphone|ipad|ipod)/i.test(navigator.userAgent || ''); }
+function isMarkedInstalled(){ try{ return localStorage.getItem('pwaInstalledFlagSupervision') === '1'; }catch(_){ return false; } }
+function markInstalled(){ try{ localStorage.setItem('pwaInstalledFlagSupervision', '1'); }catch(_){ } }
+function clearInstalledMark(){ try{ localStorage.removeItem('pwaInstalledFlagSupervision'); }catch(_){ } }
 async function detectInstalled(){
   if (isStandalone()) return true;
   if (typeof navigator.getInstalledRelatedApps === 'function'){
     try{
       const apps = await navigator.getInstalledRelatedApps();
-      const found = apps.some(a =>
-        a.platform === 'webapp' &&
-        typeof a.url === 'string' &&
-        /manifest\.webmanifest$/.test(a.url)
-      );
-      if (found){
-        markInstalled();
-        return true;
-      } else {
-        clearInstalledMark();
-      }
+      const found = apps.some(a => a.platform === 'webapp' && typeof a.url === 'string' && /manifest\.webmanifest$/.test(a.url));
+      if (found){ markInstalled(); return true; } else { clearInstalledMark(); }
     }catch(_){}
   }
   return isMarkedInstalled();
@@ -2210,84 +2190,46 @@ function updateInstallButtonsVisibility(){
   const shouldShow = !installed && (canPrompt || isIOS());
   if(btn1) btn1.style.display = shouldShow ? '' : 'none';
 }
-
-window.addEventListener('beforeinstallprompt', (e)=>{
-  e.preventDefault();
-  deferredPrompt = e;
-  updateInstallButtonsVisibility();
-});
-
-window.addEventListener('appinstalled', ()=>{
-  markInstalled();
-  deferredPrompt = null;
-  updateInstallButtonsVisibility();
-});
-
+window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); deferredPrompt = e; updateInstallButtonsVisibility(); });
+window.addEventListener('appinstalled', ()=>{ markInstalled(); deferredPrompt = null; updateInstallButtonsVisibility(); });
 document.getElementById('btn-instalar').addEventListener('click', async ()=>{
-  // Flujo iOS: se respeta exactamente tu alerta e instrucciones
   if(isIOS()){
-    Swal.fire({
+    // Instrucciones iOS (igual que referencia.md)
+    return Swal.fire({
       icon:'info',
-      title:'Para Instalar en tu Iphone',
-      html:'1) Toca Compartir (cuadro con flecha en la parte inferior).<br>2) Elige "Agregar a pantalla de inicio".<br>3) Confirma "Agregar".'
+      title:'Instalar en iPhone/iPad',
+      html:'1) Toca Compartir (cuadro con flecha).<br>2) Elige "Agregar a pantalla de inicio".<br>3) Confirma "Agregar".'
     });
-    return;
   }
-  // Android: requiere beforeinstallprompt (deferredPrompt)
   if(!deferredPrompt){
-    Swal.fire({icon:'info',title:'Instalación no disponible todavía'});
-    return;
+    return Swal.fire({ icon:'info', title:'Instalación no disponible todavía' });
   }
-
-  const dp = deferredPrompt;
-  dp.prompt();                           // muestra diálogo nativo de instalación
-  const choice = await dp.userChoice;    // espera la elección del usuario
-  deferredPrompt = null;                 // limpia el prompt (solo se usa una vez)
+  deferredPrompt.prompt();
+  const choice = await deferredPrompt.userChoice;
+  deferredPrompt = null;
 
   if (choice.outcome === 'accepted'){
-    // Primera alerta (Android): confirma inicio de instalación por 6 segundos
     markInstalled();
-    __installStartShown = true;
-    Swal.fire({
-  icon: 'success',
-  title: '¡App instalándose!',
-  html: `
-    <div style="text-align:center; margin-top:8px;">
-      <img
-        src="https://res.cloudinary.com/dqqeavica/image/upload/v1764209976/Robot_c2vtua.gif"
-        alt="Instalando app"
-        style="width:180px; max-width:70vw; height:auto; display:block; margin:0 auto 12px;"
-      >
-      <div>Debes esperar unos segundos mientras el sistema instala la App.</div>
-      <div style="margin-top:10px;">
-        <b>Ya puedes salir de esta vista, aparecerá en la pantalla principal de este dispositivo.</b>
-      </div>
-    </div>
-  `,
-  timer: 12000,
-  showConfirmButton: false
-});
-  } else {
-    Swal.fire({icon:'info',title:'Instalación cancelada'});
-  }
 
+    // ALERTA IGUAL A referencia.md
+    Swal.fire({
+      icon: 'success',
+      title: '¡App instalándose!',
+      html: 'Debes esperar 1 minuto.<br><br>Al terminar este tiempo, refresca la página o busca el icono de la aplicación en la pantalla de tu dispositivo.',
+      timer: 8000,
+      showConfirmButton: false
+    });
+  } else {
+    Swal.fire({ icon:'info', title:'Instalación cancelada' });
+  }
   updateInstallButtonsVisibility();
 });
 
 async function initPWAVista(){
   const installed = await detectInstalled();
-  if (installed){
-    showView('view-login');
-  } else {
-    showView('view-instalar');
-    updateInstallButtonsVisibility();
-  }
+  if (installed){ showView('view-login'); } else { showView('view-instalar'); updateInstallButtonsVisibility(); }
 }
-if ('serviceWorker' in navigator){
-  window.addEventListener('load', ()=>{
-    navigator.serviceWorker.register('./sw.js').catch(()=>{});
-  });
-}
+if ('serviceWorker' in navigator){ window.addEventListener('load', ()=>{ navigator.serviceWorker.register('./sw.js').catch(()=>{}); }); }
 window.addEventListener('load', initPWAVista);
   
 // Helper para IDs con prefijo "add-"
