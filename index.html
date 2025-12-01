@@ -1099,6 +1099,17 @@ document.getElementById('go-contratistas').addEventListener('click', async ()=>{
 document.getElementById('go-revision').addEventListener('click', async ()=>{
   playSoundOnce(SOUNDS.login);
   await cargarCuentasPendientes();
+  if (!CUENTAS_DATA || CUENTAS_DATA.length === 0){
+    await Swal.fire({
+      icon:'success',
+      title:'¡Estás al día!',
+      text:'No tienes CUENTAS pendientes por revisar y aprobar',
+      timer: 3200,
+      showConfirmButton: false
+    });
+    showView('view-inicio');
+    return;
+  }
   showView('view-revision');
 });
 document.getElementById('go-requerimientos').addEventListener('click', async ()=>{
