@@ -998,7 +998,7 @@ toggleCedulaBtn.addEventListener('click', ()=>{
 btnLogin.addEventListener('click', async () => {
   const cedula = (loginCedula.value || '').trim();
   if (cedula === '') {
-    Swal.fire({ icon:'warning', title:'Ingresa la Cédula', text:'Campo requerido.' });
+    Swal.fire({ icon:'warning', title:'¿Deseas iniciar Sesión?', text:'Ingresa tu Contraseña.' });
     return;
   }
   if (!/^\d{6,10}$/.test(cedula)) {
@@ -1445,8 +1445,9 @@ async function mostrarDetallesContratista(documento){
         `<b>OBJETO:</b> ${d.objeto||''}`,
         `<b>FECHA DE INICIO:</b> ${d.fechaInicio||''}`,
         `<b>FECHA DE TERMINO:</b> ${d.fechaTermino||''}`,
+        `<b>VALOR INICIAL:</b> ${d.valor||''}`,
         `<b>MRA:</b> ${d.mra||''}`,
-        `<b>VALOR:</b> ${d.valorFinal||''}`,
+        `<b>VALOR FINAL:</b> ${d.valorFinal||''}`,
         `<b>CDP:</b> ${d.cdp||''}`,
         `<b>RP:</b> ${d.rp||''}`,
         `<b>CDP ADICIÓN:</b> ${d.cdpAdicion||''}`,
