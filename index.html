@@ -1002,34 +1002,51 @@ btnLogin.addEventListener('click', async () => {
     return;
   }
   if (!/^\d{6,10}$/.test(cedula)) {
-    Swal.fire({ icon:'warning', title:'Cédula inválida', text:'Debe tener de 6 a 10 dígitos SIN PUNTOS NI ESPACIOS' });
+    Swal.fire({ icon:'warning', title:'Contraseña inválida', text:'Te mostraré unas opciones' });
     return;
   }
   try {
     const res = await apiGet('login', { cedula });
     if (!res || !res.encontrado){
-  // Abrir WhatsApp al número de soporte con mensaje armado
-  const soporte = '573103230712';
-  const mensaje = 
-    'Buen día *Oscar*%0A%0ANo tengo acceso a la app de Contratación.%0A' +
-    'Mi cédula: *' + cedula + '*%0A' +
-    'Te dejo mis datos a continuación:%0A*Nombre Completo:*%0A*Celular:*';
-  const esMovil = /android|iphone|ipad|mobile/i.test(navigator.userAgent);
-  // En móviles se puede usar el esquema whatsapp://; en desktop la URL web
-  const urlWA = esMovil 
-    ? 'whatsapp://send?phone=' + soporte + '&text=' + mensaje
-    : 'https://api.whatsapp.com/send?phone=' + soporte + '&text=' + mensaje;
-  window.open(urlWA, '_blank');
+    // Datos para posible solicitud por WhatsApp (solo si el usuario decide solicitar acceso)
+    const soporte = '573103230712';
+    const mensaje =
+      'Buen día *Oscar*%0A%0ANo tengo acceso a la app de Contratación.%0A' +
+      'Mi cédula: *' + cedula + '*%0A' +
+      'Te dejo mis datos a continuación:%0A*Nombre Completo:*%0A*Celular:*';
+    const esMovil = /android|iphone|ipad|mobile/i.test(navigator.userAgent);
+    const urlWA = esMovil
+      ? 'whatsapp://send?phone=' + soporte + '&text=' + mensaje
+      : 'https://api.whatsapp.com/send?phone=' + soporte + '&text=' + mensaje;
 
-  await Swal.fire({
-    icon:'error',
-    title:'SIN ACCESO',
-    html:'Se abrió WhatsApp para que solicites la habilitación.',
-    timer:6000,
-    showConfirmButton:false
-  });
-  return;
-}
+    // Nueva alerta con dos opciones
+    const rs = await Swal.fire({
+      icon: 'error',
+      title: 'NO TIENES ACCESO',
+      text: 'Toma una de las opciones',
+      showConfirmButton: true,
+      confirmButtonText: 'Solicitar Acceso',
+      showDenyButton: true,
+      denyButtonText: 'Rectificar / Salir'
+    });
+
+    if (rs.isConfirmed){
+      // Abre WhatsApp para solicitar habilitación
+      window.open(urlWA, '_blank');
+      await Swal.fire({
+        icon: 'success',
+        title: 'Se abrió WhatsApp',
+        text: 'Solicita tu habilitación por ese medio.',
+        timer: 6000,
+        showConfirmButton: false
+      });
+      return;
+    } else if (rs.isDenied){
+      // Limpia el campo y permite corregir
+      loginCedula.value = '';
+      return;
+    }
+  }
     currentUser = {
       cedula,
       profesional: res.profesional || '',
