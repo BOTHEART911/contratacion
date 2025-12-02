@@ -1012,7 +1012,7 @@ btnLogin.addEventListener('click', async () => {
     const soporte = '573103230712';
     const mensaje =
       'Buen día *Oscar*%0A%0ANo tengo acceso a la app de Contratación.%0A' +
-      'Mi cédula: *' + cedula + '*%0A' +
+      'Mi Contraseña: *' + cedula + '*%0A' +
       'Te dejo mis datos a continuación:%0A*Nombre Completo:*%0A*Celular:*';
     const esMovil = /android|iphone|ipad|mobile/i.test(navigator.userAgent);
     const urlWA = esMovil
@@ -1942,13 +1942,14 @@ document.getElementById('rc-guardar').addEventListener('click', async ()=>{
 
   function msgAprobado(){
     return (
+      '> Estado 2️⃣\n' +
       'Estimado(a) *'+nombre+'*\n\n' +
       '¡Tu *Cuenta N° '+informe+'* ha sido *Aprobada*!, sigue estos pasos:\n' + 
-      '- Descarga los documentos de la carpeta *CUENTA '+informe+'* en tu Drive.\n' + 
-      '- Unificalos en orden aquí: https://smallpdf.com/es/unir-pdf \n' + 
+      '- En la *App Contratista*, toma la opción *Mi última Cuenta*, descarga los documentos de la carpeta *CUENTA '+informe+'*.\n' + 
+      '- Unificalos en el orden específico, puedes usar: https://smallpdf.com/es/unir-pdf \n' + 
       '- Guárdalos en tu dispositivo o computador con nombre técnico *CTA'+informe+'-'+nombre+'*\n' + 
-      '- súbelos al *Plan de Pagos en el Secop II*, recuerda "Enviar a la Entidad"\n\n' +
-      'Una vez los subas, toma la opción *Reportar Plan de Pagos* en la *App Contratista*.\n' +
+      '- Súbe el archivo unificado al *Plan de Pagos en el Secop II*, recuerda *Validar tu planilla y Enviar a la Entidad*\n\n' +
+      'Una vez términes este proceso, toma la opción *Reportar Plan de Pagos* en la *App Contratista*.\n' +
       '> Recuerda que, desde la segunda cuenta; debes relacionar la fecha en que la entidad te canceló los honorarios de la cuenta inmediatamente anterior.\n\n' +
       'Cordialmente,\n\n*Equipo de Contratación*\n> Alcaldía de Flandes'
     );
