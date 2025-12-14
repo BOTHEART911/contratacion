@@ -2258,8 +2258,19 @@ document.getElementById('btn-instalar').addEventListener('click', async ()=>{
   if(isIOS()){
     Swal.fire({
       icon:'info',
-      title:'Para Instalar en tu Iphone',
-      html:'1) Toca Compartir (cuadro con flecha en la parte inferior).<br>2) Elige "Agregar a pantalla de inicio".<br>3) Confirma "Agregar".'
+      title: '¡Para Instalar en tu Iphone!',
+  html: `
+    <div style="text-align:center; margin-top:8px;">
+      <img
+        src="https://res.cloudinary.com/dqqeavica/image/upload/v1765744300/instalacion_ios_hiosrs.gif"
+        alt="Instalación de IOS"
+        style="width:180px; max-width:70vw; height:auto; display:block; margin:0 auto 12px;"
+      >
+      <div style="margin-top:10px;">
+        <b>1.</b> Toca Compartir.<br><b>2.</b> Elige "Agregar a pantalla de inicio".<br><b>3.</b> Confirma "Agregar".
+      </div>
+    </div>
+  `,
     });
     return;
   }
@@ -2284,13 +2295,13 @@ document.getElementById('btn-instalar').addEventListener('click', async ()=>{
   html: `
     <div style="text-align:center; margin-top:8px;">
       <img
-        src="https://res.cloudinary.com/dqqeavica/image/upload/v1764209976/Robot_c2vtua.gif"
+        src="https://res.cloudinary.com/dqqeavica/image/upload/v1765740540/instalacion_lydtcl.gif"
         alt="Instalando app"
         style="width:180px; max-width:70vw; height:auto; display:block; margin:0 auto 12px;"
       >
       <div>Debes esperar unos segundos mientras el sistema instala la App.</div>
       <div style="margin-top:10px;">
-        <b>Ya puedes salir de esta vista, aparecerá en la pantalla principal de este dispositivo.</b>
+        <b>Al desaparecer este aviso, puedes salir de esta vista. La App aparecerá en la pantalla principal de este dispositivo.</b>
       </div>
     </div>
   `,
@@ -2319,6 +2330,7 @@ if ('serviceWorker' in navigator){
   });
 }
 window.addEventListener('load', initPWAVista);
+  
   
 // Helper para IDs con prefijo "add-"
 function $id(base) {
