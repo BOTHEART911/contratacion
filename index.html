@@ -1372,12 +1372,52 @@ const objeto = objetoRaw
   .trim()
   .toUpperCase();
 
-// Normalización Obligaciones: crear subcampos (máximo 26), limpiando número y punto inicial
-const obligaciones = obligacionesRaw
-  .split(/\r?\n+/)
-  .map(l => l.replace(/^\s*\d+\.\s*/, '').trim())  // limpia "1. ", "2. ", etc. al inicio
-  .filter(Boolean)
-  .slice(0, 26);
+// Normalización Obligaciones:
+// - NO partir por saltos de línea
+// - Partir únicamente cuando aparece un marcador de ítem permitido (1..26):
+//   1.  1)  1:  1-  1–  1— (con o sin espacios) ... hasta 26.
+// - Dentro de cada obligación: unir saltos de línea en un solo párrafo
+const obligaciones = (() => {
+  const text = String(obligacionesRaw || '').trim();
+  if (!text) return [];
+
+  // Marcador permitido: (inicio o whitespace) + (1..26) + separador + opcional espacios
+  // Separadores: .  )  :  -  –  —
+  const marker = /(?:^|\s)((?:[1-9]|1\d|2[0-6]))\s*(?:[.)]|:|[-–—])\s*/g;
+
+  // Si no hay marcadores, se toma todo como una sola obligación
+  if (!marker.test(text)) {
+    const unico = text.replace(/\r?\n+/g, ' ').replace(/\s+/g, ' ').trim();
+    return unico ? [unico] : [];
+  }
+
+  // Reinicia el regex porque test() avanzó el lastIndex al ser /g
+  marker.lastIndex = 0;
+
+  const parts = [];
+  const indices = [];
+  let match;
+
+  while ((match = marker.exec(text)) !== null) {
+    indices.push({ index: match.index, len: match[0].length });
+  }
+
+  for (let i = 0; i < indices.length; i++) {
+    const start = indices[i].index + indices[i].len;
+    const end = (i + 1 < indices.length) ? indices[i + 1].index : text.length;
+    const chunk = text.slice(start, end);
+
+    const cleaned = chunk
+      .replace(/\r?\n+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    if (cleaned) parts.push(cleaned);
+  }
+
+  return parts.slice(0, 26);
+})();
+
 
 if (obligaciones.length === 0){
   Swal.fire({icon:'warning',title:'Debes ingresar al menos una obligación'}); return;
