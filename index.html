@@ -447,26 +447,25 @@
     flex-wrap: wrap !important;
     align-items: center;
   }
-  /* Fila 1: iconos a la derecha */
   .contr-actions .right-group{
     order: 1 !important;
-    flex: 0 0 100% !important;   /* ocupa toda la fila 1 */
+    flex: 0 0 100% !important;
     justify-content: flex-end !important;
     margin-left: 0 !important;
     margin-top: 0 !important;
   }
-  /* Fila 2: los dos botones */
   .contr-actions .left-group{
     order: 2 !important;
-    flex: 0 0 100% !important;   /* toda la fila 2 */
+    flex: 0 0 100% !important;
     min-width: 0;
     margin-top: 8px;
     display: flex;
     gap: 12px;
+    flex-direction: column;
   }
-  /* Dos botones lado a lado en la segunda fila */
   .contr-actions .left-group > button{
-    flex: 1 1 48%;
+    flex: 1 1 100%;
+    width: 100%;
   }
 }
 /* Extra: si la pantalla es MUY estrecha, apila los botones verticalmente */
@@ -582,6 +581,89 @@
         <div id="contr-list" class="list-grid"></div>
       </div>
     </section>
+
+    <!-- VISTA ADICIÓN -->
+<section id="view-adicion" class="view">
+  <div class="card narrow">
+    <h2 style="color:var(--primary)">ADICIÓN DE CONTRATO</h2>
+
+    <label>Fecha de Inicio</label>
+    <input id="fechaInicio" type="text" readonly>
+
+    <label>Fecha de Inicio de Adición</label>
+    <input id="inicioA" type="text" placeholder="dd/mm/2026" readonly onclick="abrirPickerAdicion('inicioA')">
+
+    <label>Fecha de Fin de Adición</label>
+    <input id="finA" type="text" placeholder="dd/mm/2026" readonly onclick="abrirPickerAdicion('finA')">
+
+    <label>Meses de Adición</label>
+    <input id="mesesA" type="tel" inputmode="numeric" placeholder="Automático">
+
+    <label>Días de complemento Adición si Aplica</label>
+    <input id="diasA" type="tel" inputmode="numeric" placeholder="Automático">
+
+    <label>Tiempo de Adición</label>
+    <input id="adicion" type="text" readonly>
+
+    <label>Meses Totales del Contrato</label>
+    <input id="mesesT" type="tel" inputmode="numeric" placeholder="Automático">
+
+    <label>Días de complemento Contrato si Aplica</label>
+    <input id="diasT" type="tel" inputmode="numeric" placeholder="Automático">
+
+    <label>Tiempo de Ejecución Total del Contrato</label>
+    <input id="ejecucion" type="text" readonly>
+
+    <label>CDP Adición</label>
+    <input id="cdpA" type="tel" inputmode="numeric" placeholder="10 dígitos (2026...)" maxlength="10" style="border:1.5px solid #ccc;">
+
+    <label>Valor del Contrato</label>
+    <input id="valorInicio" type="text" readonly>
+
+    <label>Valor de la Adición</label>
+    <input id="mra" type="tel" inputmode="numeric" placeholder="$ ">
+
+    <input id="textoAdicion" type="hidden">
+    <input id="valorFin" type="hidden">
+    <input id="textoValor" type="hidden">
+
+    <input id="adicionDocumento" type="hidden">
+    <input id="adicionTelefono" type="hidden">
+    <input id="adicionNombre" type="hidden">
+    <input id="adicionContrato" type="hidden">
+
+    <div class="btn-row spaced" style="margin-top:14px;">
+      <button id="adicion-guardar" class="btn-primary">Guardar</button>
+      <button id="adicion-volver" class="danger">Regresar</button>
+    </div>
+  </div>
+
+  <div id="adicionFechaModal" class="picker-modal" aria-hidden="true" style="align-items:flex-start; padding-top:16px;">
+    <div class="picker-box">
+      <h3 style="margin:0 0 8px 0;">Selecciona la fecha</h3>
+      <div class="picker-grid">
+        <div>
+          <small>Día</small>
+          <select id="adicionDia" size="10"></select>
+        </div>
+        <div>
+          <small>Mes</small>
+          <select id="adicionMes" size="12"></select>
+        </div>
+        <div>
+          <small>Año</small>
+          <select id="adicionAnio" size="3" disabled>
+            <option selected>2026</option>
+          </select>
+        </div>
+      </div>
+      <div class="picker-actions">
+        <button type="button" class="btn btn-cancel" onclick="cancelarPickerAdicion()">Cancelar</button>
+        <button type="button" class="btn btn-ok" onclick="confirmarPickerAdicion()">Ok</button>
+      </div>
+    </div>
+  </div>
+</section>
 
     <!-- VISTA AGREGAR CONTRATISTA -->
     <section id="view-agregar" class="view">
@@ -818,93 +900,6 @@
       </div>
     </div>
 
-        <!-- VISTA ADICIÓN -->
-    <section id="view-adicion" class="view">
-      <div class="card narrow">
-        <h2 style="color:var(--primary)">ADICIÓN DE CONTRATO</h2>
-
-        <label>Fecha de Inicio</label>
-        <input id="ad-fechaInicio" type="text" readonly style="background:#f0f0f0;">
-
-        <label>Fecha de Inicio de Adición</label>
-        <input id="ad-inicioA" type="text" placeholder="dd/mm/2026" readonly onclick="abrirPickerAdicion('inicioA')">
-        <input id="ad-diaInicioA" type="text" readonly style="display:none;">
-        <input id="ad-mesInicioA" type="text" readonly style="display:none;">
-
-        <label>Fecha de Fin de Adición</label>
-        <input id="ad-finA" type="text" placeholder="dd/mm/2026" readonly onclick="abrirPickerAdicion('finA')">
-        <input id="ad-diaFinA" type="text" readonly style="display:none;">
-        <input id="ad-mesFinA" type="text" readonly style="display:none;">
-
-        <!-- Modal Picker Adición -->
-        <div id="adicionFechaModal" class="picker-modal" aria-hidden="true" style="position:fixed; inset:0; display:none; align-items:flex-start; justify-content:center; background:rgba(0,0,0,.5); z-index:9999; padding-top:16px;">
-          <div class="picker-box" style="width:90%; max-width:520px; background:#fff; border-radius:8px; padding:16px;">
-            <h3 style="margin:0 0 8px 0;">Selecciona la fecha</h3>
-            <div class="picker-grid" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin:12px 0;">
-              <div>
-                <small>Día</small>
-                <select id="adicionDia" size="10"></select>
-              </div>
-              <div>
-                <small>Mes</small>
-                <select id="adicionMes" size="12"></select>
-              </div>
-              <div>
-                <small>Año</small>
-                <select id="adicionAnio" size="3" disabled>
-                  <option selected>2026</option>
-                </select>
-              </div>
-            </div>
-            <div class="picker-actions" style="display:flex; gap:8px; justify-content:flex-end;">
-              <button type="button" class="btn btn-cancel" onclick="cancelarPickerAdicion()">Cancelar</button>
-              <button type="button" class="btn btn-ok" onclick="confirmarPickerAdicion()">Ok</button>
-            </div>
-          </div>
-        </div>
-
-        <label>Meses de Adición</label>
-        <input id="ad-mesesA" type="tel" inputmode="numeric" placeholder="Automático">
-
-        <label>Días de complemento Adición si Aplica</label>
-        <input id="ad-diasA" type="tel" inputmode="numeric" placeholder="Automático">
-
-        <label>Tiempo de Adición</label>
-        <input id="ad-adicion" type="text" readonly>
-
-        <label>Meses Totales del Contrato</label>
-        <input id="ad-mesesT" type="tel" inputmode="numeric" placeholder="Automático">
-
-        <label>Días de complemento Contrato si Aplica</label>
-        <input id="ad-diasT" type="tel" inputmode="numeric" placeholder="Automático">
-
-        <label>Tiempo de Ejecución Total del Contrato</label>
-        <input id="ad-ejecucion" type="text" readonly>
-
-        <label>CDP Adición</label>
-        <input id="ad-cdpA" type="tel" inputmode="numeric" placeholder="10 dígitos" maxlength="10">
-
-        <label>Valor del Contrato</label>
-        <input id="ad-valorInicial" type="text" readonly style="background:#f0f0f0;">
-
-        <label>Valor de la Adición</label>
-        <input id="ad-mra" type="tel" inputmode="numeric" placeholder="$ ">
-
-        <input id="ad-textoAdicion" type="hidden">
-
-        <label>Valor Final del Contrato</label>
-        <input id="ad-valorFin" type="text" readonly>
-
-        <input id="ad-textoValor" type="hidden">
-        <input id="ad-documento" type="hidden">
-
-        <div class="btn-row spaced" style="margin-top:12px;">
-          <button id="ad-guardar" class="btn-primary">Guardar</button>
-          <button id="ad-volver" class="danger">Regresar</button>
-        </div>
-      </div>
-    </section>
-    
     <!-- VISTA COMUNICADOS -->
     <section id="view-comunicados" class="view">
       <div class="card narrow">
@@ -1330,13 +1325,6 @@ btnDetalles.addEventListener('click', ()=>{
   }
 });
 
-        const btnAdicion=document.createElement('button');
-    btnAdicion.textContent='ADICIÓN';
-    btnAdicion.addEventListener('click', async ()=>{
-      playSoundOnce(SOUNDS.login);
-      await abrirVistaAdicion(c.documento);
-    });
-
     const btnWhatsapp=document.createElement('button');
     btnWhatsapp.className='btn-icon';
     btnWhatsapp.innerHTML='<img src="https://res.cloudinary.com/dqqeavica/image/upload/v1759166341/WhatsApp_mljaqm.webp" alt="WhatsApp">';
@@ -1362,6 +1350,49 @@ btnDetalles.addEventListener('click', ()=>{
         Swal.fire({icon:'info',title:'Sin carpeta',text:'No hay carpeta asociada.'});
       }
     });
+
+    const btnAdicion = document.createElement('button');
+btnAdicion.textContent = 'ADICIÓN';
+btnAdicion.addEventListener('click', async ()=> {
+  playSoundOnce(SOUNDS.login);
+  try{
+    const data = await apiGet('getAdicionBase', { documento: c.documento });
+    if(!data || !data.found){
+      Swal.fire({ icon:'info', title:'No encontrado' });
+      return;
+    }
+
+    document.getElementById('adicionDocumento').value = data.documento || '';
+    document.getElementById('adicionTelefono').value  = data.telefono || '';
+    document.getElementById('adicionNombre').value    = data.nombre || '';
+    document.getElementById('adicionContrato').value  = data.contrato || '';
+
+    document.getElementById('fechaInicio').value  = data.fechaInicio || '';
+    document.getElementById('valorInicio').value  = data.valorInicial || '$ 0';
+
+    document.getElementById('inicioA').value = data.inicioA || '';
+    document.getElementById('finA').value    = data.finA || '';
+    document.getElementById('mesesA').value  = data.mesesA ? String(data.mesesA) : '';
+    document.getElementById('diasA').value   = data.diasA ? String(data.diasA) : '';
+    document.getElementById('adicion').value = data.adicion || '';
+
+    document.getElementById('mesesT').value    = data.mesesT ? String(data.mesesT) : '';
+    document.getElementById('diasT').value     = data.diasT ? String(data.diasT) : '';
+    document.getElementById('ejecucion').value = data.ejecucion || '';
+
+    document.getElementById('cdpA').value = data.cdpA || '';
+
+    document.getElementById('mra').value = (data.mraCOP && String(data.mraCOP).trim()) ? data.mraCOP : '$ ';
+    document.getElementById('textoAdicion').value = data.textoAdicion || '';
+    document.getElementById('valorFin').value = data.valorFinNum ? String(data.valorFinNum) : '';
+    document.getElementById('textoValor').value = data.textoValor || '';
+
+    recomputeAdicionAll();
+    showView('view-adicion');
+  }catch(e){
+    Swal.fire({ icon:'error', title:'Error', text:e.message });
+  }
+});
 
     leftGroup.appendChild(btnDetalles);
     leftGroup.appendChild(btnGuardarEstado);
@@ -2640,146 +2671,251 @@ function convertirNumeroATexto(numero) {
   resize();
 })();
 
-  /* ================== ADICIÓN DE CONTRATO ================== */
+/* ================== ADICIÓN DE CONTRATO ================== */
 let __adicionPickerTarget = null;
-let __adFechaInicioAISO = '';
-let __adFechaFinAISO = '';
 
-(function initPickerAdicion(){
-  const dSel = document.getElementById('adicionDia');
-  const mSel = document.getElementById('adicionMes');
-  if(dSel && !dSel.childElementCount){
-    for(let d=1; d<=31; d++){
-      const opt=document.createElement('option');
-      opt.value=String(d).padStart(2,'0');
-      opt.textContent=opt.value;
-      dSel.appendChild(opt);
+function bindNumericSanitizerId(id, maxLen){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.addEventListener('input', ()=>{
+    const raw = String(el.value || '').replace(/\D/g,'');
+    el.value = maxLen ? raw.slice(0, maxLen) : raw;
+  });
+}
+
+function formatCOPView(n){
+  const x = Number(String(n).replace(/\D/g,''))||0;
+  return '$ ' + x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+function numPure(s){
+  return Number(String(s||'').replace(/\D/g,''))||0;
+}
+function pad2(n){ return String(n).padStart(2,'0'); }
+
+function formatCOPInstant(el){
+  if(!el) return;
+  const raw = numPure(el.value);
+  if(!raw){ el.value = '$ '; return; }
+  el.value = formatCOPView(raw);
+}
+
+function convertirNumeroATexto(n){
+  const unidades=["","UN","DOS","TRES","CUATRO","CINCO","SEIS","SIETE","OCHO","NUEVE"];
+  const especiales=["DIEZ","ONCE","DOCE","TRECE","CATORCE","QUINCE","DIECISEIS","DIECISIETE","DIECIOCHO","DIECINUEVE"];
+  const decenas=["","DIEZ","VEINTE","TREINTA","CUARENTA","CINCUENTA","SESENTA","SETENTA","OCHENTA","NOVENTA"];
+  const centenas=["","CIENTO","DOSCIENTOS","TRESCIENTOS","CUATROCIENTOS","QUINIENTOS","SEISCIENTOS","SETECIENTOS","OCHOCIENTOS","NOVECIENTOS"];
+  function cDec(x){
+    if(x<10) return unidades[x];
+    if(x<20) return especiales[x-10];
+    if(x===20) return "VEINTE";
+    if(x<30) return "VEINTI"+unidades[x%10];
+    return decenas[Math.floor(x/10)] + (x%10 ? " Y " + unidades[x%10] : "");
+  }
+  function cCent(x){
+    if(x===100) return "CIEN";
+    if(x>100) return (centenas[Math.floor(x/100)]+" "+cDec(x%100)).trim();
+    return cDec(x);
+  }
+  function cMiles(x){
+    if(x<1000) return cCent(x);
+    if(x<1000000){
+      const miles=Math.floor(x/1000), resto=x%1000;
+      if(miles===1) return ("MIL "+(resto?cCent(resto):"")).trim();
+      return (cCent(miles)+" MIL "+(resto?cCent(resto):"")).trim();
+    }
+    const millones=Math.floor(x/1000000), resto=x%1000000;
+    if(millones===1) return ("UN MILLÓN "+(resto?cMiles(resto):"DE")).trim();
+    return (cCent(millones)+" MILLONES "+(resto?cMiles(resto):"DE")).trim();
+  }
+  let t=cMiles(parseInt(n||0,10));
+  if(t.endsWith(" UNO")) t=t.slice(0,-4)+" UN";
+  return t;
+}
+
+function textoTiempo(meses, dias){
+  const m = Number(meses)||0;
+  const d = Number(dias)||0;
+  let txt = '';
+  if(m>0) txt += `${convertirNumeroATexto(m)} (${m}) ${m===1?'MES':'MESES'}`;
+  if(d>0){
+    if(txt) txt += ' Y ';
+    txt += `${convertirNumeroATexto(d)} (${d}) ${d===1?'DIA':'DIAS'}`;
+  }
+  return txt;
+}
+
+function parseDMY(str){
+  if(!str) return null;
+  const p = String(str).trim().split('/');
+  if(p.length !== 3) return null;
+  const d = parseInt(p[0],10);
+  const m = parseInt(p[1],10);
+  const y = parseInt(p[2],10);
+  if(!d || !m || !y) return null;
+  const dt = new Date(y, m-1, d);
+  if(isNaN(dt.getTime())) return null;
+  return dt;
+}
+function getDaysInMonth(y,m0){
+  return new Date(y, m0+1, 0).getDate();
+}
+function calcMesesDiasEntre(fechaInicioDMY, fechaFinDMY){
+  const fi = parseDMY(fechaInicioDMY);
+  const ft = parseDMY(fechaFinDMY);
+  if(!fi || !ft || ft < fi) return { meses:0, dias:0 };
+
+  let fechaInicio = new Date(fi.getFullYear(), fi.getMonth(), fi.getDate());
+  let fechaTermino = new Date(ft.getFullYear(), ft.getMonth(), ft.getDate());
+
+  let diffTime = Math.abs(fechaTermino - fechaInicio) + (1000*60*60*24);
+  let diffDays = Math.ceil(diffTime / (1000*60*60*24));
+
+  let meses=0, dias=0;
+
+  while(diffDays>0){
+    const dim = getDaysInMonth(fechaInicio.getFullYear(), fechaInicio.getMonth());
+    if(diffDays >= dim){
+      meses++;
+      diffDays -= dim;
+      fechaInicio.setMonth(fechaInicio.getMonth()+1);
+    }else{
+      dias = diffDays;
+      diffDays = 0;
     }
   }
-  if(mSel && !mSel.childElementCount){
+
+  return { meses, dias };
+}
+
+function recomputeAdicionAll(){
+  const baseInicio = document.getElementById('fechaInicio')?.value || '';
+  const inicioA = document.getElementById('inicioA')?.value || '';
+  const finA    = document.getElementById('finA')?.value || '';
+
+  if(inicioA && finA){
+    const mdA = calcMesesDiasEntre(inicioA, finA);
+    const mesesAEl = document.getElementById('mesesA');
+    const diasAEl  = document.getElementById('diasA');
+    if(mesesAEl && (mesesAEl.value==='' || mesesAEl.dataset.autofill==='1')){
+      mesesAEl.value = String(mdA.meses);
+      mesesAEl.dataset.autofill='1';
+    }
+    if(diasAEl && (diasAEl.value==='' || diasAEl.dataset.autofill==='1')){
+      diasAEl.value = String(mdA.dias);
+      diasAEl.dataset.autofill='1';
+    }
+  }
+
+  const mesesA = Number(document.getElementById('mesesA')?.value || 0);
+  const diasA  = Number(document.getElementById('diasA')?.value || 0);
+  const adicionTxt = textoTiempo(mesesA, diasA);
+  document.getElementById('adicion').value = adicionTxt;
+  document.getElementById('textoAdicion').value = adicionTxt;
+
+  if(baseInicio && finA){
+    const mdT = calcMesesDiasEntre(baseInicio, finA);
+    const mesesTEl = document.getElementById('mesesT');
+    const diasTEl  = document.getElementById('diasT');
+    if(mesesTEl && (mesesTEl.value==='' || mesesTEl.dataset.autofill==='1')){
+      mesesTEl.value = String(mdT.meses);
+      mesesTEl.dataset.autofill='1';
+    }
+    if(diasTEl && (diasTEl.value==='' || diasTEl.dataset.autofill==='1')){
+      diasTEl.value = String(mdT.dias);
+      diasTEl.dataset.autofill='1';
+    }
+  }
+
+  const mesesT = Number(document.getElementById('mesesT')?.value || 0);
+  const diasT  = Number(document.getElementById('diasT')?.value || 0);
+  document.getElementById('ejecucion').value = textoTiempo(mesesT, diasT);
+
+  const valorInicioNum = numPure(document.getElementById('valorInicio')?.value || '$ 0');
+  const mraNum = numPure(document.getElementById('mra')?.value || '');
+  const valorFinNum = valorInicioNum + mraNum;
+
+  document.getElementById('valorFin').value = String(valorFinNum);
+  document.getElementById('textoValor').value = (convertirNumeroATexto(valorFinNum) + ' PESOS M/CTE').toUpperCase();
+}
+
+function recomputeAdicionFromManual(){
+  const mesesA = Number(document.getElementById('mesesA')?.value || 0);
+  const diasA  = Number(document.getElementById('diasA')?.value || 0);
+  const adicionTxt = textoTiempo(mesesA, diasA);
+  document.getElementById('adicion').value = adicionTxt;
+  document.getElementById('textoAdicion').value = adicionTxt;
+
+  const mesesT = Number(document.getElementById('mesesT')?.value || 0);
+  const diasT  = Number(document.getElementById('diasT')?.value || 0);
+  document.getElementById('ejecucion').value = textoTiempo(mesesT, diasT);
+}
+
+(function initAdicionPicker(){
+  const d = document.getElementById('adicionDia');
+  const m = document.getElementById('adicionMes');
+  if(d && !d.childElementCount){
+    for(let i=1;i<=31;i++){
+      const o=document.createElement('option');
+      o.value=pad2(i);
+      o.textContent=o.value;
+      d.appendChild(o);
+    }
+  }
+  if(m && !m.childElementCount){
     const mesesNombres=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
     for(let i=0;i<12;i++){
-      const opt=document.createElement('option');
-      opt.value=String(i+1).padStart(2,'0');
-      opt.textContent=mesesNombres[i];
-      mSel.appendChild(opt);
+      const o=document.createElement('option');
+      o.value=pad2(i+1);
+      o.textContent=mesesNombres[i];
+      m.appendChild(o);
     }
   }
 })();
 
-function abrirPickerAdicion(target){
-  __adicionPickerTarget = target;
-  const m=document.getElementById('adicionFechaModal');
-  if(m){ m.style.display='flex'; m.setAttribute('aria-hidden','false'); }
+function abrirPickerAdicion(targetId){
+  __adicionPickerTarget = targetId;
+  const modal = document.getElementById('adicionFechaModal');
+  if(modal){
+    modal.style.display='flex';
+    modal.setAttribute('aria-hidden','false');
+  }
 }
-
 function cancelarPickerAdicion(){
-  const m=document.getElementById('adicionFechaModal');
-  if(m){ m.style.display='none'; m.setAttribute('aria-hidden','true'); }
+  const modal = document.getElementById('adicionFechaModal');
+  if(modal){
+    modal.style.display='none';
+    modal.setAttribute('aria-hidden','true');
+  }
 }
-
 function confirmarPickerAdicion(){
-  const dSel=document.getElementById('adicionDia')?.value||'01';
-  const mSel=document.getElementById('adicionMes')?.value||'01';
-  const anio='2026';
-  const mesesNombres=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-  const idx=Math.max(1,Math.min(12,parseInt(mSel,10)))-1;
-  const mesNombre = mesesNombres[idx];
+  const dSel = document.getElementById('adicionDia')?.value || '01';
+  const mSel = document.getElementById('adicionMes')?.value || '01';
+  const val = `${dSel}/${mSel}/2026`;
 
-  if(__adicionPickerTarget==='inicioA'){
-    document.getElementById('ad-inicioA').value = `${dSel}/${mSel}/${anio}`;
-    document.getElementById('ad-diaInicioA').value = dSel;
-    document.getElementById('ad-mesInicioA').value = mesNombre;
-    __adFechaInicioAISO = `${dSel}/${mSel}/${anio}`;
-  }else if(__adicionPickerTarget==='finA'){
-    document.getElementById('ad-finA').value = `${dSel}/${mSel}/${anio}`;
-    document.getElementById('ad-diaFinA').value = dSel;
-    document.getElementById('ad-mesFinA').value = mesNombre;
-    __adFechaFinAISO = `${dSel}/${mSel}/${anio}`;
+  if(__adicionPickerTarget === 'inicioA'){
+    document.getElementById('inicioA').value = val;
+  }else if(__adicionPickerTarget === 'finA'){
+    document.getElementById('finA').value = val;
   }
   cancelarPickerAdicion();
-  calcularPlazoAdicion();
+
+  ['mesesA','diasA','mesesT','diasT'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.dataset.autofill='1';
+  });
+
+  recomputeAdicionAll();
 }
 
-function getDaysInMonthAd(y,m){ return new Date(y, m+1, 0).getDate(); }
+bindNumericSanitizerId('mesesA', 3);
+bindNumericSanitizerId('diasA', 3);
+bindNumericSanitizerId('mesesT', 3);
+bindNumericSanitizerId('diasT', 3);
+bindNumericSanitizerId('cdpA', 10);
 
-function calcularPlazoAdicion(){
-  const inicioA = __adFechaInicioAISO;
-  const finA = __adFechaFinAISO;
-  const fechaInicio = document.getElementById('ad-fechaInicio').value;
-  
-  if(inicioA && finA){
-    const [di,mi,yi] = inicioA.split('/').map(x=>parseInt(x,10));
-    const [df,mf,yf] = finA.split('/').map(x=>parseInt(x,10));
-    let d1 = new Date(yi, mi-1, di);
-    let d2 = new Date(yf, mf-1, df);
-    
-    if(!isNaN(d1) && !isNaN(d2) && d2>=d1){
-      let diffTime = Math.abs(d2 - d1) + (1000*60*60*24);
-      let diffDays = Math.ceil(diffTime / (1000*60*60*24));
-      let meses=0, dias=0;
-      while(diffDays>0){
-        const dim = getDaysInMonthAd(d1.getFullYear(), d1.getMonth());
-        if(diffDays >= dim){
-          meses++; diffDays -= dim; d1.setMonth(d1.getMonth()+1);
-        }else{ dias = diffDays; diffDays = 0; }
-      }
-      document.getElementById('ad-mesesA').value = meses;
-      document.getElementById('ad-diasA').value = dias;
-      actualizarAdicion();
-    }
-  }
-  
-  if(fechaInicio && finA){
-    const [di,mi,yi] = fechaInicio.split('/').map(x=>parseInt(x,10));
-    const [df,mf,yf] = finA.split('/').map(x=>parseInt(x,10));
-    let d1 = new Date(yi, mi-1, di);
-    let d2 = new Date(yf, mf-1, df);
-    
-    if(!isNaN(d1) && !isNaN(d2) && d2>=d1){
-      let diffTime = Math.abs(d2 - d1) + (1000*60*60*24);
-      let diffDays = Math.ceil(diffTime / (1000*60*60*24));
-      let meses=0, dias=0;
-      while(diffDays>0){
-        const dim = getDaysInMonthAd(d1.getFullYear(), d1.getMonth());
-        if(diffDays >= dim){
-          meses++; diffDays -= dim; d1.setMonth(d1.getMonth()+1);
-        }else{ dias = diffDays; diffDays = 0; }
-      }
-      document.getElementById('ad-mesesT').value = meses;
-      document.getElementById('ad-diasT').value = dias;
-      actualizarEjecucionTotal();
-    }
-  }
-}
-
-function actualizarAdicion(){
-  const meses = parseInt(document.getElementById('ad-mesesA').value)||0;
-  const dias = parseInt(document.getElementById('ad-diasA').value)||0;
-  let txt = '';
-  if(meses>0){ txt += `${convertirNumeroATexto(meses)} (${meses}) ${meses===1?'MES':'MESES'}`; }
-  if(dias>0){ if(txt!=='') txt += ' Y '; txt += `${convertirNumeroATexto(dias)} (${dias}) ${dias===1?'DIA':'DIAS'}`; }
-  document.getElementById('ad-adicion').value = txt;
-  document.getElementById('ad-textoAdicion').value = txt;
-}
-
-function actualizarEjecucionTotal(){
-  const meses = parseInt(document.getElementById('ad-mesesT').value)||0;
-  const dias = parseInt(document.getElementById('ad-diasT').value)||0;
-  let txt = '';
-  if(meses>0){ txt += `${convertirNumeroATexto(meses)} (${meses}) ${meses===1?'MES':'MESES'}`; }
-  if(dias>0){ if(txt!=='') txt += ' Y '; txt += `${convertirNumeroATexto(dias)} (${dias}) ${dias===1?'DIA':'DIAS'}`; }
-  document.getElementById('ad-ejecucion').value = txt;
-}
-
-document.getElementById('ad-mesesA')?.addEventListener('input', actualizarAdicion);
-document.getElementById('ad-diasA')?.addEventListener('input', actualizarAdicion);
-document.getElementById('ad-mesesT')?.addEventListener('input', actualizarEjecucionTotal);
-document.getElementById('ad-diasT')?.addEventListener('input', actualizarEjecucionTotal);
-
-document.getElementById('ad-cdpA')?.addEventListener('input', ()=>{
-  const el = document.getElementById('ad-cdpA');
-  const raw = (el.value||'').replace(/\D/g,'').slice(0,10);
+document.getElementById('cdpA')?.addEventListener('input', ()=>{
+  const el = document.getElementById('cdpA');
+  let raw = String(el.value||'').replace(/\D/g,'').slice(0,10);
   el.value = raw;
   el.style.border = '';
   if(raw.length===10 && raw.startsWith('2026')){
@@ -2787,147 +2923,126 @@ document.getElementById('ad-cdpA')?.addEventListener('input', ()=>{
   }
 });
 
-document.getElementById('ad-mra')?.addEventListener('input', ()=>{
-  const el = document.getElementById('ad-mra');
-  const raw = numPure(el.value);
-  el.value = formatCOPView(raw);
-  
-  const valorInicial = numPure(document.getElementById('ad-valorInicial').value);
-  const valorFin = valorInicial + raw;
-  document.getElementById('ad-valorFin').value = formatCOPView(valorFin);
-  
-  const textoMra = convertirNumeroATexto(raw);
-  const textoFin = convertirNumeroATexto(valorFin);
-  document.getElementById('ad-textoValor').value = textoFin + ' PESOS M/CTE';
+document.getElementById('mra')?.addEventListener('input', ()=>{
+  const el = document.getElementById('mra');
+  formatCOPInstant(el);
+  recomputeAdicionAll();
+});
+document.getElementById('mra')?.addEventListener('blur', ()=> formatCOPInstant(document.getElementById('mra')));
+
+['mesesA','diasA','mesesT','diasT'].forEach(id=>{
+  document.getElementById(id)?.addEventListener('input', ()=>{
+    const el = document.getElementById(id);
+    if(el) el.dataset.autofill='0';
+    recomputeAdicionFromManual();
+  });
 });
 
-async function abrirVistaAdicion(documento){
-  if(!currentUser){ Swal.fire({icon:'warning', title:'Sesión inválida'}); return; }
-  
-  try{
-    const data = await apiGet('getAdicionData', { documento });
-    if(!data){
-      Swal.fire({icon:'info', title:'No se encontraron datos'}); return;
-    }
-    
-    document.getElementById('ad-documento').value = documento;
-    document.getElementById('ad-fechaInicio').value = data.fechaInicio || '';
-    document.getElementById('ad-valorInicial').value = formatCOPView(data.valorInicial || 0);
-    
-    document.getElementById('ad-inicioA').value = '';
-    document.getElementById('ad-finA').value = '';
-    document.getElementById('ad-mesesA').value = '';
-    document.getElementById('ad-diasA').value = '';
-    document.getElementById('ad-adicion').value = '';
-    document.getElementById('ad-mesesT').value = '';
-    document.getElementById('ad-diasT').value = '';
-    document.getElementById('ad-ejecucion').value = '';
-    document.getElementById('ad-cdpA').value = '';
-    document.getElementById('ad-mra').value = '$ ';
-    document.getElementById('ad-valorFin').value = formatCOPView(data.valorInicial || 0);
-    document.getElementById('ad-textoAdicion').value = '';
-    document.getElementById('ad-textoValor').value = '';
-    
-    __adFechaInicioAISO = '';
-    __adFechaFinAISO = '';
-    
-    showView('view-adicion');
-  }catch(e){
-    Swal.fire({icon:'error', title:'Error', text:String(e.message||e)});
-  }
-}
-
-document.getElementById('ad-volver')?.addEventListener('click', ()=>{
+document.getElementById('adicion-volver')?.addEventListener('click', ()=>{
   playSoundOnce(SOUNDS.back);
-  showView('view-contratistas');
+  showView('view-inicio');
 });
 
-document.getElementById('ad-guardar')?.addEventListener('click', async ()=>{
-  if(!currentUser){ Swal.fire({icon:'warning', title:'Sesión inválida'}); return; }
-  
-  const documento = document.getElementById('ad-documento').value;
-  const inicioA = document.getElementById('ad-inicioA').value;
-  const finA = document.getElementById('ad-finA').value;
-  const mesesA = document.getElementById('ad-mesesA').value;
-  const diasA = document.getElementById('ad-diasA').value;
-  const adicion = document.getElementById('ad-adicion').value;
-  const mesesT = document.getElementById('ad-mesesT').value;
-  const diasT = document.getElementById('ad-diasT').value;
-  const ejecucion = document.getElementById('ad-ejecucion').value;
-  const cdpA = (document.getElementById('ad-cdpA').value||'').replace(/\D/g,'');
-  const mra = numPure(document.getElementById('ad-mra').value);
-  const valorFin = numPure(document.getElementById('ad-valorFin').value);
-  const textoAdicion = document.getElementById('ad-textoAdicion').value;
-  const textoValor = document.getElementById('ad-textoValor').value;
-  
-  if(!inicioA || !finA || !cdpA || !mra){
-    Swal.fire({icon:'warning', title:'Faltan campos requeridos'}); return;
+document.getElementById('adicion-guardar')?.addEventListener('click', async ()=>{
+  const documento = (document.getElementById('adicionDocumento').value||'').trim();
+  if(!documento){
+    Swal.fire({icon:'warning', title:'Documento inválido'});
+    return;
   }
-  
-  if(cdpA.length !== 10 || !cdpA.startsWith('2026')){
-    Swal.fire({icon:'warning', title:'CDP Adición inválido'}); return;
+
+  const fechaInicio = (document.getElementById('fechaInicio').value||'').trim();
+  const inicioA = (document.getElementById('inicioA').value||'').trim();
+  const finA    = (document.getElementById('finA').value||'').trim();
+  const mesesA  = (document.getElementById('mesesA').value||'').trim();
+  const diasA   = (document.getElementById('diasA').value||'').trim();
+  const adicion = (document.getElementById('adicion').value||'').trim();
+  const mesesT  = (document.getElementById('mesesT').value||'').trim();
+  const diasT   = (document.getElementById('diasT').value||'').trim();
+  const ejecucion = (document.getElementById('ejecucion').value||'').trim();
+  const cdpA = (document.getElementById('cdpA').value||'').trim();
+
+  if(!fechaInicio){
+    Swal.fire({icon:'warning', title:'Falta Fecha de Inicio del contrato'});
+    return;
   }
-  
+  if(!inicioA || !finA){
+    Swal.fire({icon:'warning', title:'Selecciona Inicio y Fin de Adición'});
+    return;
+  }
+  if(!cdpA || !/^\d{10}$/.test(cdpA) || !cdpA.startsWith('2026')){
+    Swal.fire({icon:'warning', title:'CDP Adición inválido', text:'Debe tener 10 dígitos y empezar por 2026'});
+    return;
+  }
+
+  const valorInicioNum = numPure(document.getElementById('valorInicio').value||'$ 0');
+  const mraNum = numPure(document.getElementById('mra').value||'');
+  if(!mraNum){
+    Swal.fire({icon:'warning', title:'Valor de la Adición requerido'});
+    return;
+  }
+
+  const valorFinNum = Number(document.getElementById('valorFin').value||'0') || (valorInicioNum + mraNum);
+
   const body = {
     documento,
     inicioA,
     finA,
-    mesesA: mesesA || '0',
-    diasA: diasA || '0',
+    mesesA,
+    diasA,
     adicion,
-    mesesT: mesesT || '0',
-    diasT: diasT || '0',
+    mesesT,
+    diasT,
     ejecucion,
     cdpA,
-    mra: String(mra),
-    valorFin: String(valorFin),
-    textoAdicion,
-    textoValor
+    mra: String(mraNum),
+    textoAdicion: (document.getElementById('textoAdicion').value||'').trim(),
+    valorFin: String(valorFinNum),
+    textoValor: (document.getElementById('textoValor').value||'').trim()
   };
-  
+
   const resumen = [
-    `<b>Fecha Inicio Adición:</b> ${inicioA}`,
-    `<b>Fecha Fin Adición:</b> ${finA}`,
-    `<b>Tiempo de Adición:</b> ${adicion}`,
-    `<b>Tiempo Total Contrato:</b> ${ejecucion}`,
+    `<b>Inicio Contrato:</b> ${fechaInicio}`,
+    `<b>Inicio Adición:</b> ${inicioA}`,
+    `<b>Fin Adición:</b> ${finA}`,
+    `<b>Tiempo Adición:</b> ${adicion || '-'}`,
+    `<b>Ejecución Total:</b> ${ejecucion || '-'}`,
     `<b>CDP Adición:</b> ${cdpA}`,
-    `<b>Valor Adición:</b> ${formatCOPView(mra)}`,
-    `<b>Valor Final:</b> ${formatCOPView(valorFin)}`
+    `<b>Valor Contrato:</b> ${formatCOPView(valorInicioNum)}`,
+    `<b>Valor Adición:</b> ${formatCOPView(mraNum)}`,
+    `<b>Valor Final:</b> ${formatCOPView(valorFinNum)}`
   ].join('<br>');
-  
+
   const rs = await Swal.fire({
-    icon:'info', title:'Resumen de Adición', html:resumen,
-    showCancelButton:true, confirmButtonText:'Confirmar', cancelButtonText:'Editar', soundTag:'resumen'
+    icon:'info',
+    title:'Resumen Adición',
+    html: resumen,
+    showCancelButton:true,
+    confirmButtonText:'Confirmar',
+    cancelButtonText:'Editar'
   });
-  
   if(!rs.isConfirmed) return;
-  
+
   try{
-    const r = await apiPost('guardarAdicion', body);
-    if(r && r.success){
-      const tel57 = normalizeNumber57(r.telefono || '');
-      if(tel57){
-        const msg =
-          'Estimado(a) *'+r.nombre+'*\n\n' +
-          '¡Se ha generado la *Adición del Contrato N° '+r.contrato+'*!\n' + 
-          '- En la *App Contratista*, toma la opción *DATOS DEL CONTRATO* - Actualizar. Registra solo el RP de Adición Correctamente una vez lo tenga.\n\n' + 
-          'Para la *Primera cuenta en esta Adición* debes Anexar el CDP y RP de Adición.\n' + 
-          '> Si no tienes esta guía, toma la opción GUIAS en la App.\n\n' + 
-          'Cordialmente,\n\n*Equipo de Contratación*\n> Alcaldía de Flandes';
-        sendBuilderbotMessage(tel57, msg);
-      }
-      
-      await Swal.fire({icon:'success', title:'Adición guardada', timer:1800, showConfirmButton:false});
-      await cargarContratistas();
-      showView('view-contratistas');
-    }else{
-      Swal.fire({icon:'error', title:'Error al guardar', text:r?.message || 'Error desconocido'});
+    const r = await apiPost('guardarAdicionContrato', body);
+    if(!r || !r.success){
+      Swal.fire({icon:'error', title:'Error', text: (r && r.message) ? r.message : 'Error desconocido'});
+      return;
     }
+
+    Swal.fire({icon:'success', title:'Adición guardada', timer:2200, showConfirmButton:false});
+
+    await cargarContratistas();
+
+    if(r && r.notify && r.notify.destino && r.notify.mensaje){
+      sendBuilderbotMessage(r.notify.destino, r.notify.mensaje);
+    }
+
+    showView('view-contratistas');
   }catch(e){
-    Swal.fire({icon:'error', title:'Error', text:e.message});
+    Swal.fire({icon:'error', title:'Error', text: e.message});
   }
 });
-
+  
 /* ================== FIN ================== */
 </script>
 </body>
