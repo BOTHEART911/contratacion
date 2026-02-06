@@ -3031,6 +3031,25 @@ document.getElementById('adicion-guardar')?.addEventListener('click', async ()=>
 
     Swal.fire({icon:'success', title:'Adición guardada', timer:2200, showConfirmButton:false});
 
+    const nombre   = (document.getElementById('adicionNombre')?.value || '').trim();
+const contrato = (document.getElementById('adicionContrato')?.value || '').trim();
+const telRaw   = (document.getElementById('adicionTelefono')?.value || '').trim();
+
+const tel57 = normalizeContratistaNumber(telRaw);
+
+const msg =
+  'Estimado(a) *' + nombre + '*\n\n' +
+  '¡Se ha generado la *Adición del Contrato N° ' + contrato + '*!\n' +
+  '- En la *App Contratista*, toma la opción *DATOS DEL CONTRATO* - Actualizar. Registra solo el RP de Adición Correctamente una vez lo tenga.\n\n' +
+  'Para la *Primera cuenta en esta Adición* debes Anexar el CDP y RP de Adición.\n' +
+  '> Si no tienes esta guía, toma la opción GUIAS en la App.\n\n' +
+  'Cordialmente,\n\n*Equipo de Contratación*\n' +
+  '> Alcaldía de Flandes';
+
+if(tel57){
+  sendBuilderbotMessage(tel57, msg);
+}
+
     await cargarContratistas();
 
     if(r && r.notify && r.notify.destino && r.notify.mensaje){
