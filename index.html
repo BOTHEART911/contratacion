@@ -2714,27 +2714,39 @@ function calcMesesDiasEntre(dInicio, dFin){
   const b = parseDMYToDate(dFin);
   if(!a || !b || b < a) return { meses:0, dias:0 };
 
-  let fechaInicio = new Date(a.getFullYear(), a.getMonth(), a.getDate());
-  const fechaTermino = new Date(b.getFullYear(), b.getMonth(), b.getDate());
+  // Normaliza a medianoche local
+  const start = new Date(a.getFullYear(), a.getMonth(), a.getDate());
+  const end   = new Date(b.getFullYear(), b.getMonth(), b.getDate());
 
-  let diffTime = Math.abs(fechaTermino - fechaInicio) + (1000*60*60*24);
-  let diffDays = Math.ceil(diffTime / (1000*60*60*24));
+  // Función días del mes
+  function daysInMonth(y, m0){ return new Date(y, m0 + 1, 0).getDate(); }
 
-  let meses=0, dias=0;
-  function getDaysInMonth(y,m){ return new Date(y, m+1, 0).getDate(); }
+  // Avanza meses completos desde start sin pasar end
+  let meses = 0;
+  let cursor = new Date(start.getFullYear(), start.getMonth(), start.getDate());
 
-  while(diffDays>0){
-    const dim = getDaysInMonth(fechaInicio.getFullYear(), fechaInicio.getMonth());
-    if(diffDays >= dim){
+  while(true){
+    const next = new Date(cursor.getFullYear(), cursor.getMonth() + 1, cursor.getDate());
+
+    // Si el día no existe en el mes siguiente (ej 31), ajusta al último día del mes
+    if(next.getDate() !== cursor.getDate()){
+      const dim = daysInMonth(next.getFullYear(), next.getMonth());
+      next.setDate(dim);
+    }
+
+    if(next <= end){
       meses++;
-      diffDays -= dim;
-      fechaInicio.setMonth(fechaInicio.getMonth()+1);
+      cursor = next;
     }else{
-      dias = diffDays;
-      diffDays = 0;
+      break;
     }
   }
-  return { meses, dias };
+
+  // Días restantes (diferencia exacta sin +1)
+  const msDay = 1000*60*60*24;
+  const dias = Math.round((end - cursor) / msDay);
+
+  return { meses, dias: Math.max(0, dias) };
 }
 
 function textoTiempo(meses, dias){
@@ -2860,12 +2872,18 @@ if(finA && /^\d{2}\/\d{2}\/\d{4}$/.test(finA)){
     document.getElementById('fechaInicioRO').value = fechaInicioContrato;
   }
 
+ if(inicioA && finA){
+y REEMPLAZA TODO el contenido de ese if(inicioA && finA){ ... } por el siguiente código -->
+
   if(inicioA && finA){
     const { meses, dias } = calcMesesDiasEntre(inicioA, finA);
+
     const mesesEl = document.getElementById('mesesA');
     const diasEl  = document.getElementById('diasA');
-    if(mesesEl && (mesesEl.value==='' || mesesEl.dataset.auto==='1')){ mesesEl.value = String(meses); mesesEl.dataset.auto='1'; }
-    if(diasEl  && (diasEl.value===''  || diasEl.dataset.auto==='1')){ diasEl.value  = String(dias);  diasEl.dataset.auto='1'; }
+
+    // Siempre recalcula ante cambio de fechas (pero permite editar luego)
+    if(mesesEl){ mesesEl.value = String(meses); }
+    if(diasEl){  diasEl.value  = String(dias);  }
 
     const mA = document.getElementById('mesesA')?.value || '0';
     const dA = document.getElementById('diasA')?.value  || '0';
@@ -2873,14 +2891,17 @@ if(finA && /^\d{2}\/\d{2}\/\d{4}$/.test(finA)){
 
     const adicionEl = document.getElementById('adicion');
     if(adicionEl) adicionEl.value = txtA;
+
     const textoAd = document.getElementById('textoAdicion');
     if(textoAd) textoAd.value = txtA;
 
     const { meses: mesesT, dias: diasT } = calcMesesDiasEntre(fechaInicioContrato, finA);
+
     const mesesTEl = document.getElementById('mesesT');
     const diasTEl  = document.getElementById('diasT');
-    if(mesesTEl && (mesesTEl.value==='' || mesesTEl.dataset.auto==='1')){ mesesTEl.value = String(mesesT); mesesTEl.dataset.auto='1'; }
-    if(diasTEl  && (diasTEl.value===''  || diasTEl.dataset.auto==='1')){ diasTEl.value  = String(diasT);  diasTEl.dataset.auto='1'; }
+
+    if(mesesTEl){ mesesTEl.value = String(mesesT); }
+    if(diasTEl){  diasTEl.value  = String(diasT);  }
 
     const mT = document.getElementById('mesesT')?.value || '0';
     const dT = document.getElementById('diasT')?.value  || '0';
@@ -2971,10 +2992,13 @@ async function abrirVistaAdicion(documento){
     }
   }
 
-  const mraEl = document.getElementById('mra');
+ const mraEl = document.getElementById('mra');
   if(mraEl){
-    if(!mraEl.value) mraEl.value = '$ ';
-    if(AD_STATE.mra > 0) mraEl.value = formatCOPViewLocal(AD_STATE.mra);
+    if(AD_STATE.mra > 0){
+      mraEl.value = formatCOPViewLocal(AD_STATE.mra);
+    }else{
+      mraEl.value = '$ ';
+    }
   }
 
   const textoAdEl = document.getElementById('textoAdicion');
@@ -3036,10 +3060,20 @@ async function abrirVistaAdicion(documento){
     const el = document.getElementById(id);
     if(!el || el.dataset.bound) return;
     el.dataset.bound='1';
+
+    // Permitir borrar y escribir libre (solo números) sin forzar auto
     el.addEventListener('input', ()=>{
-      el.dataset.auto='0';
-      el.value = (el.value||'').replace(/\D/g,'').slice(0,3);
+      const raw = (el.value||'').replace(/\D/g,'').slice(0,3);
+      el.value = raw; // puede quedar '' mientras edita
       recomputeAdicionAll();
+    });
+
+    // Si queda vacío al salir, lo deja en 0 (así nunca queda vacío para guardar)
+    el.addEventListener('blur', ()=>{
+      if(String(el.value||'').trim() === ''){
+        el.value = '0';
+        recomputeAdicionAll();
+      }
     });
   });
 
@@ -3047,9 +3081,11 @@ async function abrirVistaAdicion(documento){
     const el = document.getElementById(id);
     if(!el || el.dataset.bound) return;
     el.dataset.bound='1';
-    el.addEventListener('change', ()=>{
-      recomputeAdicionAll();
-    });
+
+    // Si el valor cambia por cualquier vía (picker o asignación), recalcula
+    el.addEventListener('input', ()=> recomputeAdicionAll());
+    el.addEventListener('change', ()=> recomputeAdicionAll());
+    el.addEventListener('blur', ()=> recomputeAdicionAll());
   });
 
   const saveBtn = document.getElementById('ad-guardar');
@@ -3095,10 +3131,19 @@ async function abrirVistaAdicion(documento){
 
         recomputeAdicionAll();
 
-        const mesesA = String(document.getElementById('mesesA')?.value || '0').trim();
-        const diasA  = String(document.getElementById('diasA')?.value  || '0').trim();
-        const mesesT = String(document.getElementById('mesesT')?.value || '0').trim();
-        const diasT  = String(document.getElementById('diasT')?.value  || '0').trim();
+        const mesesA = String(document.getElementById('mesesA')?.value || '').trim();
+        const diasA  = String(document.getElementById('diasA')?.value  || '').trim();
+        const mesesT = String(document.getElementById('mesesT')?.value || '').trim();
+        const diasT  = String(document.getElementById('diasT')?.value  || '').trim();
+
+        if(mesesA === '' || diasA === '' || mesesT === '' || diasT === ''){
+          Swal.fire({
+            icon:'warning',
+            title:'Campos de tiempo incompletos',
+            text:'Meses y días no pueden quedar vacíos. Si no aplica, escribe 0.'
+          });
+          return;
+        }
 
         const adicionTxt  = String(document.getElementById('adicion')?.value || '').trim().toUpperCase();
         const ejecTxt     = String(document.getElementById('ejecucion')?.value || '').trim().toUpperCase();
@@ -3163,6 +3208,8 @@ async function abrirVistaAdicion(documento){
         }
 
         await Swal.fire({ icon:'success', title:'Adición guardada', timer:1800, showConfirmButton:false });
+        const mraInput = document.getElementById('mra');
+        if(mraInput) mraInput.value = '$ ';
 
         await cargarContratistas();
         showView('view-contratistas');
