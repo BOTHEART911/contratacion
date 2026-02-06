@@ -758,6 +758,9 @@
     <input id="textoAdicion" type="hidden">
     <input id="textoValor" type="hidden">
 
+    <input id="diaFa" type="hidden">
+    <input id="mesFa" type="hidden">
+
     <label>Valor Final del Contrato</label>
     <input id="valorFin" type="text" readonly>
 
@@ -1297,6 +1300,14 @@ function pintarContratistas(list){
     pTermino.className='item-sub';
     pTermino.textContent='FECHA TERMINO: '+(c.fechaTermino||'');
     div.appendChild(pTermino);
+
+    const tieneAdicion = String(c.tieneAdicion||'') === 'true' || c.tieneAdicion === true;
+      if(tieneAdicion){
+        const pAdi = document.createElement('p');
+        pAdi.className = 'item-sub';
+        pAdi.textContent = 'ADICIONADO';
+        div.appendChild(pAdi);
+      }
 
     const actionsRow=document.createElement('div');
     actionsRow.className='contr-actions';
@@ -2825,6 +2836,26 @@ function recomputeAdicionAll(){
   const inicioA = normDMY(document.getElementById('inicioA')?.value || '');
   const finA    = normDMY(document.getElementById('finA')?.value || '');
 
+  const mesesNombres = [
+  'Enero','Febrero','Marzo','Abril','Mayo','Junio',
+  'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'
+];
+
+// diaFa / mesFa desde finA (dd/mm/yyyy)
+const diaFaEl = document.getElementById('diaFa');
+const mesFaEl = document.getElementById('mesFa');
+if(finA && /^\d{2}\/\d{2}\/\d{4}$/.test(finA)){
+  const parts = finA.split('/');
+  const dd = parts[0];
+  const mm = parts[1];
+  const idx = Math.max(1, Math.min(12, parseInt(mm,10))) - 1;
+  if(diaFaEl) diaFaEl.value = dd;
+  if(mesFaEl) mesFaEl.value = mesesNombres[idx] || '';
+} else {
+  if(diaFaEl) diaFaEl.value = '';
+  if(mesFaEl) mesFaEl.value = '';
+}
+
   if(fechaInicioContrato){
     document.getElementById('fechaInicioRO').value = fechaInicioContrato;
   }
@@ -3102,6 +3133,8 @@ async function abrirVistaAdicion(documento){
           documento: AD_STATE.documento,
           inicioA,
           finA,
+          diaFa: String(document.getElementById('diaFa')?.value || '').trim(),
+          mesFa: String(document.getElementById('mesFa')?.value || '').trim(),
           mesesA,
           diasA,
           adicion: adicionTxt,
