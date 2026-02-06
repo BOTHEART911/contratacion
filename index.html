@@ -2872,10 +2872,7 @@ if(finA && /^\d{2}\/\d{2}\/\d{4}$/.test(finA)){
     document.getElementById('fechaInicioRO').value = fechaInicioContrato;
   }
 
- if(inicioA && finA){
-y REEMPLAZA TODO el contenido de ese if(inicioA && finA){ ... } por el siguiente código -->
-
-  if(inicioA && finA){
+   if(inicioA && finA){
     const { meses, dias } = calcMesesDiasEntre(inicioA, finA);
 
     const mesesEl = document.getElementById('mesesA');
