@@ -214,6 +214,11 @@
     font-size:.72rem; font-weight:700; color:#333; margin:0;
   }
 
+    .item-sub.adicionado{
+  color:#dc2626;        /* rojo */
+  font-weight:900;
+}
+
   .tag-count{
     display:inline-block;
     border-radius:999px;
@@ -1303,11 +1308,11 @@ function pintarContratistas(list){
 
     const tieneAdicion = String(c.tieneAdicion||'') === 'true' || c.tieneAdicion === true;
       if(tieneAdicion){
-        const pAdi = document.createElement('p');
-        pAdi.className = 'item-sub';
-        pAdi.textContent = 'ADICIONADO';
-        div.appendChild(pAdi);
-      }
+  const pAdi = document.createElement('p');
+  pAdi.className = 'item-sub adicionado';
+  pAdi.textContent = 'ADICIONADO';
+  div.appendChild(pAdi);
+}
 
     const actionsRow=document.createElement('div');
     actionsRow.className='contr-actions';
