@@ -447,26 +447,30 @@
     flex-wrap: wrap !important;
     align-items: center;
   }
+
   /* Fila 1: iconos a la derecha */
   .contr-actions .right-group{
     order: 1 !important;
-    flex: 0 0 100% !important;   /* ocupa toda la fila 1 */
+    flex: 0 0 100% !important;
     justify-content: flex-end !important;
     margin-left: 0 !important;
     margin-top: 0 !important;
   }
-  /* Fila 2: los dos botones */
+
+  /* Fila 2: botones (ahora 3) en columna */
   .contr-actions .left-group{
     order: 2 !important;
-    flex: 0 0 100% !important;   /* toda la fila 2 */
+    flex: 0 0 100% !important;
     min-width: 0;
     margin-top: 8px;
     display: flex;
+    flex-direction: column;
     gap: 12px;
   }
-  /* Dos botones lado a lado en la segunda fila */
+
   .contr-actions .left-group > button{
-    flex: 1 1 48%;
+    flex: 1 1 auto;
+    width: 100%;
   }
 }
 /* Extra: si la pantalla es MUY estrecha, apila los botones verticalmente */
@@ -710,6 +714,86 @@
       </div>
     </section>
 
+    <!-- VISTA ADICIÓN -->
+<section id="view-adicion" class="view">
+  <div class="card narrow">
+    <h2 style="color:var(--primary)">ADICIÓN DE CONTRATO</h2>
+
+    <label>Fecha de Inicio (Contrato)</label>
+    <input id="fechaInicioRO" type="text" readonly>
+
+    <label>Fecha de Inicio de Adición</label>
+    <input id="inicioA" type="text" placeholder="dd/mm/2026" readonly onclick="abrirPickerAdicion('inicioA')">
+
+    <label>Fecha de Fin de Adición</label>
+    <input id="finA" type="text" placeholder="dd/mm/2026" readonly onclick="abrirPickerAdicion('finA')">
+
+    <label>Meses de Adición</label>
+    <input id="mesesA" type="tel" inputmode="numeric" placeholder="Automático">
+
+    <label>Días de complemento Adición si Aplica</label>
+    <input id="diasA" type="tel" inputmode="numeric" placeholder="Automático">
+
+    <label>Tiempo de Adición</label>
+    <input id="adicion" type="text" readonly>
+
+    <label>Meses Totales del Contrato</label>
+    <input id="mesesT" type="tel" inputmode="numeric" placeholder="Automático">
+
+    <label>Días de complemento Contrato si Aplica</label>
+    <input id="diasT" type="tel" inputmode="numeric" placeholder="Automático">
+
+    <label>Tiempo de Ejecución Total del Contrato</label>
+    <input id="ejecucion" type="text" readonly>
+
+    <label>CDP Adición</label>
+    <input id="cdpA" type="tel" inputmode="numeric" placeholder="10 dígitos (2026...)" maxlength="10">
+
+    <label>Valor del Contrato</label>
+    <input id="valorInicioRO" type="text" readonly>
+
+    <label>Valor de la Adición</label>
+    <input id="mra" type="text" inputmode="numeric" placeholder="$ ">
+
+    <input id="textoAdicion" type="hidden">
+    <input id="textoValor" type="hidden">
+
+    <label>Valor Final del Contrato</label>
+    <input id="valorFin" type="text" readonly>
+
+    <div id="adicionModal" class="picker-modal" aria-hidden="true">
+      <div class="picker-box">
+        <h3 style="margin:0 0 8px 0;">Selecciona la fecha</h3>
+        <div class="picker-grid">
+          <div>
+            <small>Día</small>
+            <select id="adicionDia" size="10"></select>
+          </div>
+          <div>
+            <small>Mes</small>
+            <select id="adicionMes" size="12"></select>
+          </div>
+          <div>
+            <small>Año</small>
+            <select id="adicionAnio" size="3" disabled>
+              <option selected>2026</option>
+            </select>
+          </div>
+        </div>
+        <div class="picker-actions">
+          <button type="button" class="btn btn-cancel" onclick="cancelarPickerAdicion()">Cancelar</button>
+          <button type="button" class="btn btn-ok" onclick="confirmarPickerAdicion()">Ok</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row spaced">
+      <button id="ad-guardar" class="btn-primary">Guardar</button>
+      <button id="ad-volver" class="danger">Regresar</button>
+    </div>
+  </div>
+</section>
+    
     <!-- VISTA REVISIÓN DE CUENTAS -->
     <section id="view-revision" class="view">
       <div class="card">
@@ -1270,7 +1354,19 @@ btnDetalles.addEventListener('click', ()=>{
     });
 
     leftGroup.appendChild(btnDetalles);
-    leftGroup.appendChild(btnGuardarEstado);
+leftGroup.appendChild(btnGuardarEstado);
+
+const btnAdicion = document.createElement('button');
+btnAdicion.textContent = 'ADICIÓN';
+btnAdicion.addEventListener('click', async ()=>{
+  playSoundOnce(SOUNDS.login);
+  try{
+    await abrirVistaAdicion(c.documento);
+  }catch(e){
+    Swal.fire({icon:'error',title:'Error',text:e.message});
+  }
+});
+leftGroup.appendChild(btnAdicion);
     rightGroup.appendChild(btnWhatsapp);
     rightGroup.appendChild(btnDrive);
     actionsRow.appendChild(leftGroup);
@@ -2545,6 +2641,505 @@ function convertirNumeroATexto(numero) {
   resize();
 })();
 
+/* ================== ADICIÓN DE CONTRATO (CONTRATACIÓN) ================== */
+
+let AD_STATE = {
+  documento: '',
+  nombre: '',
+  contrato: '',
+  telefono: '',
+  fechaInicio: '',
+  valorInicial: 0,
+  fechaInicioFmt: '',
+  valorInicialFmt: '',
+  inicioA: '',
+  finA: '',
+  mesesA: '',
+  diasA: '',
+  adicion: '',
+  mesesT: '',
+  diasT: '',
+  ejecucion: '',
+  cdpA: '',
+  mra: 0,
+  textoAdicion: '',
+  valorFin: 0,
+  textoValor: ''
+};
+
+function numPureCOP(s){
+  return Number(String(s||'').replace(/\D/g,'')) || 0;
+}
+function formatCOPViewLocal(n){
+  const x = Number(String(n).replace(/\D/g,''))||0;
+  return '$ ' + x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+function pad2Local(n){ return String(n).padStart(2,'0'); }
+
+/* Formato fecha dd/mm/yyyy garantizado */
+function normDMY(str){
+  const s = String(str||'').trim();
+  if(!s) return '';
+  if(/^\d{2}\/\d{2}\/\d{4}$/.test(s)) return s;
+  const d = new Date(s.replace(' ', 'T'));
+  if(!isNaN(d.getTime())){
+    return pad2Local(d.getDate()) + '/' + pad2Local(d.getMonth()+1) + '/' + d.getFullYear();
+  }
+  return s;
+}
+function parseDMYToDate(dmy){
+  const s = String(dmy||'').trim();
+  const m = s.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if(!m) return null;
+  const dd = parseInt(m[1],10), mm = parseInt(m[2],10), yy = parseInt(m[3],10);
+  const dt = new Date(yy, mm-1, dd);
+  if(isNaN(dt.getTime())) return null;
+  return dt;
+}
+
+/* Calcula meses y días entre dos fechas incluyendo el día final (misma lógica de indexref: diffDays +1) */
+function calcMesesDiasEntre(dInicio, dFin){
+  const a = parseDMYToDate(dInicio);
+  const b = parseDMYToDate(dFin);
+  if(!a || !b || b < a) return { meses:0, dias:0 };
+
+  let fechaInicio = new Date(a.getFullYear(), a.getMonth(), a.getDate());
+  const fechaTermino = new Date(b.getFullYear(), b.getMonth(), b.getDate());
+
+  let diffTime = Math.abs(fechaTermino - fechaInicio) + (1000*60*60*24);
+  let diffDays = Math.ceil(diffTime / (1000*60*60*24));
+
+  let meses=0, dias=0;
+  function getDaysInMonth(y,m){ return new Date(y, m+1, 0).getDate(); }
+
+  while(diffDays>0){
+    const dim = getDaysInMonth(fechaInicio.getFullYear(), fechaInicio.getMonth());
+    if(diffDays >= dim){
+      meses++;
+      diffDays -= dim;
+      fechaInicio.setMonth(fechaInicio.getMonth()+1);
+    }else{
+      dias = diffDays;
+      diffDays = 0;
+    }
+  }
+  return { meses, dias };
+}
+
+function textoTiempo(meses, dias){
+  const m = parseInt(meses||'0',10) || 0;
+  const d = parseInt(dias||'0',10) || 0;
+
+  let txt = '';
+  if(m>0){
+    txt += `${convertirNumeroATexto(m)} (${m}) ${m===1?'MES':'MESES'}`;
+  }
+  if(d>0){
+    if(txt) txt += ' Y ';
+    txt += `${convertirNumeroATexto(d)} (${d}) ${d===1?'DIA':'DIAS'}`;
+  }
+  return (txt||'').toUpperCase();
+}
+
+function bindNumericSanitizerLocal(id, maxLen){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.addEventListener('input', ()=>{
+    const raw = (el.value || '').replace(/\D/g,'');
+    el.value = maxLen ? raw.slice(0,maxLen) : raw;
+  });
+}
+
+/* Picker Adición (año fijo 2026) */
+let __adPickerTarget = null;
+
+(function initPickerAdicion(){
+  const dSel = document.getElementById('adicionDia');
+  const mSel = document.getElementById('adicionMes');
+  if(!dSel || !mSel) return;
+
+  if(!dSel.childElementCount){
+    for(let d=1; d<=31; d++){
+      const opt = document.createElement('option');
+      opt.value = pad2Local(d);
+      opt.textContent = opt.value;
+      dSel.appendChild(opt);
+    }
+  }
+  if(!mSel.childElementCount){
+    const mesesNombres = [
+      'Enero','Febrero','Marzo','Abril','Mayo','Junio',
+      'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'
+    ];
+    for(let i=0;i<12;i++){
+      const opt = document.createElement('option');
+      opt.value = pad2Local(i+1);
+      opt.textContent = mesesNombres[i];
+      mSel.appendChild(opt);
+    }
+  }
+})();
+
+function abrirPickerAdicion(target){
+  __adPickerTarget = target;
+  const modal = document.getElementById('adicionModal');
+  if(modal){
+    modal.style.display = 'flex';
+    modal.setAttribute('aria-hidden','false');
+  }
+}
+function cancelarPickerAdicion(){
+  const modal = document.getElementById('adicionModal');
+  if(modal){
+    modal.style.display = 'none';
+    modal.setAttribute('aria-hidden','true');
+  }
+}
+function confirmarPickerAdicion(){
+  const dia = document.getElementById('adicionDia')?.value || '';
+  const mes = document.getElementById('adicionMes')?.value || '';
+  if(!dia || !mes){
+    Swal.fire({ icon:'info', title:'DEBES SELECCIONAR', text:'Corrobora tu selección', timer:1000, showConfirmButton:false });
+    return;
+  }
+
+  const anio = '2026';
+  const val = `${dia}/${mes}/${anio}`;
+  const input = document.getElementById(__adPickerTarget);
+  if(input) input.value = val;
+
+  cancelarPickerAdicion();
+  recomputeAdicionAll();
+}
+
+/* Formato COP mientras escribe en mra */
+function formatCOPInstantLocal(el){
+  if(!el) return;
+  const raw = numPureCOP(el.value);
+  if(!raw){ el.value = '$ '; return; }
+  el.value = formatCOPViewLocal(raw);
+}
+
+function recomputeAdicionAll(){
+  const fechaInicioContrato = normDMY(AD_STATE.fechaInicio || document.getElementById('fechaInicioRO')?.value || '');
+  const inicioA = normDMY(document.getElementById('inicioA')?.value || '');
+  const finA    = normDMY(document.getElementById('finA')?.value || '');
+
+  if(fechaInicioContrato){
+    document.getElementById('fechaInicioRO').value = fechaInicioContrato;
+  }
+
+  if(inicioA && finA){
+    const { meses, dias } = calcMesesDiasEntre(inicioA, finA);
+    const mesesEl = document.getElementById('mesesA');
+    const diasEl  = document.getElementById('diasA');
+    if(mesesEl && (mesesEl.value==='' || mesesEl.dataset.auto==='1')){ mesesEl.value = String(meses); mesesEl.dataset.auto='1'; }
+    if(diasEl  && (diasEl.value===''  || diasEl.dataset.auto==='1')){ diasEl.value  = String(dias);  diasEl.dataset.auto='1'; }
+
+    const mA = document.getElementById('mesesA')?.value || '0';
+    const dA = document.getElementById('diasA')?.value  || '0';
+    const txtA = textoTiempo(mA, dA);
+
+    const adicionEl = document.getElementById('adicion');
+    if(adicionEl) adicionEl.value = txtA;
+    const textoAd = document.getElementById('textoAdicion');
+    if(textoAd) textoAd.value = txtA;
+
+    const { meses: mesesT, dias: diasT } = calcMesesDiasEntre(fechaInicioContrato, finA);
+    const mesesTEl = document.getElementById('mesesT');
+    const diasTEl  = document.getElementById('diasT');
+    if(mesesTEl && (mesesTEl.value==='' || mesesTEl.dataset.auto==='1')){ mesesTEl.value = String(mesesT); mesesTEl.dataset.auto='1'; }
+    if(diasTEl  && (diasTEl.value===''  || diasTEl.dataset.auto==='1')){ diasTEl.value  = String(diasT);  diasTEl.dataset.auto='1'; }
+
+    const mT = document.getElementById('mesesT')?.value || '0';
+    const dT = document.getElementById('diasT')?.value  || '0';
+    const txtT = textoTiempo(mT, dT);
+
+    const ejecEl = document.getElementById('ejecucion');
+    if(ejecEl) ejecEl.value = txtT;
+  }else{
+    const adicionEl = document.getElementById('adicion');
+    if(adicionEl) adicionEl.value = '';
+    const ejecEl = document.getElementById('ejecucion');
+    if(ejecEl) ejecEl.value = '';
+  }
+
+  const valorInicial = numPureCOP(AD_STATE.valorInicial || document.getElementById('valorInicioRO')?.value || '');
+  const mraRaw = numPureCOP(document.getElementById('mra')?.value || '');
+  const valorFin = valorInicial + mraRaw;
+
+  const valorFinEl = document.getElementById('valorFin');
+  if(valorFinEl) valorFinEl.value = formatCOPViewLocal(valorFin);
+
+  const textoValorEl = document.getElementById('textoValor');
+  if(textoValorEl){
+    const texto = convertirNumeroATexto(valorFin);
+    textoValorEl.value = (texto ? (texto + ' PESOS M/CTE') : '').toUpperCase();
+  }
+}
+
+async function abrirVistaAdicion(documento){
+  if(!documento) throw new Error('Documento inválido');
+
+  const data = await apiGet('getAdicionData', { documento });
+
+  if(!data || !data.found){
+    throw new Error('Contratista no encontrado');
+  }
+
+  AD_STATE = {
+    documento: String(data.documento||'').trim(),
+    nombre: String(data.nombre||'').trim(),
+    contrato: String(data.contrato||'').trim(),
+    telefono: String(data.telefono||'').trim(),
+    fechaInicio: normDMY(data.fechaInicio || ''),
+    valorInicial: Number(String(data.valorInicial||'').replace(/\D/g,'')) || 0,
+    inicioA: normDMY(data.inicioA || ''),
+    finA: normDMY(data.finA || ''),
+    mesesA: String(data.mesesA||''),
+    diasA: String(data.diasA||''),
+    adicion: String(data.adicion||''),
+    mesesT: String(data.mesesT||''),
+    diasT: String(data.diasT||''),
+    ejecucion: String(data.ejecucion||''),
+    cdpA: String(data.cdpA||''),
+    mra: Number(String(data.mra||'').replace(/\D/g,'')) || 0,
+    textoAdicion: String(data.textoAdicion||''),
+    valorFin: Number(String(data.valorFin||'').replace(/\D/g,'')) || 0,
+    textoValor: String(data.textoValor||'')
+  };
+
+  document.getElementById('fechaInicioRO').value = AD_STATE.fechaInicio;
+  document.getElementById('valorInicioRO').value = formatCOPViewLocal(AD_STATE.valorInicial);
+
+  document.getElementById('inicioA').value = AD_STATE.inicioA || '';
+  document.getElementById('finA').value    = AD_STATE.finA || '';
+
+  const mesesAEl = document.getElementById('mesesA');
+  const diasAEl  = document.getElementById('diasA');
+  const mesesTEl = document.getElementById('mesesT');
+  const diasTEl  = document.getElementById('diasT');
+
+  if(mesesAEl){ mesesAEl.value = AD_STATE.mesesA || ''; mesesAEl.dataset.auto='1'; }
+  if(diasAEl){  diasAEl.value  = AD_STATE.diasA  || ''; diasAEl.dataset.auto='1'; }
+  if(mesesTEl){ mesesTEl.value = AD_STATE.mesesT || ''; mesesTEl.dataset.auto='1'; }
+  if(diasTEl){  diasTEl.value  = AD_STATE.diasT  || ''; diasTEl.dataset.auto='1'; }
+
+  const adicionEl = document.getElementById('adicion');
+  if(adicionEl) adicionEl.value = (AD_STATE.textoAdicion || AD_STATE.adicion || '').toUpperCase();
+
+  const ejecEl = document.getElementById('ejecucion');
+  if(ejecEl) ejecEl.value = (AD_STATE.ejecucion || '').toUpperCase();
+
+  const cdpEl = document.getElementById('cdpA');
+  if(cdpEl){
+    cdpEl.value = String(AD_STATE.cdpA || '').replace(/\D/g,'').slice(0,10);
+    cdpEl.style.border = '';
+    if(cdpEl.value.length === 10 && cdpEl.value.startsWith('2026')){
+      cdpEl.style.border = '2px solid green';
+    }
+  }
+
+  const mraEl = document.getElementById('mra');
+  if(mraEl){
+    if(!mraEl.value) mraEl.value = '$ ';
+    if(AD_STATE.mra > 0) mraEl.value = formatCOPViewLocal(AD_STATE.mra);
+  }
+
+  const textoAdEl = document.getElementById('textoAdicion');
+  if(textoAdEl) textoAdEl.value = (AD_STATE.textoAdicion || '').toUpperCase();
+
+  const textoValEl = document.getElementById('textoValor');
+  if(textoValEl) textoValEl.value = (AD_STATE.textoValor || '').toUpperCase();
+
+  const valorFinEl = document.getElementById('valorFin');
+  if(valorFinEl){
+    const fin = AD_STATE.valorFin || (AD_STATE.valorInicial + (AD_STATE.mra||0));
+    valorFinEl.value = formatCOPViewLocal(fin);
+  }
+
+  showView('view-adicion');
+}
+
+/* Eventos UI Adición */
+(function bindAdicionHandlers(){
+  const back = document.getElementById('ad-volver');
+  if(back && !back.dataset.bound){
+    back.dataset.bound = '1';
+    back.addEventListener('click', ()=>{
+      playSoundOnce(SOUNDS.back);
+      showView('view-inicio');
+    });
+  }
+
+  bindNumericSanitizerLocal('cdpA', 10);
+
+  const cdp = document.getElementById('cdpA');
+  if(cdp && !cdp.dataset.bound){
+    cdp.dataset.bound='1';
+    cdp.addEventListener('input', ()=>{
+      const raw = (cdp.value||'').replace(/\D/g,'').slice(0,10);
+      cdp.value = raw;
+      cdp.style.border = '';
+      if(raw.length === 10 && raw.startsWith('2026')){
+        cdp.style.border = '2px solid green';
+      }
+    });
+  }
+
+  const mra = document.getElementById('mra');
+  if(mra && !mra.dataset.bound){
+    mra.dataset.bound='1';
+    if(!mra.value) mra.value = '$ ';
+    mra.addEventListener('input', ()=>{
+      formatCOPInstantLocal(mra);
+      recomputeAdicionAll();
+    });
+    mra.addEventListener('blur', ()=>{
+      formatCOPInstantLocal(mra);
+      recomputeAdicionAll();
+    });
+  }
+
+  ['mesesA','diasA','mesesT','diasT'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el || el.dataset.bound) return;
+    el.dataset.bound='1';
+    el.addEventListener('input', ()=>{
+      el.dataset.auto='0';
+      el.value = (el.value||'').replace(/\D/g,'').slice(0,3);
+      recomputeAdicionAll();
+    });
+  });
+
+  ['inicioA','finA'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el || el.dataset.bound) return;
+    el.dataset.bound='1';
+    el.addEventListener('change', ()=>{
+      recomputeAdicionAll();
+    });
+  });
+
+  const saveBtn = document.getElementById('ad-guardar');
+  if(saveBtn && !saveBtn.dataset.bound){
+    saveBtn.dataset.bound='1';
+    saveBtn.addEventListener('click', async ()=>{
+      try{
+        const fechaInicioContrato = normDMY(document.getElementById('fechaInicioRO')?.value || '');
+        const inicioA = normDMY(document.getElementById('inicioA')?.value || '');
+        const finA    = normDMY(document.getElementById('finA')?.value || '');
+        const cdpA    = String(document.getElementById('cdpA')?.value || '').replace(/\D/g,'').slice(0,10);
+        const mraVal  = numPureCOP(document.getElementById('mra')?.value || '');
+
+        if(!fechaInicioContrato){
+          Swal.fire({ icon:'warning', title:'Falta Fecha de Inicio' });
+          return;
+        }
+        if(!inicioA || !/^\d{2}\/\d{2}\/\d{4}$/.test(inicioA)){
+          Swal.fire({ icon:'warning', title:'Fecha Inicio de Adición inválida' });
+          return;
+        }
+        if(!finA || !/^\d{2}\/\d{2}\/\d{4}$/.test(finA)){
+          Swal.fire({ icon:'warning', title:'Fecha Fin de Adición inválida' });
+          return;
+        }
+
+        const dIni = parseDMYToDate(inicioA);
+        const dFin = parseDMYToDate(finA);
+        if(!dIni || !dFin || dFin < dIni){
+          Swal.fire({ icon:'warning', title:'Rango de fechas inválido', text:'La fecha fin debe ser mayor o igual a la fecha inicio.' });
+          return;
+        }
+
+        if(!(cdpA.length === 10 && cdpA.startsWith('2026'))){
+          Swal.fire({ icon:'warning', title:'CDP Adición inválido', text:'Debe tener 10 dígitos e iniciar por 2026.' });
+          return;
+        }
+
+        if(!mraVal || mraVal <= 0){
+          Swal.fire({ icon:'warning', title:'Valor de la Adición requerido' });
+          return;
+        }
+
+        recomputeAdicionAll();
+
+        const mesesA = String(document.getElementById('mesesA')?.value || '0').trim();
+        const diasA  = String(document.getElementById('diasA')?.value  || '0').trim();
+        const mesesT = String(document.getElementById('mesesT')?.value || '0').trim();
+        const diasT  = String(document.getElementById('diasT')?.value  || '0').trim();
+
+        const adicionTxt  = String(document.getElementById('adicion')?.value || '').trim().toUpperCase();
+        const ejecTxt     = String(document.getElementById('ejecucion')?.value || '').trim().toUpperCase();
+        const textoAdicion= String(document.getElementById('textoAdicion')?.value || '').trim().toUpperCase();
+        const textoValor  = String(document.getElementById('textoValor')?.value || '').trim().toUpperCase();
+
+        const valorInicial = numPureCOP(AD_STATE.valorInicial);
+        const valorFin     = valorInicial + mraVal;
+
+        const resumen = [
+          `<b>Inicio contrato:</b> ${fechaInicioContrato}`,
+          `<b>Inicio adición:</b> ${inicioA}`,
+          `<b>Fin adición:</b> ${finA}`,
+          `<b>Tiempo adición:</b> ${adicionTxt || '-'}`,
+          `<b>CDP Adición:</b> ${cdpA}`,
+          `<b>Valor contrato:</b> ${formatCOPViewLocal(valorInicial)}`,
+          `<b>Valor adición:</b> ${formatCOPViewLocal(mraVal)}`,
+          `<b>Valor final:</b> ${formatCOPViewLocal(valorFin)}`
+        ].join('<br>');
+
+        const rs = await Swal.fire({
+          icon:'info',
+          title:'Resumen de Adición',
+          html: resumen,
+          showCancelButton:true,
+          confirmButtonText:'Confirmar',
+          cancelButtonText:'Editar'
+        });
+        if(!rs.isConfirmed) return;
+
+        const payload = {
+          documento: AD_STATE.documento,
+          inicioA,
+          finA,
+          mesesA,
+          diasA,
+          adicion: adicionTxt,
+          mesesT,
+          diasT,
+          ejecucion: ejecTxt,
+          cdpA,
+          mra: String(mraVal),
+          textoAdicion: textoAdicion || adicionTxt,
+          valorFin: String(valorFin),
+          textoValor
+        };
+
+        await apiPost('guardarAdicion', payload);
+
+        const tel = normalizeContratistaNumber(AD_STATE.telefono);
+        if(tel){
+          const msg =
+            'Estimado(a) *'+(AD_STATE.nombre||'')+'*\n\n' +
+            '¡Se ha generado la *Adición del Contrato N° '+(AD_STATE.contrato||'')+'*!\n' +
+            '- En la *App Contratista*, toma la opción *DATOS DEL CONTRATO* - Actualizar. Registra solo el RP de Adición Correctamente una vez lo tenga.\n\n' +
+            'Para la *Primera cuenta en esta Adición* debes Anexar el CDP y RP de Adición.\n' +
+            '> Si no tienes esta guía, toma la opción GUIAS en la App.\n\n' +
+            'Cordialmente,\n\n*Equipo de Contratación*\n> Alcaldía de Flandes';
+          sendBuilderbotMessage(tel, msg);
+        }
+
+        await Swal.fire({ icon:'success', title:'Adición guardada', timer:1800, showConfirmButton:false });
+
+        await cargarContratistas();
+        showView('view-contratistas');
+      }catch(e){
+        Swal.fire({ icon:'error', title:'Error', text:String(e.message||e) });
+      }
+    });
+  }
+})();
+  
 /* ================== FIN ================== */
 </script>
 </body>
