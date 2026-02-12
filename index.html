@@ -1408,6 +1408,54 @@ document.getElementById('contr-volver').addEventListener('click', ()=>{
 });
 
 /* ================== AGREGAR CONTRATISTA ================== */
+  function resetFormAgregarContratista(){
+  const ids = [
+    'add-documento',
+    'add-nombre',
+    'add-secretaria',
+    'add-carpetaSecretaria',
+    'add-supervisor',
+    'add-contactoSupervisor',
+    'add-contrato',
+    'add-tipoContrato',
+    'add-fechaContrato',
+    'add-diaContrato',
+    'add-mesContrato',
+    'add-valor',
+    'add-valorTexto',
+    'add-cdp',
+    'add-objeto',
+    'add-obligaciones',
+    'add-mra'
+  ];
+
+  ids.forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+
+    if(el.tagName === 'SELECT'){
+      // vuelve al placeholder (tu <option value="" disabled selected>)
+      el.selectedIndex = 0;
+    }else{
+      el.value = '';
+    }
+
+    // limpia bordes/estilos aplicados por validaciones (CDP/valorTexto)
+    el.style.border = '';
+  });
+
+  // valor inicial esperado para mra oculto
+  const mra = document.getElementById('add-mra');
+  if(mra) mra.value = '0';
+
+  // si el textarea tiene autogrow, fuerza recalcular altura
+  const ob = document.getElementById('add-obligaciones');
+  if(ob){
+    ob.style.height = 'auto';
+    ob.style.height = (ob.scrollHeight + 4) + 'px';
+  }
+}
+  
 const MAP_SECRETARIA_CARPETA={
   'DESPACHO MUNICIPAL':'1KkTSaWUnNkKzES_Drn7cO449hYYDT-Pd',
   'SECRETARÍA DE GOBIERNO Y SERVICIOS ADMINISTRATIVOS':'1X5spQ24vs5wzZyI1AtiMMMBrTCzKMNOH',
@@ -1432,6 +1480,7 @@ const MAP_SUPERVISOR_CONTACTO={
 
 document.getElementById('btn-add-contratista').addEventListener('click', ()=>{
   playSoundOnce(SOUNDS.login);
+  resetFormAgregarContratista();
   showView('view-agregar');
 });
 document.getElementById('add-secretaria').addEventListener('change',()=>{
