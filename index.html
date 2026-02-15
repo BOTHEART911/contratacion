@@ -2152,9 +2152,9 @@ document.getElementById('rc-guardar').addEventListener('click', async ()=>{
       'Estimado(a) *'+nombre+'*\n\n' +
       '¡Tu *Cuenta N° '+informe+'* ha sido *Aprobada*!, sigue estos pasos:\n' + 
       '- En la *App Contratista*, toma la opción *MI CUENTA DRIVE*, descarga los documentos de la carpeta *CUENTA '+informe+'*.\n' + 
-      '- Para realizar correctamente este proceso, revisa el documento *Guía Plan de Pagos* que ya conoces.\n' + 
-      '> Si no tienes esta guía, toma la opción Guías en la App.\n' + 
-      'Una vez términes este proceso, toma la opción *PLAN DE PAGOS* para avisarle a tu Supervisor.\n\n' +
+      '- Para realizar correctamente este proceso, revisa los TUTORIALES ne la App.\n' + 
+      '> Puedes descargar el documento *Guía Plan de Pagos* en el catálogo de esta cuenta WhatsApp.\n' + 
+      'Una vez términes correctamente este proceso, toma la opción *PLAN DE PAGOS* para avisarle a tu Supervisor.\n\n' +
       'Cordialmente,\n\n*Equipo de Contratación*\n> Alcaldía de Flandes'
     );
   }
@@ -3256,9 +3256,9 @@ async function abrirVistaAdicion(documento){
           const msg =
             'Estimado(a) *'+(AD_STATE.nombre||'')+'*\n\n' +
             '¡Se ha generado la *Adición del Contrato N° '+(AD_STATE.contrato||'')+'*!\n' +
-            '- En la *App Contratista*, toma la opción *DATOS DEL CONTRATO* - Actualizar. Registra solo el RP de Adición Correctamente una vez lo tenga.\n\n' +
+            '- En la *App Contratista*, toma la opción *DATOS DEL CONTRATO* - Actualizar. Registra solo el RP de Adición Correctamente una vez lo tengas.\n\n' +
             'Para la *Primera cuenta en esta Adición* debes Anexar el CDP y RP de Adición.\n' +
-            '> Si no tienes esta guía, toma la opción GUIAS en la App.\n\n' +
+            '> Si no tienes esta guía, revisa los TUTORIALES en la App.\n\n' +
             'Cordialmente,\n\n*Equipo de Contratación*\n> Alcaldía de Flandes';
           sendBuilderbotMessage(tel, msg);
         }
