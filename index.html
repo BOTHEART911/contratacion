@@ -1394,11 +1394,33 @@ leftGroup.appendChild(btnAdicion);
 } 
 
 document.getElementById('contr-filter').addEventListener('input',()=>{
-  const q=document.getElementById('contr-filter').value.trim().toLowerCase();
-  const filtered=CONTR_DATA.filter(c=>{
-    return [c.nombre,c.documento,c.secretaria,c.supervisor,c.telefono,c.contrato]
-      .some(v=>String(v||'').toLowerCase().includes(q));
+  const input = document.getElementById('contr-filter');
+  const q = (input.value || '').trim().toLowerCase();
+
+  const qDigits = q.replace(/\D/g,''); // solo números digitados
+  const allowDocumento = qDigits.length >= 6; // documento mínimo 6 dígitos
+
+  const filtered = CONTR_DATA.filter(c=>{
+    const nombre     = String(c.nombre||'').toLowerCase();
+    const secretaria = String(c.secretaria||'').toLowerCase();
+    const supervisor = String(c.supervisor||'').toLowerCase();
+    const telefono   = String(c.telefono||'').toLowerCase();
+
+    const contratoDigits  = String(c.contrato||'').replace(/\D/g,'');
+    const documentoDigits = String(c.documento||'').replace(/\D/g,'');
+
+    const hitTexto =
+      nombre.includes(q) ||
+      secretaria.includes(q) ||
+      supervisor.includes(q) ||
+      telefono.includes(q);
+
+    const hitContrato = qDigits ? contratoDigits.includes(qDigits) : false;
+    const hitDocumento = allowDocumento && qDigits ? documentoDigits.includes(qDigits) : false;
+
+    return hitTexto || hitContrato || hitDocumento;
   });
+
   pintarContratistas(filtered);
   actualizarResumenContratistas(filtered);
 });
@@ -1791,11 +1813,31 @@ btnRevisar.addEventListener('click', ()=>{
   }
 }
 document.getElementById('cuentas-filter').addEventListener('input',()=>{
-  const q=document.getElementById('cuentas-filter').value.trim().toLowerCase();
-  const filtered=CUENTAS_DATA.filter(c=>{
-    return [c.nombre,c.documento,c.informe,c.totalInformes,c.contrato]
-      .some(v=>String(v||'').toLowerCase().includes(q));
+  const input = document.getElementById('cuentas-filter');
+  const q = (input.value || '').trim().toLowerCase();
+
+  const qDigits = q.replace(/\D/g,'');
+  const allowDocumento = qDigits.length >= 6;
+
+  const filtered = CUENTAS_DATA.filter(c=>{
+    const nombre = String(c.nombre||'').toLowerCase();
+    const informe = String(c.informe||'').toLowerCase();
+    const totalInformes = String(c.totalInformes||'').toLowerCase();
+
+    const contratoDigits  = String(c.contrato||'').replace(/\D/g,'');
+    const documentoDigits = String(c.documento||'').replace(/\D/g,'');
+
+    const hitTexto =
+      nombre.includes(q) ||
+      informe.includes(q) ||
+      totalInformes.includes(q);
+
+    const hitContrato = qDigits ? contratoDigits.includes(qDigits) : false;
+    const hitDocumento = allowDocumento && qDigits ? documentoDigits.includes(qDigits) : false;
+
+    return hitTexto || hitContrato || hitDocumento;
   });
+
   pintarCuentas(filtered);
   actualizarResumenCuentas(filtered);
 });
