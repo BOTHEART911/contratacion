@@ -581,7 +581,7 @@
           <p id="contr-caption" class="muted" style="margin:6px 0 12px;">N° de Contratistas OPS</p>
         </div>
 
-        <input id="contr-filter" class="filter-input" type="text" placeholder="Filtrar por nombre, documento, secretaria, supervisor o teléfono" aria-label="Filtrar contratistas">
+        <input id="contr-filter" class="filter-input" type="text" placeholder="Filtrar por nombre, documento, secretaria, supervisor, contrato" aria-label="Filtrar contratistas">
 
         <div class="btn-row spaced">
           <button id="btn-add-contratista" class="btn-primary">AGREGAR CONTRATISTA</button>
@@ -812,7 +812,7 @@
           <p class="muted" style="margin:6px 0 12px;">N° de Cuentas Pendientes</p>
         </div>
 
-        <input id="cuentas-filter" class="filter-input" type="text" placeholder="Filtrar por nombre, documento, informe o total informes">
+        <input id="cuentas-filter" class="filter-input" type="text" placeholder="Filtrar por nombre, documento, informe, contrato">
 
         <div class="btn-row spaced">
           <button id="revision-volver" class="danger">REGRESAR</button>
@@ -1396,7 +1396,7 @@ leftGroup.appendChild(btnAdicion);
 document.getElementById('contr-filter').addEventListener('input',()=>{
   const q=document.getElementById('contr-filter').value.trim().toLowerCase();
   const filtered=CONTR_DATA.filter(c=>{
-    return [c.nombre,c.documento,c.secretaria,c.supervisor,c.telefono]
+    return [c.nombre,c.documento,c.secretaria,c.supervisor,c.telefono,c.contrato]
       .some(v=>String(v||'').toLowerCase().includes(q));
   });
   pintarContratistas(filtered);
@@ -1742,9 +1742,13 @@ function pintarCuentas(list){
     title.textContent= (c.nombre||'');
     header.appendChild(title);
 
-    const pDoc=document.createElement('p');
+   const pDoc=document.createElement('p');
     pDoc.className='item-sub';
     pDoc.textContent='CC / NIT: '+(c.documento||'');
+
+    const pContrato=document.createElement('p');
+    pContrato.className='item-sub';
+    pContrato.textContent='CONTRATO: '+(c.contrato||'');
 
     const pInf=document.createElement('p');
     pInf.className='item-sub';
@@ -1780,6 +1784,7 @@ btnRevisar.addEventListener('click', ()=>{
 
     div.appendChild(header);
     div.appendChild(pDoc);
+    div.appendChild(pContrato);
     div.appendChild(pInf);
     div.appendChild(btnRow);
     wrap.appendChild(div);
@@ -1788,7 +1793,7 @@ btnRevisar.addEventListener('click', ()=>{
 document.getElementById('cuentas-filter').addEventListener('input',()=>{
   const q=document.getElementById('cuentas-filter').value.trim().toLowerCase();
   const filtered=CUENTAS_DATA.filter(c=>{
-    return [c.nombre,c.documento,c.informe,c.totalInformes]
+    return [c.nombre,c.documento,c.informe,c.totalInformes,c.contrato]
       .some(v=>String(v||'').toLowerCase().includes(q));
   });
   pintarCuentas(filtered);
