@@ -1278,7 +1278,7 @@ function pintarContratistas(list){
 
     const pDoc=document.createElement('p');
     pDoc.className='item-sub';
-    pDoc.textContent='CC: '+(c.documento||'');
+    pDoc.textContent='CC / NIT: '+(c.documento||'');
     div.appendChild(pDoc);
 
     const pSec=document.createElement('p');
@@ -1661,7 +1661,7 @@ async function mostrarDetallesContratista(documento){
     }else{
       const lines=[
         `<b>NOMBRE:</b> ${d.nombre||''}`,
-        `<b>CC:</b> ${d.documento||''} <b>de:</b> ${d.expedida||''}`,
+        `<b>CC / NIT:</b> ${d.documento||''} <b>de:</b> ${d.expedida||''}`,
         `<b>TELEFONO:</b> ${d.telefono||'SIN REGISTRO'}`,
         `<b>CORREO:</b> ${d.correo||'SIN REGISTRO'}`,
         `<b>CUENTA:</b> ${d.cuenta||''} ${d.tipoCuenta||''} ${d.banco||''}`,
@@ -1744,7 +1744,7 @@ function pintarCuentas(list){
 
     const pDoc=document.createElement('p');
     pDoc.className='item-sub';
-    pDoc.textContent='CC: '+(c.documento||'');
+    pDoc.textContent='CC / NIT: '+(c.documento||'');
 
     const pInf=document.createElement('p');
     pInf.className='item-sub';
@@ -2273,7 +2273,7 @@ function pintarRequerimientos(list){
 
     const title=document.createElement('p');
     title.className='item-title';
-    title.textContent='NOMBRE: '+(c.nombre||'');
+    title.textContent=(c.nombre||'');
 
     header.appendChild(title);
     div.appendChild(header);
