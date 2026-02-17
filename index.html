@@ -1204,43 +1204,11 @@ document.getElementById('go-revision').addEventListener('click', async ()=>{
   }
   showView('view-revision');
 });
-
-document.getElementById('go-revision').addEventListener('click', async ()=>{
-  playSoundOnce(SOUNDS.login);
-
-  const prof = String(currentUser?.profesional || '').trim().toUpperCase();
-  const allowed = (prof === 'YESICA ALFARADO' || prof === 'OSCAR POLANIA');
-
-  if(!allowed){
-    await Swal.fire({
-      icon:'info',
-      title:'NO TIENES PERMISOS PARA REVISAR',
-      text:'Rol exclusivo para personal autorizado.'
-    });
-    return;
-  }
-
-  await cargarCuentasPendientes();
-  if (!CUENTAS_DATA || CUENTAS_DATA.length === 0){
-    await Swal.fire({
-      icon:'success',
-      title:'¡Estás al día!',
-      text:'No tienes CUENTAS pendientes por revisar y aprobar',
-      timer: 3200,
-      showConfirmButton: false
-    });
-    showView('view-inicio');
-    return;
-  }
-  showView('view-revision');
-});
-  
 document.getElementById('go-requerimientos').addEventListener('click', async ()=>{
   playSoundOnce(SOUNDS.login);
   await cargarRequerimientosBase();
   showView('view-requerimientos');
 });
-  
 document.getElementById('go-comunicados').addEventListener('click', ()=>{
   playSoundOnce(SOUNDS.login);
   showView('view-comunicados');
@@ -1796,32 +1764,46 @@ function pintarCuentas(list){
     title.textContent= (c.nombre||'');
     header.appendChild(title);
 
+   const pDoc=document.createElement('p');
+    pDoc.className='item-sub';
+    pDoc.textContent='CC / NIT: '+(c.documento||'');
+
     const pContrato=document.createElement('p');
     pContrato.className='item-sub';
     pContrato.textContent='CONTRATO: '+(c.contrato||'');
-    
+
     const pInf=document.createElement('p');
     pInf.className='item-sub';
     pInf.textContent='INFORME: '+(c.informe||'')+' de: '+(c.totalInformes||'');
-    
+
     const btnRow=document.createElement('div');
     btnRow.className='btn-row';
-    
+
     const btnRevisar=document.createElement('button');
-    btnRevisar.textContent='REVISAR';
-    btnRevisar.className='btn-primary';
-    btnRevisar.style.borderRadius='12px';
-    btnRevisar.style.padding='14px 16px';
-    btnRevisar.style.fontSize='18px';
-    btnRevisar.style.fontWeight='900';
-    btnRevisar.style.borderWidth='2px';
-    btnRevisar.style.boxShadow='0 8px 16px rgba(0,0,0,.12)';
-    btnRevisar.addEventListener('click', ()=>{
-      playSoundOnce(SOUNDS.login);
-      abrirRevisionCuenta(c.documento);
-    });
+btnRevisar.textContent='REVISAR';
+btnRevisar.addEventListener('click', ()=>{
+  playSoundOnce(SOUNDS.login);
+  abrirRevisionCuenta(c.documento);
+});
     btnRow.appendChild(btnRevisar);
-    
+
+    if (c.telefono){
+  const btnWhatsapp = document.createElement('button');
+  btnWhatsapp.className = 'btn-icon';
+  btnWhatsapp.innerHTML = '<img src="https://res.cloudinary.com/dqqeavica/image/upload/v1759166341/WhatsApp_mljaqm.webp" alt="WhatsApp">';
+  btnWhatsapp.setAttribute('aria-label','Abrir chat de WhatsApp');
+  btnWhatsapp.addEventListener('click', ()=>{
+    let tel = String(c.telefono||'').replace(/\D/g,'');
+    if(!tel){ Swal.fire({icon:'info',title:'Sin teléfono'}); return; }
+    if(!tel.startsWith('57')) tel = '57' + tel;
+    if(!/^57\d{10}$/.test(tel)){
+      Swal.fire({icon:'warning',title:'Teléfono inválido'}); return;
+    }
+    window.open('https://wa.me/'+tel,'_blank');
+  });
+  btnRow.appendChild(btnWhatsapp);
+}
+
     div.appendChild(header);
     div.appendChild(pDoc);
     div.appendChild(pContrato);
