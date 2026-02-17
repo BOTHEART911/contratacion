@@ -1192,7 +1192,7 @@ document.getElementById('go-revision').addEventListener('click', async ()=>{
   playSoundOnce(SOUNDS.login);
 
   const prof = String(currentUser?.profesional || '').trim().toUpperCase();
-  const allowed = (prof === 'YESICA ALFARO' || prof === 'OSCAR POLANIA');
+  const allowed = (prof === 'YESICA ALFARO' || prof === 'OSCAR POLANIA'); 
 
   if(!allowed){
     await Swal.fire({
