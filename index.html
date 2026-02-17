@@ -1190,6 +1190,19 @@ document.getElementById('go-contratistas').addEventListener('click', async ()=>{
 });
 document.getElementById('go-revision').addEventListener('click', async ()=>{
   playSoundOnce(SOUNDS.login);
+
+  const prof = String(currentUser?.profesional || '').trim().toUpperCase();
+  const allowed = (prof === 'YESICA ALFARADO' || prof === 'OSCAR POLANIA');
+
+  if(!allowed){
+    await Swal.fire({
+      icon:'info',
+      title:'NO TIENES PERMISOS PARA REVISAR',
+      text:'Rol exclusivo para personal autorizado.'
+    });
+    return;
+  }
+
   await cargarCuentasPendientes();
   if (!CUENTAS_DATA || CUENTAS_DATA.length === 0){
     await Swal.fire({
@@ -1204,6 +1217,7 @@ document.getElementById('go-revision').addEventListener('click', async ()=>{
   }
   showView('view-revision');
 });
+  
 document.getElementById('go-requerimientos').addEventListener('click', async ()=>{
   playSoundOnce(SOUNDS.login);
   await cargarRequerimientosBase();
@@ -1786,23 +1800,6 @@ btnRevisar.addEventListener('click', ()=>{
   abrirRevisionCuenta(c.documento);
 });
     btnRow.appendChild(btnRevisar);
-
-    if (c.telefono){
-  const btnWhatsapp = document.createElement('button');
-  btnWhatsapp.className = 'btn-icon';
-  btnWhatsapp.innerHTML = '<img src="https://res.cloudinary.com/dqqeavica/image/upload/v1759166341/WhatsApp_mljaqm.webp" alt="WhatsApp">';
-  btnWhatsapp.setAttribute('aria-label','Abrir chat de WhatsApp');
-  btnWhatsapp.addEventListener('click', ()=>{
-    let tel = String(c.telefono||'').replace(/\D/g,'');
-    if(!tel){ Swal.fire({icon:'info',title:'Sin teléfono'}); return; }
-    if(!tel.startsWith('57')) tel = '57' + tel;
-    if(!/^57\d{10}$/.test(tel)){
-      Swal.fire({icon:'warning',title:'Teléfono inválido'}); return;
-    }
-    window.open('https://wa.me/'+tel,'_blank');
-  });
-  btnRow.appendChild(btnWhatsapp);
-}
 
     div.appendChild(header);
     div.appendChild(pDoc);
