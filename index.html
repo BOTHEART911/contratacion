@@ -1872,6 +1872,10 @@ async function abrirRevisionCuenta(documento){
       Swal.fire({icon:'info',title:'No encontrado'}); return;
     }
     REV_CUENTA=data;
+
+    const obsEl = document.getElementById('rc-observaciones');
+    if(obsEl) obsEl.value = '';
+
     resetSeccionesRevision();
     renderRevisionCuenta();
     showView('view-revisar-cuenta');
@@ -1896,6 +1900,7 @@ function renderRevisionCuenta(){
   const sContrato=document.getElementById('sec-contrato');
   sContrato.innerHTML=[
     `<b>CONTRATO N°:</b> ${c?.contrato||''}`,
+    `<b>OBJETO:</b> ${c?.objeto||''}`,
     `<b>FECHA DE CONTRATO:</b> ${c?.fechaContrato||''}`,
     `<b>FECHA DE INICIO:</b> ${c?.fechaInicio||''}`,
     `<b>FECHA DE TERMINO:</b> ${c?.fechaTermino||''}`,
