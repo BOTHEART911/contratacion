@@ -1811,6 +1811,7 @@ btnRevisar.addEventListener('click', ()=>{
     div.appendChild(header);
     div.appendChild(pDoc);
     div.appendChild(pContrato);
+    div.appendChild(pSupervisor);
     div.appendChild(pInf);
     div.appendChild(btnRow);
     wrap.appendChild(div);
@@ -1826,6 +1827,7 @@ document.getElementById('cuentas-filter').addEventListener('input',()=>{
   const filtered = CUENTAS_DATA.filter(c=>{
     const nombre = String(c.nombre||'').toLowerCase();
     const informe = String(c.informe||'').toLowerCase();
+    const supervisor = String(c.supervisor||'').toLowerCase();
     const totalInformes = String(c.totalInformes||'').toLowerCase();
 
     const contratoDigits  = String(c.contrato||'').replace(/\D/g,'');
