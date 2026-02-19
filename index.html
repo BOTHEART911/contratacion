@@ -1836,7 +1836,8 @@ document.getElementById('cuentas-filter').addEventListener('input',()=>{
     const hitTexto =
       nombre.includes(q) ||
       informe.includes(q) ||
-      totalInformes.includes(q);
+      totalInformes.includes(q) ||
+      supervisor.includes(q);
 
     const hitContrato = qDigits ? contratoDigits.includes(qDigits) : false;
     const hitDocumento = allowDocumento && qDigits ? documentoDigits.includes(qDigits) : false;
