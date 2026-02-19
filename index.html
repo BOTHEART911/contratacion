@@ -1827,8 +1827,8 @@ document.getElementById('cuentas-filter').addEventListener('input',()=>{
   const filtered = CUENTAS_DATA.filter(c=>{
     const nombre = String(c.nombre||'').toLowerCase();
     const informe = String(c.informe||'').toLowerCase();
-    const supervisor = String(c.supervisor||'').toLowerCase();
     const totalInformes = String(c.totalInformes||'').toLowerCase();
+    const supervisor = String(c.supervisor||'').toLowerCase();
 
     const contratoDigits  = String(c.contrato||'').replace(/\D/g,'');
     const documentoDigits = String(c.documento||'').replace(/\D/g,'');
