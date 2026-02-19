@@ -1793,6 +1793,10 @@ function pintarCuentas(list){
     pInf.className='item-sub';
     pInf.textContent='INFORME: '+(c.informe||'')+' de: '+(c.totalInformes||'');
 
+    const pSupervisor=document.createElement('p');
+    pSupervisor.className='item-sub';
+    pSupervisor.textContent='SUPERVISOR: '+(c.supervisor||'');
+
     const btnRow=document.createElement('div');
     btnRow.className='btn-row';
 
