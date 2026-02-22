@@ -1320,46 +1320,81 @@ function buildDateListDMY(maxDate, minDate){
   return out;
 }
 
-(function initPickerReporteFechas(){
+(async function initPickerReporteFechas(){
   const selDesde = document.getElementById('reporteDesde');
   const selHasta = document.getElementById('reporteHasta');
   if(!selDesde || !selHasta) return;
 
-  // Limites:
-  // Desde: hasta ayer
-  // Hasta: hasta hoy
-  const hoy = new Date();
-  const hoy0 = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
-  const ayer0 = new Date(hoy0); ayer0.setDate(ayer0.getDate()-1);
+  function parseDMYLocal(s){
+    const m = String(s||'').trim().match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if(!m) return null;
+    const dd = parseInt(m[1],10), mm = parseInt(m[2],10), yy = parseInt(m[3],10);
+    const dt = new Date(yy, mm-1, dd);
+    if(isNaN(dt.getTime())) return null;
+    dt.setHours(0,0,0,0);
+    return dt;
+  }
 
-  // Base mínima: 2026-01-01 (ajústalo si quieres más histórico)
-  const min0 = new Date(2026,0,1);
+  function formatDMYLocal(d){
+    const dd = String(d.getDate()).padStart(2,'0');
+    const mm = String(d.getMonth()+1).padStart(2,'0');
+    const yy = d.getFullYear();
+    return `${dd}/${mm}/${yy}`;
+  }
 
-  // Lista Desde: min..ayer
-  const listDesde = (ayer0 >= min0) ? buildDateListDMY(ayer0, min0) : [];
-  // Lista Hasta: min..hoy
-  const listHasta = buildDateListDMY(hoy0, min0);
+  function buildDateListDMY(minDate, maxDate){
+    const out = [];
+    const a = new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate());
+    const b = new Date(maxDate.getFullYear(), maxDate.getMonth(), maxDate.getDate());
+    for(let d=new Date(a); d<=b; d.setDate(d.getDate()+1)){
+      out.push(formatDMYLocal(d));
+    }
+    return out;
+  }
+
+  // 1) Consultar al backend cuál es el min/max real de fechas en APROBADAS para este usuario
+  let mm = null;
+  try{
+    const prof = String(currentUser?.profesional || '').trim();
+    mm = await apiGet('reporteAprobadasMinMax', { responsable: prof });
+  }catch(e){
+    mm = null;
+  }
+
+  // Fallback si algo falla
+  const fallbackMin = new Date(2026,0,1);
+  const fallbackMax = new Date();
+  fallbackMax.setHours(0,0,0,0);
+
+  const minD = parseDMYLocal(mm?.min || '') || fallbackMin;
+  const maxD = parseDMYLocal(mm?.max || '') || fallbackMax;
+
+  // Si por algún motivo min > max, corrige
+  const realMin = (minD.getTime() <= maxD.getTime()) ? minD : maxD;
+  const realMax = (minD.getTime() <= maxD.getTime()) ? maxD : minD;
+
+  const list = buildDateListDMY(realMin, realMax);
 
   selDesde.innerHTML = '';
   selHasta.innerHTML = '';
 
-  listDesde.forEach(v=>{
-    const opt = document.createElement('option');
-    opt.value = v;
-    opt.textContent = v;
-    selDesde.appendChild(opt);
+  list.forEach(v=>{
+    const o1 = document.createElement('option');
+    o1.value = v;
+    o1.textContent = v;
+    selDesde.appendChild(o1);
+
+    const o2 = document.createElement('option');
+    o2.value = v;
+    o2.textContent = v;
+    selHasta.appendChild(o2);
   });
 
-  listHasta.forEach(v=>{
-    const opt = document.createElement('option');
-    opt.value = v;
-    opt.textContent = v;
-    selHasta.appendChild(opt);
-  });
-
-  // Defaults: desde=ayer, hasta=hoy
-  if(listDesde.length) selDesde.value = listDesde[listDesde.length-1];
-  if(listHasta.length) selHasta.value = listHasta[listHasta.length-1];
+  // Defaults: desde=min, hasta=max
+  if(list.length){
+    selDesde.value = list[0];
+    selHasta.value = list[list.length-1];
+  }
 })();
 
 document.getElementById('btn-open-reporte-fechas').addEventListener('click', ()=>{
@@ -1396,20 +1431,6 @@ function confirmarPickerReporte(){
   }
   if(d2 < d1){
     Swal.fire({ icon:'warning', title:'Rango inválido', text:'Hasta debe ser mayor o igual a Desde.' });
-    return;
-  }
-
-  // Reglas pedidas:
-  const hoy = new Date();
-  const hoy0 = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
-  const ayer0 = new Date(hoy0); ayer0.setDate(ayer0.getDate()-1);
-
-  if(d1 > ayer0){
-    Swal.fire({ icon:'warning', title:'Desde inválido', text:'Desde solo permite hasta ayer.' });
-    return;
-  }
-  if(d2 > hoy0){
-    Swal.fire({ icon:'warning', title:'Hasta inválido', text:'Hasta solo permite hasta hoy.' });
     return;
   }
 
