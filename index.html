@@ -1399,14 +1399,6 @@ function buildDateListDMY(maxDate, minDate){
     // Fallback anterior (si el backend no envía fechas)
     list = buildDateListDMY(realMin, realMax);
 
-    
-  // Defaults: desde=min, hasta=max
-  if(list.length){
-    selDesde.value = list[0];
-    selHasta.value = list[list.length-1];
-  }
-})();
-
 document.getElementById('btn-open-reporte-fechas').addEventListener('click', ()=>{
   playSoundOnce(SOUNDS.login);
   const modal = document.getElementById('reporteFechaModal');
