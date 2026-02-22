@@ -556,6 +556,7 @@
           <button id="go-revision" class="btn-primary">REVISAR CUENTAS</button>
           <button id="go-requerimientos" class="btn-primary">REQUERIMIENTO</button>
           <button id="go-comunicados" class="btn-primary">COMUNICADOS</button>
+          <button id="go-reporte" class="btn-primary">REPORTE</button>
           <button id="go-soporte" class="btn-primary">SOPORTE</button>
         </div>
 
@@ -916,6 +917,47 @@
       </div>
     </section>
 
+    <!-- VISTA REPORTE -->
+    <section id="view-reporte" class="view">
+  <div class="card narrow">
+    <h2 style="color:var(--primary)">Genera Reporte de Cuentas Revisadas</h2>
+
+    <div class="btn-row spaced">
+      <button id="btn-open-reporte-fechas" class="btn-primary">Filtro</button>
+    </div>
+
+    <p id="reporte-rango-label" class="center muted" style="margin-top:10px;"></p>
+
+    <div class="btn-row spaced">
+      <button id="btn-generar-reporte" class="btn-primary">Generar</button>
+      <button id="btn-reporte-volver" class="danger">Regresar</button>
+    </div>
+  </div>
+</section>
+
+<div id="reporteFechaModal" class="picker-modal" aria-hidden="true">
+  <div class="picker-box">
+    <h3 style="margin:0 0 8px 0;">Selecciona el rango de fechas</h3>
+
+    <div class="picker-grid" style="grid-template-columns: 1fr 1fr;">
+      <div>
+        <small>Desde</small>
+        <select id="reporteDesde" size="10"></select>
+      </div>
+      <div>
+        <small>Hasta</small>
+        <select id="reporteHasta" size="10"></select>
+      </div>
+    </div>
+
+    <div class="picker-actions">
+      <button type="button" class="btn btn-cancel" onclick="cancelarPickerReporte()">Cancelar</button>
+      <button type="button" class="btn btn-ok" onclick="confirmarPickerReporte()">Ok</button>
+    </div>
+  </div>
+</div>
+
+
     <!-- VISTA SOPORTE -->
     <section id="view-soporte" class="view">
       <div class="card narrow">
@@ -1225,6 +1267,200 @@ document.getElementById('go-comunicados').addEventListener('click', ()=>{
 document.getElementById('go-soporte').addEventListener('click', ()=>{
   playSoundOnce(SOUNDS.login);
   showView('view-soporte');
+});
+
+  document.getElementById('go-reporte').addEventListener('click', async ()=>{
+  playSoundOnce(SOUNDS.login);
+
+  const prof = String(currentUser?.profesional || '').trim().toUpperCase();
+  const allowed = (prof === 'YESICA ALFARO' || prof === 'OSCAR POLANIA');
+
+  if(!allowed){
+    await Swal.fire({
+      icon:'info',
+      title:'NO TIENES PERMISOS PARA REPORTE',
+      text:'Rol exclusivo para personal autorizado.'
+    });
+    return;
+  }
+
+  // reset rango visible
+  REPORTE_STATE.desde = '';
+  REPORTE_STATE.hasta = '';
+  const lbl = document.getElementById('reporte-rango-label');
+  if(lbl) lbl.textContent = '';
+
+  showView('view-reporte');
+});
+
+/* ================== REPORTE (FRONTEND) ================== */
+const REPORTE_STATE = { desde:'', hasta:'' };
+
+function formatDMYLocal(d){
+  const dd = String(d.getDate()).padStart(2,'0');
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const yy = d.getFullYear();
+  return `${dd}/${mm}/${yy}`;
+}
+function parseDMYLocal(s){
+  const m = String(s||'').trim().match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if(!m) return null;
+  const dd = parseInt(m[1],10), mm = parseInt(m[2],10), yy = parseInt(m[3],10);
+  const dt = new Date(yy, mm-1, dd);
+  if(isNaN(dt.getTime())) return null;
+  return dt;
+}
+function buildDateListDMY(maxDate, minDate){
+  const out = [];
+  const a = new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate());
+  const b = new Date(maxDate.getFullYear(), maxDate.getMonth(), maxDate.getDate());
+  for(let d=new Date(a); d<=b; d.setDate(d.getDate()+1)){
+    out.push(formatDMYLocal(d));
+  }
+  return out;
+}
+
+(function initPickerReporteFechas(){
+  const selDesde = document.getElementById('reporteDesde');
+  const selHasta = document.getElementById('reporteHasta');
+  if(!selDesde || !selHasta) return;
+
+  // Limites:
+  // Desde: hasta ayer
+  // Hasta: hasta hoy
+  const hoy = new Date();
+  const hoy0 = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+  const ayer0 = new Date(hoy0); ayer0.setDate(ayer0.getDate()-1);
+
+  // Base mínima: 2026-01-01 (ajústalo si quieres más histórico)
+  const min0 = new Date(2026,0,1);
+
+  // Lista Desde: min..ayer
+  const listDesde = (ayer0 >= min0) ? buildDateListDMY(ayer0, min0) : [];
+  // Lista Hasta: min..hoy
+  const listHasta = buildDateListDMY(hoy0, min0);
+
+  selDesde.innerHTML = '';
+  selHasta.innerHTML = '';
+
+  listDesde.forEach(v=>{
+    const opt = document.createElement('option');
+    opt.value = v;
+    opt.textContent = v;
+    selDesde.appendChild(opt);
+  });
+
+  listHasta.forEach(v=>{
+    const opt = document.createElement('option');
+    opt.value = v;
+    opt.textContent = v;
+    selHasta.appendChild(opt);
+  });
+
+  // Defaults: desde=ayer, hasta=hoy
+  if(listDesde.length) selDesde.value = listDesde[listDesde.length-1];
+  if(listHasta.length) selHasta.value = listHasta[listHasta.length-1];
+})();
+
+document.getElementById('btn-open-reporte-fechas').addEventListener('click', ()=>{
+  playSoundOnce(SOUNDS.login);
+  const modal = document.getElementById('reporteFechaModal');
+  if(modal){
+    modal.style.display='flex';
+    modal.setAttribute('aria-hidden','false');
+  }
+});
+
+function cancelarPickerReporte(){
+  const modal = document.getElementById('reporteFechaModal');
+  if(modal){
+    modal.style.display='none';
+    modal.setAttribute('aria-hidden','true');
+  }
+}
+
+function confirmarPickerReporte(){
+  const desde = String(document.getElementById('reporteDesde')?.value || '').trim();
+  const hasta = String(document.getElementById('reporteHasta')?.value || '').trim();
+
+  if(!desde || !hasta){
+    Swal.fire({ icon:'warning', title:'Debes seleccionar ambas fechas' });
+    return;
+  }
+
+  const d1 = parseDMYLocal(desde);
+  const d2 = parseDMYLocal(hasta);
+  if(!d1 || !d2){
+    Swal.fire({ icon:'warning', title:'Formato de fecha inválido' });
+    return;
+  }
+  if(d2 < d1){
+    Swal.fire({ icon:'warning', title:'Rango inválido', text:'Hasta debe ser mayor o igual a Desde.' });
+    return;
+  }
+
+  // Reglas pedidas:
+  const hoy = new Date();
+  const hoy0 = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+  const ayer0 = new Date(hoy0); ayer0.setDate(ayer0.getDate()-1);
+
+  if(d1 > ayer0){
+    Swal.fire({ icon:'warning', title:'Desde inválido', text:'Desde solo permite hasta ayer.' });
+    return;
+  }
+  if(d2 > hoy0){
+    Swal.fire({ icon:'warning', title:'Hasta inválido', text:'Hasta solo permite hasta hoy.' });
+    return;
+  }
+
+  REPORTE_STATE.desde = desde;
+  REPORTE_STATE.hasta = hasta;
+
+  const lbl = document.getElementById('reporte-rango-label');
+  if(lbl) lbl.textContent = `REPORTE ENTRE ${desde} HASTA ${hasta}`;
+
+  cancelarPickerReporte();
+}
+
+document.getElementById('btn-reporte-volver').addEventListener('click', ()=>{
+  playSoundOnce(SOUNDS.back);
+  showView('view-inicio');
+});
+
+document.getElementById('btn-generar-reporte').addEventListener('click', async ()=>{
+  playSoundOnce(SOUNDS.login);
+
+  const prof = String(currentUser?.profesional || '').trim();
+  const desde = String(REPORTE_STATE.desde || '').trim();
+  const hasta = String(REPORTE_STATE.hasta || '').trim();
+
+  if(!desde || !hasta){
+    Swal.fire({ icon:'warning', title:'Filtro requerido', text:'Selecciona Desde y Hasta.' });
+    return;
+  }
+
+  try{
+    const data = await apiGet('reporteAprobadasUrl', { desde, hasta, responsable: prof });
+
+    if(!data || !data.url){
+      Swal.fire({ icon:'info', title:'Sin datos', text:'No se generó el archivo.' });
+      return;
+    }
+
+    // Descarga
+    window.open(data.url, '_blank');
+
+    // Limpieza (best-effort)
+    if(data.cleanupToken){
+      try{
+        await apiPost('cleanupReporte', { cleanupToken: data.cleanupToken });
+      }catch(_){}
+    }
+
+    Swal.fire({ icon:'success', title:'Reporte generado', timer:1400, showConfirmButton:false });
+  }catch(e){
+    Swal.fire({ icon:'error', title:'Error', text:e.message });
+  }
 });
 
 /* ================== CONTRATISTAS ================== */
