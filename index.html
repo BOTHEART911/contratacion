@@ -1481,19 +1481,17 @@ document.getElementById('btn-generar-reporte').addEventListener('click', async (
       return;
     }
 
-    const url = String(data.url || '').trim();
+   const url = String(data.url || '').trim();
     const filename = String(data.filename || '').trim() || ('REPORTE_REVISION_' + desde.replace(/\//g,'-') + '_A_' + hasta.replace(/\//g,'-') + '.xlsx');
 
-    // Descarga: abre el endpoint de descarga directa y asigna nombre (si el navegador lo respeta)
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.target = '_blank';
-    a.rel = 'noopener';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    // Descarga más compatible: abrir en nueva pestaña (Drive fuerza descarga con uc?export=download)
+    if(!url){
+      Swal.fire({ icon:'info', title:'Sin URL de descarga', text:'No se pudo obtener el enlace del archivo.' });
+      return;
+    }
 
+    window.open(url, '_blank', 'noopener');
+    
     // Limpieza (best-effort)
     if(data.cleanupToken){
       try{
