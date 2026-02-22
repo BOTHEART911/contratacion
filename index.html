@@ -2226,6 +2226,7 @@ document.getElementById('rc-guardar').addEventListener('click', async ()=>{
       await apiPost('aprobarCuenta',{
         documento,
         informe,
+        estadoAprobada: 'APROBAR',
         responsable: (currentUser?.profesional || '').trim()
       });
       if(telContratista){
@@ -2241,7 +2242,13 @@ document.getElementById('rc-guardar').addEventListener('click', async ()=>{
     }
   } else if(rs.isDenied){
     try{
-      await apiPost('devolverCuenta',{documento,informe,observaciones:observ});
+      await apiPost('devolverCuenta',{
+        documento,
+        informe,
+        observaciones: observ,
+        estadoAprobada: 'DEVOLVER',
+        responsable: (currentUser?.profesional || '').trim()
+      });
       if(supervisorGrupoId){
         // Se envía tal cual como "number" porque el backend acepta grupo también
         sendBuilderbotMessage(supervisorGrupoId, msgDevueltaSupervisor());
