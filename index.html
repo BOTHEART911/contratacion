@@ -1473,18 +1473,21 @@ document.getElementById('btn-generar-reporte').addEventListener('click', async (
     const data = await apiGet('reporteAprobadasUrl', { desde, hasta, responsable: prof });
 
     if(!data || !data.url){
-      const dbg = data && data.debug ? JSON.stringify(data.debug, null, 2) : '';
       Swal.fire({
         icon:'info',
-        title:'Sin datos',
-        html: 'No se generó el archivo.' + (dbg ? '<pre style="text-align:left;white-space:pre-wrap;max-height:240px;overflow:auto;">'+dbg+'</pre>' : '')
+        title:'NO HAY REVISIONES EN ESTE RANGO DE FECHAS',
+        text:'Revisa bien el rango seleccionado'
       });
       return;
     }
 
-    // Descarga (forzar descarga real)
+    const url = String(data.url || '').trim();
+    const filename = String(data.filename || '').trim() || ('REPORTE_REVISION_' + desde.replace(/\//g,'-') + '_A_' + hasta.replace(/\//g,'-') + '.xlsx');
+
+    // Descarga: abre el endpoint de descarga directa y asigna nombre (si el navegador lo respeta)
     const a = document.createElement('a');
-    a.href = data.url;
+    a.href = url;
+    a.download = filename;
     a.target = '_blank';
     a.rel = 'noopener';
     document.body.appendChild(a);
