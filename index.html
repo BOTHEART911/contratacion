@@ -1473,8 +1473,14 @@ document.getElementById('btn-generar-reporte').addEventListener('click', async (
       return;
     }
 
-    // Descarga
-    window.open(data.url, '_blank');
+    // Descarga (forzar descarga real)
+    const a = document.createElement('a');
+    a.href = data.url;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
 
     // Limpieza (best-effort)
     if(data.cleanupToken){
