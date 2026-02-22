@@ -1373,7 +1373,15 @@ function buildDateListDMY(maxDate, minDate){
   const realMin = (minD.getTime() <= maxD.getTime()) ? minD : maxD;
   const realMax = (minD.getTime() <= maxD.getTime()) ? maxD : minD;
 
-  const list = buildDateListDMY(realMin, realMax);
+  // 2) Si el backend devuelve lista exacta de fechas con datos, úsala
+  //    (evita seleccionar rangos sin registros).
+  let list = [];
+  if (mm && Array.isArray(mm.fechas) && mm.fechas.length){
+    list = mm.fechas;
+  } else {
+    // Fallback anterior (si el backend no envía fechas)
+    list = buildDateListDMY(realMin, realMax);
+  }
 
   selDesde.innerHTML = '';
   selHasta.innerHTML = '';
