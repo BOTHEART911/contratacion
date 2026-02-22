@@ -1443,7 +1443,12 @@ document.getElementById('btn-generar-reporte').addEventListener('click', async (
     const data = await apiGet('reporteAprobadasUrl', { desde, hasta, responsable: prof });
 
     if(!data || !data.url){
-      Swal.fire({ icon:'info', title:'Sin datos', text:'No se generó el archivo.' });
+      const dbg = data && data.debug ? JSON.stringify(data.debug, null, 2) : '';
+      Swal.fire({
+        icon:'info',
+        title:'Sin datos',
+        html: 'No se generó el archivo.' + (dbg ? '<pre style="text-align:left;white-space:pre-wrap;max-height:240px;overflow:auto;">'+dbg+'</pre>' : '')
+      });
       return;
     }
 
