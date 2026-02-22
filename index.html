@@ -1342,54 +1342,6 @@ function buildDateListDMY(maxDate, minDate){
     return `${dd}/${mm}/${yy}`;
   }
 
-  function buildDateListDMY(minDate, maxDate){
-    const out = [];
-    const a = new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate());
-    const b = new Date(maxDate.getFullYear(), maxDate.getMonth(), maxDate.getDate());
-    for(let d=new Date(a); d<=b; d.setDate(d.getDate()+1)){
-      out.push(formatDMYLocal(d));
-    }
-    return out;
-  }
-
-  // 1) Consultar al backend cuál es el min/max real de fechas en APROBADAS para este usuario
-  let mm = null;
-  try{
-    const prof = String(currentUser?.profesional || '').trim();
-    mm = await apiGet('reporteAprobadasMinMax', { responsable: prof });
-  }catch(e){
-    mm = null;
-  }
-
-  // Fallback si algo falla
-  const fallbackMin = new Date(2026,0,1);
-  const fallbackMax = new Date();
-  fallbackMax.setHours(0,0,0,0);
-
-  const minD = parseDMYLocal(mm?.min || '') || fallbackMin;
-  const maxD = parseDMYLocal(mm?.max || '') || fallbackMax;
-
-  // Si por algún motivo min > max, corrige
-  const realMin = (minD.getTime() <= maxD.getTime()) ? minD : maxD;
-  const realMax = (minD.getTime() <= maxD.getTime()) ? maxD : minD;
-
-  const list = buildDateListDMY(realMin, realMax);
-
-  selDesde.innerHTML = '';
-  selHasta.innerHTML = '';
-
-  list.forEach(v=>{
-    const o1 = document.createElement('option');
-    o1.value = v;
-    o1.textContent = v;
-    selDesde.appendChild(o1);
-
-    const o2 = document.createElement('option');
-    o2.value = v;
-    o2.textContent = v;
-    selHasta.appendChild(o2);
-  });
-
     // 2) Si el backend devuelve lista exacta de fechas con datos, úsala
   //    (evita seleccionar rangos sin registros).
   let list = [];
@@ -1398,6 +1350,13 @@ function buildDateListDMY(maxDate, minDate){
   } else {
     // Fallback anterior (si el backend no envía fechas)
     list = buildDateListDMY(realMin, realMax);
+
+      // Defaults: desde=min, hasta=max
+  if(list.length){
+    selDesde.value = list[0];
+    selHasta.value = list[list.length-1];
+  }
+})();
 
 document.getElementById('btn-open-reporte-fechas').addEventListener('click', ()=>{
   playSoundOnce(SOUNDS.login);
