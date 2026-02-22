@@ -1390,6 +1390,16 @@ function buildDateListDMY(maxDate, minDate){
     selHasta.appendChild(o2);
   });
 
+    // 2) Si el backend devuelve lista exacta de fechas con datos, úsala
+  //    (evita seleccionar rangos sin registros).
+  let list = [];
+  if (mm && Array.isArray(mm.fechas) && mm.fechas.length){
+    list = mm.fechas;
+  } else {
+    // Fallback anterior (si el backend no envía fechas)
+    list = buildDateListDMY(realMin, realMax);
+
+    
   // Defaults: desde=min, hasta=max
   if(list.length){
     selDesde.value = list[0];
