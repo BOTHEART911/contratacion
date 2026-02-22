@@ -1,12 +1,5 @@
 <!doctype html>
-<html lang="es">
-<head>
-  <meta charset="utf-8" />
-  <title>CONTRATACIÓN</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="icon" href="https://res.cloudinary.com/dqqeavica/image/upload/v1766609125/contratacion_uuoyf7.png">
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<html 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
   <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -1928,6 +1921,7 @@ function renderRevisionCuenta(){
     `<p><b>INICIO DE PERIODO RATIFICADO:</b> ${cu?.inicioRatificar||''}</p>`,
     `<p><b>FIN DE PERIODO RATIFICADO:</b> ${cu?.finRatificar||''}</p>`,
     `<h4 style="margin:14px 0 4px;color:var(--primary)">RELACIÓN DE PAGO</h4>`,
+    `<p><b>N° FACTURA DIGITAL:</b> ${cu?.facturaDigital || 'N/A'}</p>`,
     `<p><b>SALDO ACTUAL:</b> ${cu?.saldoActual||''}</p>`,
     `<p><b>VALOR COBRADO:</b> ${cu?.menos||''}</p>`,
     `<p><b>NUEVO SALDO:</b> ${cu?.nuevoSaldo||''}</p>`
