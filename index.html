@@ -1490,20 +1490,12 @@ document.getElementById('btn-generar-reporte').addEventListener('click', async (
   });
 
   try{
-     const data = await apiGet('reporteAprobadasUrl', { desde, hasta, responsable: prof });
+    const data = await apiGet('reporteAprobadasUrl', { desde, hasta, responsable: prof });
 
     await Swal.close();
 
-    if(!data || !data.base64){
-      Swal.fire({
-        icon:'info',
-        title:'NO HAY REVISIONES EN ESTE RANGO DE FECHAS',
-        text:'Revisa bien el rango seleccionado'
-      });
-      return;
-    }
-
-    if(!data || !data.exportUrl){
+    // Este endpoint devuelve exportUrl. Si no hay registros en el rango retorna created:false o exportUrl vacío.
+    if(!data || data.created === false || !data.exportUrl){
       Swal.fire({
         icon:'info',
         title:'NO HAY REVISIONES EN ESTE RANGO DE FECHAS',
