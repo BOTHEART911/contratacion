@@ -1352,7 +1352,29 @@ function buildDateListDMY(maxDate, minDate){
     return out;
   }
 
-  // 1) Consultar al backend cuál es el min/max real de fechas en APROBADAS para este usuario
+  // Helpers para habilitar/deshabilitar Hasta
+  function disableHasta(){
+    selHasta.innerHTML = '';
+    selHasta.disabled = true;
+  }
+  function enableHasta(){
+    selHasta.disabled = false;
+  }
+  function fillHastaFrom(desdeValue, fullList){
+    const idx = fullList.indexOf(desdeValue);
+    const sub = (idx >= 0) ? fullList.slice(idx) : fullList.slice();
+    selHasta.innerHTML = '';
+    sub.forEach(v=>{
+      const o = document.createElement('option');
+      o.value = v;
+      o.textContent = v;
+      selHasta.appendChild(o);
+    });
+    // Hasta arranca igual a Desde
+    if(sub.length) selHasta.value = sub[0];
+  }
+
+  // 1) Consultar al backend (se mantiene), pero se impone mínimo fijo 16/02/2026 para "Desde"
   let mm = null;
   try{
     const prof = String(currentUser?.profesional || '').trim();
@@ -1361,47 +1383,62 @@ function buildDateListDMY(maxDate, minDate){
     mm = null;
   }
 
-  // Fallback si algo falla
-  const fallbackMin = new Date(2026,0,1);
-  const fallbackMax = new Date();
-  fallbackMax.setHours(0,0,0,0);
+  // Mínimo fijo solicitado: 16/02/2026
+  const fixedMinDesde = parseDMYLocal('16/02/2026');
 
-  const minD = parseDMYLocal(mm?.min || '') || fallbackMin;
-  const maxD = parseDMYLocal(mm?.max || '') || fallbackMax;
+  // Máximo: hoy (como antes)
+  const today = new Date();
+  today.setHours(0,0,0,0);
 
-  // Si por algún motivo min > max, corrige
-  const realMin = (minD.getTime() <= maxD.getTime()) ? minD : maxD;
-  const realMax = (minD.getTime() <= maxD.getTime()) ? maxD : minD;
+  // Si backend trae min/max, úsalo solo para max (si viene más bajo/alto), pero NO permitas desde < 16/02/2026
+  const backendMax = parseDMYLocal(mm?.max || '');
+  const realMax = (backendMax && backendMax <= today) ? backendMax : today;
 
-  // 2) Si el backend devuelve lista exacta de fechas con datos, úsala
-  //    (evita seleccionar rangos sin registros).
-  let list = [];
-  if (mm && Array.isArray(mm.fechas) && mm.fechas.length){
-    list = mm.fechas;
-  } else {
-    // Fallback anterior (si el backend no envía fechas)
-    list = buildDateListDMY(realMin, realMax);
-  }
+  // Min real = 16/02/2026 (fijo) siempre
+  const realMin = fixedMinDesde;
 
+  // Lista completa de fechas: desde 16/02/2026 hasta hoy (o backendMax si es menor que hoy)
+  // Nota: si realMin > realMax por algún caso raro, protegemos.
+  const listFull = (realMin && realMax && realMin <= realMax)
+    ? buildDateListDMY(realMin, realMax)
+    : [];
+
+  // Pinta "Desde"
   selDesde.innerHTML = '';
-  selHasta.innerHTML = '';
-
-  list.forEach(v=>{
+  listFull.forEach(v=>{
     const o1 = document.createElement('option');
     o1.value = v;
     o1.textContent = v;
     selDesde.appendChild(o1);
-
-    const o2 = document.createElement('option');
-    o2.value = v;
-    o2.textContent = v;
-    selHasta.appendChild(o2);
   });
 
-  // Defaults: desde=min, hasta=max
-  if(list.length){
-    selDesde.value = list[0];
-    selHasta.value = list[list.length-1];
+  // 1) "Hasta" NO activa hasta escoger "Desde"
+  disableHasta();
+
+  // Cuando seleccionen "Desde", activar y poblar "Hasta" desde esa fecha hasta hoy
+  function onDesdeSelected(){
+    const desdeVal = String(selDesde.value || '').trim();
+    if(!desdeVal){
+      disableHasta();
+      return;
+    }
+    enableHasta();
+    fillHastaFrom(desdeVal, listFull);
+  }
+
+  // Listener (evita duplicarlo si esta IIFE se ejecutara más de una vez)
+  if(!selDesde.dataset.boundHasta){
+    selDesde.dataset.boundHasta = '1';
+    selDesde.addEventListener('change', onDesdeSelected);
+    selDesde.addEventListener('input', onDesdeSelected);
+  }
+
+  // 2) "Desde" arranca por defecto en 16/02/2026 (primer elemento de la lista)
+  if(listFull.length){
+    selDesde.value = listFull[0]; // 16/02/2026
+    // NO activamos "Hasta" aquí (solo se activa cuando el usuario seleccione "Desde")
+    // Si quieres que se active automáticamente al abrir, descomenta:
+    // onDesdeSelected();
   }
 })();
 
