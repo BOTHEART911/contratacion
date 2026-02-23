@@ -1469,8 +1469,31 @@ document.getElementById('btn-generar-reporte').addEventListener('click', async (
     return;
   }
 
+  // Desactivar loader global para esta operación y usar SweetAlert loading
+  const prevSuppress = (typeof suppressLoader !== 'undefined') ? suppressLoader : null;
+  if(typeof suppressLoader !== 'undefined') suppressLoader = true;
+
+  // Fuerza a ocultar el loader global si llegara a estar visible
+  loadingCount = 0;
+  if (loaderTimer){ clearTimeout(loaderTimer); loaderTimer = null; }
+  const prevLoaderDisplay = loader?.style.display;
+  if(loader){
+    loader.classList.add('hidden');
+    loader.style.display = 'none';
+  }
+
+  Swal.fire({
+    title: 'GENERANDO REPORTE...',
+    html: 'Espera unos segundos mientras genero tu archivo<br><br>Hacemos todo por ti 👩🏻‍💻',
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    didOpen: () => { Swal.showLoading(); }
+  });
+
   try{
     const data = await apiGet('reporteAprobadasUrl', { desde, hasta, responsable: prof });
+
+    await Swal.close();
 
     if(!data || !data.url){
       Swal.fire({
@@ -1481,18 +1504,23 @@ document.getElementById('btn-generar-reporte').addEventListener('click', async (
       return;
     }
 
-   const url = String(data.url || '').trim();
-    const filename = String(data.filename || '').trim() || ('REPORTE_REVISION_' + desde.replace(/\//g,'-') + '_A_' + hasta.replace(/\//g,'-') + '.xlsx');
+    const url = String(data.url || '').trim();
 
-    // Descarga más compatible: abrir en nueva pestaña (Drive fuerza descarga con uc?export=download)
-    if(!url){
-      Swal.fire({ icon:'info', title:'Sin URL de descarga', text:'No se pudo obtener el enlace del archivo.' });
-      return;
+    const isMobile = /android|iphone|ipad|mobile/i.test(navigator.userAgent);
+
+    if(isMobile){
+      window.open(url,'_blank');
+    }else{
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = '_self';
+      a.rel = 'noopener';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     }
 
-    window.open(url, '_blank', 'noopener');
-    
-    // Limpieza (best-effort)
+    // Limpieza definitiva del temporal (best-effort)
     if(data.cleanupToken){
       try{
         await apiPost('cleanupReporte', { cleanupToken: data.cleanupToken });
@@ -1501,7 +1529,17 @@ document.getElementById('btn-generar-reporte').addEventListener('click', async (
 
     Swal.fire({ icon:'success', title:'Reporte generado', timer:1400, showConfirmButton:false });
   }catch(e){
-    Swal.fire({ icon:'error', title:'Error', text:e.message });
+    try{ await Swal.close(); }catch(_){}
+    Swal.fire({ icon:'error', title:'Error', text:String(e.message||e) });
+  }finally{
+    if(typeof suppressLoader !== 'undefined') suppressLoader = prevSuppress;
+
+    loadingCount = 0;
+    if (loaderTimer){ clearTimeout(loaderTimer); loaderTimer = null; }
+    if(loader){
+      loader.style.display = prevLoaderDisplay || '';
+      loader.classList.add('hidden');
+    }
   }
 });
 
