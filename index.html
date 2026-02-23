@@ -1469,11 +1469,10 @@ document.getElementById('btn-generar-reporte').addEventListener('click', async (
     return;
   }
 
-  // Desactivar loader global para esta operación y usar SweetAlert loading
+  // Suprime loader global (misma lógica usada en indexref.md para descargas)
   const prevSuppress = (typeof suppressLoader !== 'undefined') ? suppressLoader : null;
   if(typeof suppressLoader !== 'undefined') suppressLoader = true;
 
-  // Fuerza a ocultar el loader global si llegara a estar visible
   loadingCount = 0;
   if (loaderTimer){ clearTimeout(loaderTimer); loaderTimer = null; }
   const prevLoaderDisplay = loader?.style.display;
@@ -1491,11 +1490,11 @@ document.getElementById('btn-generar-reporte').addEventListener('click', async (
   });
 
   try{
-    const data = await apiGet('reporteAprobadasUrl', { desde, hasta, responsable: prof });
+    const data = await apiGet('reporteAprobadasBase64', { desde, hasta, responsable: prof });
 
     await Swal.close();
 
-    if(!data || !data.url){
+    if(!data || !data.base64){
       Swal.fire({
         icon:'info',
         title:'NO HAY REVISIONES EN ESTE RANGO DE FECHAS',
@@ -1504,21 +1503,28 @@ document.getElementById('btn-generar-reporte').addEventListener('click', async (
       return;
     }
 
-    const url = String(data.url || '').trim();
-
-    const isMobile = /android|iphone|ipad|mobile/i.test(navigator.userAgent);
-
-    if(isMobile){
-      window.open(url,'_blank');
-    }else{
-      const a = document.createElement('a');
-      a.href = url;
-      a.target = '_self';
-      a.rel = 'noopener';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+    const byteCharacters = atob(String(data.base64 || ''));
+    const byteArrays = [];
+    const sliceSize = 1024;
+    for(let offset = 0; offset < byteCharacters.length; offset += sliceSize){
+      const slice = byteCharacters.slice(offset, offset + sliceSize);
+      const byteNumbers = new Array(slice.length);
+      for(let i = 0; i < slice.length; i++){
+        byteNumbers[i] = slice.charCodeAt(i);
+      }
+      byteArrays.push(new Uint8Array(byteNumbers));
     }
+
+    const blob = new Blob(byteArrays, { type: data.contentType || 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = data.fileName || ('REPORTE_REVISION_' + prof + '.xlsx');
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 5000);
 
     // Limpieza definitiva del temporal (best-effort)
     if(data.cleanupToken){
@@ -1527,7 +1533,7 @@ document.getElementById('btn-generar-reporte').addEventListener('click', async (
       }catch(_){}
     }
 
-    Swal.fire({ icon:'success', title:'Reporte generado', timer:1400, showConfirmButton:false });
+    Swal.fire({ icon:'success', title:'REPORTE GENERADO', timer:1400, showConfirmButton:false });
   }catch(e){
     try{ await Swal.close(); }catch(_){}
     Swal.fire({ icon:'error', title:'Error', text:String(e.message||e) });
