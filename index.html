@@ -1490,7 +1490,7 @@ document.getElementById('btn-generar-reporte').addEventListener('click', async (
   });
 
   try{
-    const data = await apiGet('reporteAprobadasBase64', { desde, hasta, responsable: prof });
+     const data = await apiGet('reporteAprobadasUrl', { desde, hasta, responsable: prof });
 
     await Swal.close();
 
@@ -1503,34 +1503,33 @@ document.getElementById('btn-generar-reporte').addEventListener('click', async (
       return;
     }
 
-    const byteCharacters = atob(String(data.base64 || ''));
-    const byteArrays = [];
-    const sliceSize = 1024;
-    for(let offset = 0; offset < byteCharacters.length; offset += sliceSize){
-      const slice = byteCharacters.slice(offset, offset + sliceSize);
-      const byteNumbers = new Array(slice.length);
-      for(let i = 0; i < slice.length; i++){
-        byteNumbers[i] = slice.charCodeAt(i);
-      }
-      byteArrays.push(new Uint8Array(byteNumbers));
+    if(!data || !data.exportUrl){
+      Swal.fire({
+        icon:'info',
+        title:'NO HAY REVISIONES EN ESTE RANGO DE FECHAS',
+        text:'Revisa bien el rango seleccionado'
+      });
+      return;
     }
 
-    const blob = new Blob(byteArrays, { type: data.contentType || 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    const url = URL.createObjectURL(blob);
+    const url = String(data.exportUrl || '').trim();
+    if(!url){
+      Swal.fire({ icon:'error', title:'Error', text:'No se recibió la URL de descarga.' });
+      return;
+    }
 
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = data.fileName || ('REPORTE_REVISION_' + prof + '.xlsx');
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(()=>URL.revokeObjectURL(url), 5000);
-
-    // Limpieza definitiva del temporal (best-effort)
-    if(data.cleanupToken){
-      try{
-        await apiPost('cleanupReporte', { cleanupToken: data.cleanupToken, hardDelete: true });
-      }catch(_){}
+    // Descarga por navegación (misma lógica que Descargar Egresos en indexref.md)
+    const isMobile = /android|iphone|ipad|mobile/i.test(navigator.userAgent);
+    if(isMobile){
+      window.open(url,'_blank');
+    }else{
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = '_self';
+      a.rel = 'noopener';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     }
 
     Swal.fire({ icon:'success', title:'REPORTE GENERADO', timer:1400, showConfirmButton:false });
