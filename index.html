@@ -1370,8 +1370,9 @@ function buildDateListDMY(maxDate, minDate){
       o.textContent = v;
       selHasta.appendChild(o);
     });
-    // Hasta arranca igual a Desde
-    if(sub.length) selHasta.value = sub[0];
+    if(sub.length){
+      selHasta.value = sub[0]; // Hasta arranca igual a Desde
+    }
   }
 
   // 1) Consultar al backend (se mantiene), pero se impone mínimo fijo 16/02/2026 para "Desde"
@@ -1390,15 +1391,13 @@ function buildDateListDMY(maxDate, minDate){
   const today = new Date();
   today.setHours(0,0,0,0);
 
-  // Si backend trae min/max, úsalo solo para max (si viene más bajo/alto), pero NO permitas desde < 16/02/2026
+  // Si backend trae max, úsalo si es <= hoy; si no, hoy
   const backendMax = parseDMYLocal(mm?.max || '');
   const realMax = (backendMax && backendMax <= today) ? backendMax : today;
 
-  // Min real = 16/02/2026 (fijo) siempre
+  // Min real fijo
   const realMin = fixedMinDesde;
 
-  // Lista completa de fechas: desde 16/02/2026 hasta hoy (o backendMax si es menor que hoy)
-  // Nota: si realMin > realMax por algún caso raro, protegemos.
   const listFull = (realMin && realMax && realMin <= realMax)
     ? buildDateListDMY(realMin, realMax)
     : [];
@@ -1412,13 +1411,13 @@ function buildDateListDMY(maxDate, minDate){
     selDesde.appendChild(o1);
   });
 
-  // 1) "Hasta" NO activa hasta escoger "Desde"
+  // (1) Hasta deshabilitado inicialmente
   disableHasta();
 
-  // Cuando seleccionen "Desde", activar y poblar "Hasta" desde esa fecha hasta hoy
+  // Cuando seleccionen "Desde" (CLAVE: usar 'click' porque es <select size="10">)
   function onDesdeSelected(){
     const desdeVal = String(selDesde.value || '').trim();
-    if(!desdeVal){
+    if(!desdeVal || !listFull.length){
       disableHasta();
       return;
     }
@@ -1426,22 +1425,21 @@ function buildDateListDMY(maxDate, minDate){
     fillHastaFrom(desdeVal, listFull);
   }
 
-  // Listener (evita duplicarlo si esta IIFE se ejecutara más de una vez)
+  // Bind una sola vez
   if(!selDesde.dataset.boundHasta){
     selDesde.dataset.boundHasta = '1';
+    selDesde.addEventListener('click', onDesdeSelected);   // <- esto arregla tu caso
     selDesde.addEventListener('change', onDesdeSelected);
     selDesde.addEventListener('input', onDesdeSelected);
   }
 
-  // 2) "Desde" arranca por defecto en 16/02/2026 (primer elemento de la lista)
+  // (2) Desde default 16/02/2026 y (3) Hasta inicia desde ese valor inmediatamente
+  //     para que el modal no quede vacío al abrir.
   if(listFull.length){
     selDesde.value = listFull[0]; // 16/02/2026
-    // NO activamos "Hasta" aquí (solo se activa cuando el usuario seleccione "Desde")
-    // Si quieres que se active automáticamente al abrir, descomenta:
-    // onDesdeSelected();
+    onDesdeSelected();            // llena Hasta desde 16/02/2026 hasta hoy
   }
 })();
-
 
 document.getElementById('btn-open-reporte-fechas').addEventListener('click', ()=>{
   playSoundOnce(SOUNDS.login);
