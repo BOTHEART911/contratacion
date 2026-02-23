@@ -1529,7 +1529,7 @@ document.getElementById('btn-generar-reporte').addEventListener('click', async (
     // Limpieza definitiva del temporal (best-effort)
     if(data.cleanupToken){
       try{
-        await apiPost('cleanupReporte', { cleanupToken: data.cleanupToken });
+        await apiPost('cleanupReporte', { cleanupToken: data.cleanupToken, hardDelete: true });
       }catch(_){}
     }
 
