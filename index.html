@@ -868,17 +868,7 @@
 </div>
         
         <h3 style="color:var(--primary); margin-top:18px;">TUS OBSERVACIONES</h3>
-        <textarea
-  id="rc-observaciones"
-  rows="4"
-  placeholder="Edita solo si vas a devolver la cuenta…"
-  lang="es-CO"
-  spellcheck="true"
-  autocomplete="on"
-  autocapitalize="sentences"
-  autocorrect="on"
-  inputmode="text"
-></textarea>
+        <textarea id="rc-observaciones" rows="4" placeholder="Edita solo si vas a devolver la cuenta…"></textarea>
 
         <div class="btn-row spaced">
           <button id="rc-guardar" class="btn-primary">Guardar</button>
@@ -3689,18 +3679,6 @@ async function abrirVistaAdicion(documento){
       }
     });
   }
-})();
-
-  /* Autocorrector */
-  (function enableSpanishSpellcheckObservaciones(){
-  const el = document.getElementById('rc-observaciones');
-  if(!el) return;
-
-  el.setAttribute('lang', 'es-CO');
-  el.setAttribute('spellcheck', 'true');
-  el.setAttribute('autocomplete', 'on');
-  el.setAttribute('autocapitalize', 'sentences');
-  el.setAttribute('autocorrect', 'on');
 })();
   
 /* ================== FIN ================== */
