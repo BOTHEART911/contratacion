@@ -2546,8 +2546,8 @@ document.getElementById('rc-guardar').addEventListener('click', async ()=>{
       'Estimado(a) *'+nombre+'*\n\n' +
       '¡Tu *Cuenta N° '+informe+'* ha sido *Aprobada*!, sigue estos pasos:\n' + 
       '- En la *App Contratista*, toma la opción *MI CUENTA DRIVE*, descarga los documentos de la carpeta *CUENTA '+informe+'*.\n' + 
-      '- Para realizar correctamente este proceso, revisa los TUTORIALES ne la App.\n' + 
-      '> Puedes descargar el documento *Guía Plan de Pagos* en el catálogo de esta cuenta WhatsApp.\n' + 
+      '- Para realizar correctamente este proceso, revisa los TUTORIALES en la App.\n' + 
+      '> Puedes descargar el documento *Guía Plan de Pagos* en el catálogo de esta cuenta WhatsApp 🛒\n' + 
       'Una vez términes correctamente este proceso, toma la opción *PLAN DE PAGOS* para avisarle a tu Supervisor.\n\n' +
       'Cordialmente,\n\n*Equipo de Contratación*\n> Alcaldía de Flandes'
     );
@@ -2556,7 +2556,8 @@ document.getElementById('rc-guardar').addEventListener('click', async ()=>{
     return (
       'Estimado(a) *'+nombre+'*\n\n' +
       'Se ha devuelto tu *Cuenta N° '+informe+'* por esta inconsistencia que omitió tu supervisor(a):\n\n*'+(observ || 'Sin observaciones')+'*\n\n' +
-      'Haz la corrección desde la *App Contratista* teniendo en cuenta las observaciones anteriores.\n\n' +
+      'Haz la corrección desde la *App Contratista* teniendo en cuenta las observaciones anteriores.\n' +
+      'Una vez corregida, vuelve a reportarla a tu supervisor.' + '\n\n' +
       'Cordialmente,\n\n*Equipo de Contratación*\n> Alcaldía de Flandes'
     );
   }
