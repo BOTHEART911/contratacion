@@ -2575,7 +2575,7 @@ document.getElementById('rc-guardar').addEventListener('click', async ()=>{
       await apiPost('aprobarCuenta',{
         documento,
         informe,
-        estadoAprobada: 'APROBAR',
+        estadoAprobada: 'APROBADA',
         responsable: (currentUser?.profesional || '').trim()
       });
       if(telContratista){
