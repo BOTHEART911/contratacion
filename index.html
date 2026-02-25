@@ -480,8 +480,7 @@
 </style>
 </head>
 <body>
- <!-- Loader -->
-<div id="loader" class="loader hidden" aria-live="polite" aria-busy="true" style="display:none;">
+<div id="loader" class="loader hidden" aria-live="polite" aria-busy="true">
   <div class="spinner-ios" role="status" aria-label="Cargando">
     <i></i><i></i><i></i><i></i><i></i><i></i>
     <i></i><i></i><i></i><i></i><i></i><i></i>
@@ -1011,24 +1010,22 @@ if (window.Swal && typeof Swal.fire === 'function'){
 const loader = document.getElementById('loader');
 let loadingCount = 0;
 let loaderTimer = null;
+// NUEVO: bandera para suprimir el loader global en flujos específicos
+let suppressLoader = false;
 
 function startLoading(){
+  if (suppressLoader) return;        // si está activa, no mostrar loader global
   loadingCount++;
   if (loadingCount === 1){
-    loaderTimer = setTimeout(()=>{
-      loader.classList.remove('hidden');
-      loaderTimer = null;
-    }, 120);
+    loaderTimer = setTimeout(()=>{ loader.classList.remove('hidden'); loaderTimer = null; }, 120);
   }
 }
 function stopLoading(){
+  if (suppressLoader) return;        // si está activa, ignorar cierres
   if (loadingCount === 0) return;
   loadingCount--;
   if (loadingCount === 0){
-    if (loaderTimer){
-      clearTimeout(loaderTimer);
-      loaderTimer = null;
-    }
+    if (loaderTimer){ clearTimeout(loaderTimer); loaderTimer = null; }
     loader.classList.add('hidden');
   }
 }
