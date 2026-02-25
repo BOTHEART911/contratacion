@@ -1349,7 +1349,6 @@ function buildDateListDMY(maxDate, minDate){
     return out;
   }
 
-  // Helpers para habilitar/deshabilitar Hasta
   function disableHasta(){
     selHasta.innerHTML = '';
     selHasta.disabled = true;
@@ -1368,38 +1367,68 @@ function buildDateListDMY(maxDate, minDate){
       selHasta.appendChild(o);
     });
     if(sub.length){
-      selHasta.value = sub[0]; // Hasta arranca igual a Desde
+      selHasta.value = sub[0];
     }
   }
 
-  // 1) Consultar al backend (se mantiene), pero se impone mínimo fijo 16/02/2026 para "Desde"
+  function fixedMinForUser(profUpper){
+    if(profUpper === 'YESICA ALFARO') return '16/02/2026';
+    if(profUpper === 'OSCAR POLANIA') return '01/01/2026';
+    return '01/01/2026';
+  }
+
+  function setListWithFixedMin(){
+    const profUp = String(currentUser?.profesional || '').trim().toUpperCase();
+    const fixedMin = parseDMYLocal(fixedMinForUser(profUp));
+
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    const listFull = (fixedMin && fixedMin <= today) ? buildDateListDMY(fixedMin, today) : [];
+
+    selDesde.innerHTML = '';
+    listFull.forEach(v=>{
+      const o1 = document.createElement('option');
+      o1.value = v;
+      o1.textContent = v;
+      selDesde.appendChild(o1);
+    });
+
+    disableHasta();
+
+    if(listFull.length){
+      selDesde.value = listFull[0];
+      enableHasta();
+      fillHastaFrom(selDesde.value, listFull);
+    }
+  }
+
+  disableHasta();
+
+  const prof = String(currentUser?.profesional || '').trim();
+
   let mm = null;
   try{
-    const prof = String(currentUser?.profesional || '').trim();
     mm = await apiGet('reporteAprobadasMinMax', { responsable: prof });
   }catch(e){
     mm = null;
   }
 
-  // Mínimo fijo solicitado: 16/02/2026
-  const fixedMinDesde = parseDMYLocal('16/02/2026');
+  const profUp = String(currentUser?.profesional || '').trim().toUpperCase();
+  const fixedMin = parseDMYLocal(fixedMinForUser(profUp));
 
-  // Máximo: hoy (como antes)
   const today = new Date();
   today.setHours(0,0,0,0);
 
-  // Si backend trae max, úsalo si es <= hoy; si no, hoy
   const backendMax = parseDMYLocal(mm?.max || '');
   const realMax = (backendMax && backendMax <= today) ? backendMax : today;
 
-  // Min real fijo
-  const realMin = fixedMinDesde;
+  const realMin = fixedMin;
 
   const listFull = (realMin && realMax && realMin <= realMax)
     ? buildDateListDMY(realMin, realMax)
     : [];
 
-  // Pinta "Desde"
   selDesde.innerHTML = '';
   listFull.forEach(v=>{
     const o1 = document.createElement('option');
@@ -1408,10 +1437,8 @@ function buildDateListDMY(maxDate, minDate){
     selDesde.appendChild(o1);
   });
 
-  // (1) Hasta deshabilitado inicialmente
   disableHasta();
 
-  // Cuando seleccionen "Desde" (CLAVE: usar 'click' porque es <select size="10">)
   function onDesdeSelected(){
     const desdeVal = String(selDesde.value || '').trim();
     if(!desdeVal || !listFull.length){
@@ -1422,19 +1449,18 @@ function buildDateListDMY(maxDate, minDate){
     fillHastaFrom(desdeVal, listFull);
   }
 
-  // Bind una sola vez
   if(!selDesde.dataset.boundHasta){
     selDesde.dataset.boundHasta = '1';
-    selDesde.addEventListener('click', onDesdeSelected);   // <- esto arregla tu caso
+    selDesde.addEventListener('click', onDesdeSelected);
     selDesde.addEventListener('change', onDesdeSelected);
     selDesde.addEventListener('input', onDesdeSelected);
   }
 
-  // (2) Desde default 16/02/2026 y (3) Hasta inicia desde ese valor inmediatamente
-  //     para que el modal no quede vacío al abrir.
   if(listFull.length){
-    selDesde.value = listFull[0]; // 16/02/2026
-    onDesdeSelected();            // llena Hasta desde 16/02/2026 hasta hoy
+    selDesde.value = listFull[0];
+    onDesdeSelected();
+  }else{
+    setListWithFixedMin();
   }
 })();
 
