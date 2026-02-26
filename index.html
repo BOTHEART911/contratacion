@@ -2605,9 +2605,6 @@ const URL_GUIA_PLAN_PAGOS = 'https://res.cloudinary.com/dqqeavica/image/upload/v
 } else {
   console.warn('Teléfono contratista inválido/no disponible');
 }
-      } else {
-        console.warn('Teléfono contratista inválido/no disponible');
-      }
       Swal.fire({icon:'success',title:'Cuenta Aprobada',timer:1800,showConfirmButton:false});
       await cargarCuentasPendientes();
       showView('view-revision');
