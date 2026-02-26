@@ -1072,7 +1072,7 @@ function normalizeContratistaNumber(raw){
   return num;
 }
 
-function sendBuilderbotMessage(destino, mensaje){
+function sendBuilderbotMessage(destino, mensaje, mediaUrl){
   const numberField = String(destino || '').trim();
   if(!numberField){
     console.warn('Destino vacío, no se envía BuilderBot');
@@ -1081,7 +1081,7 @@ function sendBuilderbotMessage(destino, mensaje){
 
   const payload = {
     messages: { content: mensaje },
-    number: numberField,
+    number: numberField,       // Puede ser número normalizado o ID de grupo
     checkIfExists: false
   };
 
@@ -1089,8 +1089,8 @@ function sendBuilderbotMessage(destino, mensaje){
   if (mediaUrl) {
     payload.messages.mediaUrl = String(mediaUrl).trim();
   }
-  
-fetch(BUILDERBOT_ENDPOINT, {
+
+  fetch(BUILDERBOT_ENDPOINT, {
     method:'POST',
     headers:{
       'Content-Type':'application/json',
