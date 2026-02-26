@@ -1058,31 +1058,43 @@ async function apiPost(action, body = {}){
 }
 
 /* ================== BUILDERBOT ================== */
-function sendBuilderbotMessage(destino, mensaje, mediaUrl){
+function normalizeContratistaNumber(raw){
+  let num = String(raw || '').replace(/\D/g,'');
+  if(!num) return '';
+  // Si tiene 10 dígitos y no comienza con 57, agregamos prefijo.
+  if(num.length === 10 && !num.startsWith('57')){
+    num = '57' + num;
+  }
+  // Formato válido esperado: 12 dígitos iniciando en 57
+  if(!(num.length === 12 && num.startsWith('57'))){
+    return '';
+  }
+  return num;
+}
+
+function sendBuilderbotMessage(destino, mensaje){
   const numberField = String(destino || '').trim();
   if(!numberField){
     console.warn('Destino vacío, no se envía BuilderBot');
     return;
   }
 
-  const payload = {
-    messages: { content: mensaje },
-    number: numberField,
-    checkIfExists: false
-  };
-
   // NUEVO: adjuntar mediaUrl solo si se envía
   if (mediaUrl) {
     payload.messages.mediaUrl = String(mediaUrl).trim();
   }
-
+  
   fetch(BUILDERBOT_ENDPOINT, {
     method:'POST',
     headers:{
       'Content-Type':'application/json',
       'x-api-builderbot':BUILDERBOT_API_KEY
     },
-    body: JSON.stringify(payload)
+    body: JSON.stringify({
+      messages: { content: mensaje },
+      number: numberField,       // Puede ser número normalizado o ID de grupo
+      checkIfExists: false
+    })
   }).catch(err => console.warn('Error enviando BuilderBot', err));
 }
 
@@ -2572,7 +2584,6 @@ document.getElementById('rc-guardar').addEventListener('click', async ()=>{
 
 // NUEVO: URL del PDF para enviar como media
 const URL_GUIA_PLAN_PAGOS = 'https://res.cloudinary.com/dqqeavica/image/upload/v1772108722/GU%C3%8DA_PLAN_DE_PAGOS_erxm5q.pdf';
-
   
   function msgDevueltaContratista(){
     return (
@@ -2600,11 +2611,11 @@ const URL_GUIA_PLAN_PAGOS = 'https://res.cloudinary.com/dqqeavica/image/upload/v
         estadoAprobada: 'APROBADA',
         responsable: (currentUser?.profesional || '').trim()
       });
-     if(telContratista){
-  sendBuilderbotMessage(telContratista, msgAprobado(), URL_GUIA_PLAN_PAGOS);
-} else {
-  console.warn('Teléfono contratista inválido/no disponible');
-}
+      if(telContratista){
+        sendBuilderbotMessage(telContratista, msgAprobado(), URL_GUIA_PLAN_PAGOS);
+      } else {
+        console.warn('Teléfono contratista inválido/no disponible');
+      }
       Swal.fire({icon:'success',title:'Cuenta Aprobada',timer:1800,showConfirmButton:false});
       await cargarCuentasPendientes();
       showView('view-revision');
