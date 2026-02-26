@@ -1079,22 +1079,24 @@ function sendBuilderbotMessage(destino, mensaje){
     return;
   }
 
+  const payload = {
+    messages: { content: mensaje },
+    number: numberField,
+    checkIfExists: false
+  };
+
   // NUEVO: adjuntar mediaUrl solo si se envía
   if (mediaUrl) {
     payload.messages.mediaUrl = String(mediaUrl).trim();
   }
   
-  fetch(BUILDERBOT_ENDPOINT, {
+fetch(BUILDERBOT_ENDPOINT, {
     method:'POST',
     headers:{
       'Content-Type':'application/json',
       'x-api-builderbot':BUILDERBOT_API_KEY
     },
-    body: JSON.stringify({
-      messages: { content: mensaje },
-      number: numberField,       // Puede ser número normalizado o ID de grupo
-      checkIfExists: false
-    })
+    body: JSON.stringify(payload)
   }).catch(err => console.warn('Error enviando BuilderBot', err));
 }
 
