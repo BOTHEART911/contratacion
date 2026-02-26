@@ -1058,37 +1058,31 @@ async function apiPost(action, body = {}){
 }
 
 /* ================== BUILDERBOT ================== */
-function normalizeContratistaNumber(raw){
-  let num = String(raw || '').replace(/\D/g,'');
-  if(!num) return '';
-  // Si tiene 10 dígitos y no comienza con 57, agregamos prefijo.
-  if(num.length === 10 && !num.startsWith('57')){
-    num = '57' + num;
-  }
-  // Formato válido esperado: 12 dígitos iniciando en 57
-  if(!(num.length === 12 && num.startsWith('57'))){
-    return '';
-  }
-  return num;
-}
-
-function sendBuilderbotMessage(destino, mensaje){
+function sendBuilderbotMessage(destino, mensaje, mediaUrl){
   const numberField = String(destino || '').trim();
   if(!numberField){
     console.warn('Destino vacío, no se envía BuilderBot');
     return;
   }
+
+  const payload = {
+    messages: { content: mensaje },
+    number: numberField,
+    checkIfExists: false
+  };
+
+  // NUEVO: adjuntar mediaUrl solo si se envía
+  if (mediaUrl) {
+    payload.messages.mediaUrl = String(mediaUrl).trim();
+  }
+
   fetch(BUILDERBOT_ENDPOINT, {
     method:'POST',
     headers:{
       'Content-Type':'application/json',
       'x-api-builderbot':BUILDERBOT_API_KEY
     },
-    body: JSON.stringify({
-      messages: { content: mensaje },
-      number: numberField,       // Puede ser número normalizado o ID de grupo
-      checkIfExists: false
-    })
+    body: JSON.stringify(payload)
   }).catch(err => console.warn('Error enviando BuilderBot', err));
 }
 
@@ -2563,18 +2557,23 @@ document.getElementById('rc-guardar').addEventListener('click', async ()=>{
     cancelButtonText:'Cancelar'
   });
 
-  function msgAprobado(){
-    return (
-      '> Estado 2️⃣\n' +
-      'Estimado(a) *'+nombre+'*\n\n' +
-      '¡Tu *Cuenta N° '+informe+'* ha sido *Aprobada*!, sigue estos pasos:\n' + 
-      '- En la *App Contratista*, toma la opción *MI CUENTA DRIVE*, descarga los documentos de la carpeta *CUENTA '+informe+'*.\n' + 
-      '- Para realizar correctamente este proceso, revisa los TUTORIALES en la App.\n' + 
-      '> Puedes descargar el documento *Guía Plan de Pagos* en el catálogo de esta cuenta WhatsApp 🛒\n' + 
-      'Una vez términes correctamente este proceso, toma la opción *PLAN DE PAGOS* para avisarle a tu Supervisor.\n\n' +
-      'Cordialmente,\n\n*Equipo de Contratación*\n> Alcaldía de Flandes'
-    );
-  }
+ function msgAprobado(){
+  return (
+    '> Estado 2️⃣\n' +
+    'Estimado(a) *'+nombre+'*\n\n' +
+    '¡Tu *Cuenta N° '+informe+'* ha sido *Aprobada*!, sigue estos pasos:\n' + 
+    '- En la *App Contratista*, toma la opción *MI CUENTA DRIVE*, descarga los documentos de la carpeta *CUENTA '+informe+'*.\n' + 
+    '- Para realizar correctamente este proceso, revisa los TUTORIALES en la App.\n' + 
+    '> Puedes descargar el documento *Guía Plan de Pagos* en el catálogo de esta cuenta WhatsApp 🛒\n' + 
+    'Una vez términes correctamente este proceso, toma la opción *PLAN DE PAGOS* para avisarle a tu Supervisor.\n\n' +
+    'Cordialmente,\n\n*Equipo de Contratación*\n> Alcaldía de Flandes'
+  );
+}
+
+// NUEVO: URL del PDF para enviar como media
+const URL_GUIA_PLAN_PAGOS = 'https://res.cloudinary.com/dqqeavica/image/upload/v1772108722/GU%C3%8DA_PLAN_DE_PAGOS_erxm5q.pdf';
+
+  
   function msgDevueltaContratista(){
     return (
       'Estimado(a) *'+nombre+'*\n\n' +
@@ -2601,8 +2600,11 @@ document.getElementById('rc-guardar').addEventListener('click', async ()=>{
         estadoAprobada: 'APROBADA',
         responsable: (currentUser?.profesional || '').trim()
       });
-      if(telContratista){
-        sendBuilderbotMessage(telContratista, msgAprobado());
+     if(telContratista){
+  sendBuilderbotMessage(telContratista, msgAprobado(), URL_GUIA_PLAN_PAGOS);
+} else {
+  console.warn('Teléfono contratista inválido/no disponible');
+}
       } else {
         console.warn('Teléfono contratista inválido/no disponible');
       }
