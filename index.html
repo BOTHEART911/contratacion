@@ -2186,14 +2186,14 @@ function pintarCuentas(list){
     pSupervisor.className='item-sub';
     pSupervisor.textContent='SUPERVISOR: '+(c.supervisor||'');
 
-     // ✅ NUEVO: FECHA DE RADICACIÓN debajo de CONTRATO (rojo + latido)
+    const btnRow=document.createElement('div');
+    btnRow.className='btn-row';
+
+      // ✅ NUEVO: FECHA DE RADICACIÓN debajo de CONTRATO (rojo + latido)
     const pRad = document.createElement('p');
     pRad.className = 'item-sub rad-latido';
     pRad.textContent = 'FECHA DE RADICACIÓN: ' + (c.fechaRadicacion || '');
     div.appendChild(pRad);
-
-    const btnRow=document.createElement('div');
-    btnRow.className='btn-row';
 
     const btnRevisar=document.createElement('button');
 btnRevisar.textContent='REVISAR';
