@@ -865,13 +865,27 @@
   <button id="btn-toggle-actividades" class="chip">Ver Relación de Actividades</button>
 </div>
 
-<!-- Botón CUENTA debajo del botón de Actividades -->
-<div class="center" style="margin-top:6px;">
+<!-- Botones (Seguimiento + Cuenta) debajo del botón de Actividades -->
+<div class="center" style="margin-top:6px; display:flex; justify-content:center; align-items:center; gap:12px;">
+  <button
+    id="btn-abrir-seguimiento"
+    class="btn-icon hidden"
+    aria-label="Ver observaciones de seguimiento"
+    title="Ver observaciones de seguimiento"
+    type="button"
+  >
+    <img
+      src="https://res.cloudinary.com/dqqeavica/image/upload/v1773105921/memoria_o2lro5.webp"
+      alt="SEGUIMIENTO"
+    >
+  </button>
+
   <button
     id="btn-abrir-carpeta-cuenta"
     class="btn-icon hidden"
     aria-label="Abrir carpeta de CUENTA en Drive"
     title="Abrir carpeta de CUENTA en Drive"
+    type="button"
   >
     <img
       src="https://res.cloudinary.com/dqqeavica/image/upload/v1764111247/carpeta_drive_epbrhp.webp"
@@ -2495,18 +2509,31 @@ function abrirZoomEvidencia(src, titulo){
     titulo.textContent='OBLIGACIÓN N° '+i;
     block.appendChild(titulo);
 
-    if(oblig && oblig!=='-'){
-      const ob=document.createElement('p');
-      ob.className='oblig-sub';
-      ob.textContent=oblig; // sin prefijo "Obligación:"
-      block.appendChild(ob);
-    }
+  if(oblig && oblig!=='-'){
+  const ob = document.createElement('p');
+  ob.className = 'oblig-sub';
+  ob.style.whiteSpace = 'pre-line';
+
+  const bOb = document.createElement('b');
+  bOb.textContent = String(oblig);
+
+  ob.appendChild(bOb);
+  block.appendChild(ob);
+}
     if(act && act!=='-'){
-      const ac=document.createElement('p');
-      ac.className='oblig-sub';
-      ac.innerHTML='<b>Actividades:</b> '+act;
-      block.appendChild(ac);
-    }
+  const ac = document.createElement('p');
+  ac.className = 'oblig-sub';
+  ac.style.whiteSpace = 'pre-line';
+
+  const bAct = document.createElement('b');
+  bAct.textContent = 'Actividades: ';
+
+  const txtAct = document.createTextNode(String(act));
+
+  ac.appendChild(bAct);
+  ac.appendChild(txtAct);
+  block.appendChild(ac);
+}
     if(evid && evid!=='-'){
       const evDiv=document.createElement('div');
       evDiv.className='evidence-grid';
@@ -2524,22 +2551,40 @@ function abrirZoomEvidencia(src, titulo){
                blocksWrap.appendChild(block);
   }
 
-    // === Mostrar/ocultar y parametrizar botón "CUENTA" (debajo de Actividades) ===
+    // === Mostrar/ocultar y parametrizar botones "SEGUIMIENTO" y "CUENTA" (debajo de Actividades) ===
 const cuentaBtn = document.getElementById('btn-abrir-carpeta-cuenta');
+const segBtn    = document.getElementById('btn-abrir-seguimiento');
+
+const observPrev = String(REV_CUENTA?.cuenta?.observacionesPrev || '').trim();
+
 if (cu?.informe && c?.carpetaContratista){
-  cuentaBtn.classList.remove('hidden');
-  cuentaBtn.dataset.parent  = c.carpetaContratista;          // carpeta del contratista (padre)
-  cuentaBtn.dataset.informe = String(cu.informe).trim();      // número de informe
-  if (cu?.idCuenta){                                         // ID directo de la subcarpeta (BH)
-    cuentaBtn.dataset.subId = String(cu.idCuenta).trim();
-  } else {
-    delete cuentaBtn.dataset.subId;
+  if (cuentaBtn){
+    cuentaBtn.classList.remove('hidden');
+    cuentaBtn.dataset.parent  = c.carpetaContratista;          // carpeta del contratista (padre)
+    cuentaBtn.dataset.informe = String(cu.informe).trim();      // número de informe
+    if (cu?.idCuenta){                                         // ID directo de la subcarpeta (BH)
+      cuentaBtn.dataset.subId = String(cu.idCuenta).trim();
+    } else {
+      delete cuentaBtn.dataset.subId;
+    }
+  }
+
+  // Seguimiento: siempre disponible en esta vista, muestra CL anterior
+  if (segBtn){
+    segBtn.classList.remove('hidden');
+    segBtn.dataset.obs = observPrev; // CL
   }
 } else {
-  cuentaBtn.classList.add('hidden');
-  delete cuentaBtn.dataset.parent;
-  delete cuentaBtn.dataset.informe;
-  delete cuentaBtn.dataset.subId;
+  if (cuentaBtn){
+    cuentaBtn.classList.add('hidden');
+    delete cuentaBtn.dataset.parent;
+    delete cuentaBtn.dataset.informe;
+    delete cuentaBtn.dataset.subId;
+  }
+  if (segBtn){
+    segBtn.classList.add('hidden');
+    delete segBtn.dataset.obs;
+  }
 }
   
 document.getElementById('rc-volver').addEventListener('click', ()=>{
@@ -2570,6 +2615,22 @@ btnAbrirCarpetaCuenta.addEventListener('click', ()=>{
     Swal.fire({ icon:'info', title:'Sin carpeta', text:'Este contratista no tiene "carpetaContratista" asociada.' });
   }
 });
+
+  const btnAbrirSeguimiento = document.getElementById('btn-abrir-seguimiento');
+if (btnAbrirSeguimiento && !btnAbrirSeguimiento.dataset.bound){
+  btnAbrirSeguimiento.dataset.bound = '1';
+  btnAbrirSeguimiento.addEventListener('click', async ()=>{
+    playSoundOnce(SOUNDS.info);
+
+    const obs = String(btnAbrirSeguimiento.dataset.obs || '').trim();
+    await Swal.fire({
+      icon: 'success',
+      title: 'OBSERVACIONES DE SEGUIMIENTO',
+      text: obs ? obs : 'Sin observaciones anteriores',
+      confirmButtonText: 'Cerrar'
+    });
+  });
+}
   
 document.getElementById('rc-guardar').addEventListener('click', async ()=>{
   if(!REV_CUENTA?.cuenta){
