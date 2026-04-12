@@ -1591,6 +1591,15 @@ document.getElementById('btn-generar-reporte').addEventListener('click', async (
     }
 
     Swal.fire({ icon:'success', title:'REPORTE GENERADO', timer:1400, showConfirmButton:false });
+
+if(data.fileId){
+  setTimeout(()=>{
+    apiPost('cleanupReporte', {
+      cleanupToken: data.fileId,
+      hardDelete: true
+    }).catch(()=>{});
+  }, 45000);  // 45 s de margen para que el navegador complete la descarga
+}
   }catch(e){
     try{ await Swal.close(); }catch(_){}
     Swal.fire({ icon:'error', title:'Error', text:String(e.message||e) });
@@ -2609,6 +2618,7 @@ document.getElementById('rc-guardar').addEventListener('click', async ()=>{
   const supervisor        = REV_CUENTA.contratista.supervisor;
   const supervisorGrupoId = (REV_CUENTA.contratista.contacto || '').trim(); // ahora es grupo
   const telContratistaRaw = REV_CUENTA.contratista.telefono;
+  const correo    = (REV_CUENTA.contratista.correo || '').trim();
   const observ = (document.getElementById('rc-observaciones').value || '').trim();
 
   const telContratista = normalizeContratistaNumber(telContratistaRaw);
@@ -2628,8 +2638,8 @@ document.getElementById('rc-guardar').addEventListener('click', async ()=>{
   return (
     '> Estado 2️⃣\n' +
     'Estimado(a) *'+nombre+'*\n\n' +
-    '¡Tu *Cuenta N° '+informe+'* ha sido *Aprobada*!, sigue estos pasos:\n' + 
-    '- En la *App Contratista*, toma la opción *MI CUENTA DRIVE*, descarga los documentos de la carpeta *CUENTA '+informe+'* E *IMPRIME DE UNA VEZ*\n' + 
+    '¡Tu *Cuenta N° '+informe+'* ha sido *Aprobada*!\n\n' +
+    '- En la *App Contratista*, toma la opción *MI CUENTA DRIVE*, usando el correo *'+correo+'* descarga los documentos de la carpeta *CUENTA '+informe+'* E *IMPRIME DE UNA VEZ*\n' +
     '> _Revisa la guía que te adjuntamos para evitar errores._\n\n' +
     'Después de hacer el Plan de Pagos en el SECOP II, toma la opción *PLAN DE PAGOS* en la App para avisarle a tu Supervisor(a).\n\n' +
     'Cordialmente,\n\n*Equipo de Contratación*\n> Alcaldía de Flandes'
