@@ -1535,13 +1535,10 @@ document.getElementById('btn-generar-reporte').addEventListener('click', async (
     return;
   }
 
-  // Suprime loader global (misma lógica usada en indexref.md para descargas)
-  const prevSuppress = (typeof suppressLoader !== 'undefined') ? suppressLoader : null;
-  if(typeof suppressLoader !== 'undefined') suppressLoader = true;
-
+  // Suprimir loader global durante esta operación
+  suppressLoader = true;
   loadingCount = 0;
-  if (loaderTimer){ clearTimeout(loaderTimer); loaderTimer = null; }
-  const prevLoaderDisplay = loader?.style.display;
+  if(loaderTimer){ clearTimeout(loaderTimer); loaderTimer = null; }
   if(loader){
     loader.classList.add('hidden');
     loader.style.display = 'none';
@@ -1560,8 +1557,7 @@ document.getElementById('btn-generar-reporte').addEventListener('click', async (
 
     await Swal.close();
 
-    // Este endpoint devuelve exportUrl. Si no hay registros en el rango retorna created:false o exportUrl vacío.
-    if(!data || data.created === false || !data.exportUrl){
+    if(!data || data.created === false || !data.base64){
       Swal.fire({
         icon:'info',
         title:'NO HAY REVISIONES EN ESTE RANGO DE FECHAS',
@@ -1570,38 +1566,39 @@ document.getElementById('btn-generar-reporte').addEventListener('click', async (
       return;
     }
 
-    const url = String(data.exportUrl || '').trim();
-    if(!url){
-      Swal.fire({ icon:'error', title:'Error', text:'No se recibió la URL de descarga.' });
-      return;
+    // ── Construir el archivo desde Base64 y descargarlo localmente ──
+    const byteChars = atob(data.base64);
+    const byteNums  = new Array(byteChars.length);
+    for(let i = 0; i < byteChars.length; i++){
+      byteNums[i] = byteChars.charCodeAt(i);
     }
+    const byteArray = new Uint8Array(byteNums);
+    const blob = new Blob([byteArray], {
+      type: data.mimeType || 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    });
 
-    // Descarga por navegación (misma lógica que Descargar Egresos en indexref.md)
-    const isMobile = /android|iphone|ipad|mobile/i.test(navigator.userAgent);
-    if(isMobile){
-      window.open(url,'_blank');
-    }else{
-      const a = document.createElement('a');
-      a.href = url;
-      a.target = '_self';
-      a.rel = 'noopener';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    }
+    const urlBlob = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = urlBlob;
+    a.download = data.fileName || 'REPORTE.xlsx';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    // Liberar memoria del blob URL
+    setTimeout(() => URL.revokeObjectURL(urlBlob), 10000);
 
     Swal.fire({ icon:'success', title:'REPORTE GENERADO', timer:1400, showConfirmButton:false });
 
   }catch(e){
     try{ await Swal.close(); }catch(_){}
-    Swal.fire({ icon:'error', title:'Error', text:String(e.message||e) });
+    Swal.fire({ icon:'error', title:'Error', text: String(e.message || e) });
   }finally{
-    if(typeof suppressLoader !== 'undefined') suppressLoader = prevSuppress;
-
+    suppressLoader = false;
     loadingCount = 0;
-    if (loaderTimer){ clearTimeout(loaderTimer); loaderTimer = null; }
+    if(loaderTimer){ clearTimeout(loaderTimer); loaderTimer = null; }
     if(loader){
-      loader.style.display = prevLoaderDisplay || '';
+      loader.style.display = '';
       loader.classList.add('hidden');
     }
   }
