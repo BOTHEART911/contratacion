@@ -1592,14 +1592,6 @@ document.getElementById('btn-generar-reporte').addEventListener('click', async (
 
     Swal.fire({ icon:'success', title:'REPORTE GENERADO', timer:1400, showConfirmButton:false });
 
-if(data.fileId){
-  setTimeout(()=>{
-    apiPost('cleanupReporte', {
-      cleanupToken: data.fileId,
-      hardDelete: true
-    }).catch(()=>{});
-  }, 45000);  // 45 s de margen para que el navegador complete la descarga
-}
   }catch(e){
     try{ await Swal.close(); }catch(_){}
     Swal.fire({ icon:'error', title:'Error', text:String(e.message||e) });
