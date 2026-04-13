@@ -1535,7 +1535,6 @@ document.getElementById('btn-generar-reporte').addEventListener('click', async (
     return;
   }
 
-  // Suprimir loader global durante esta operación
   suppressLoader = true;
   loadingCount = 0;
   if(loaderTimer){ clearTimeout(loaderTimer); loaderTimer = null; }
@@ -1557,7 +1556,7 @@ document.getElementById('btn-generar-reporte').addEventListener('click', async (
 
     await Swal.close();
 
-    if(!data || data.created === false || !data.base64){
+    if(!data || data.created === false || !data.exportUrl){
       Swal.fire({
         icon:'info',
         title:'NO HAY REVISIONES EN ESTE RANGO DE FECHAS',
@@ -1566,29 +1565,33 @@ document.getElementById('btn-generar-reporte').addEventListener('click', async (
       return;
     }
 
-    // ── Construir el archivo desde Base64 y descargarlo localmente ──
-    const byteChars = atob(data.base64);
-    const byteNums  = new Array(byteChars.length);
-    for(let i = 0; i < byteChars.length; i++){
-      byteNums[i] = byteChars.charCodeAt(i);
+    const url = String(data.exportUrl || '').trim();
+
+    // Iniciar descarga
+    const isMobile = /android|iphone|ipad|mobile/i.test(navigator.userAgent);
+    if(isMobile){
+      window.open(url, '_blank');
+    } else {
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = '_self';
+      a.rel = 'noopener';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     }
-    const byteArray = new Uint8Array(byteNums);
-    const blob = new Blob([byteArray], {
-      type: data.mimeType || 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    });
-
-    const urlBlob = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = urlBlob;
-    a.download = data.fileName || 'REPORTE.xlsx';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-
-    // Liberar memoria del blob URL
-    setTimeout(() => URL.revokeObjectURL(urlBlob), 10000);
 
     Swal.fire({ icon:'success', title:'REPORTE GENERADO', timer:1400, showConfirmButton:false });
+
+    // Eliminar el archivo después de 5s — suficiente para que la descarga inicie
+    if(data.fileId){
+      setTimeout(()=>{
+        apiPost('cleanupReporte', {
+          cleanupToken: data.fileId,
+          hardDelete: true
+        }).catch(()=>{});
+      }, 5000);
+    }
 
   }catch(e){
     try{ await Swal.close(); }catch(_){}
