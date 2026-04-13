@@ -458,6 +458,55 @@ button:active { transform: translateY(0); }
 .swal2-icon.swal2-success .swal2-success-ring { border-color: rgba(6,64,43,.25) !important; }
 .swal2-icon.swal2-info { border-color: var(--primary) !important; color: var(--primary) !important; }
 
+    /* ── Lightbox evidencia (estilo index2) ─────────────────── */
+#ev-lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.88);
+  z-index: 99999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  cursor: zoom-out;
+}
+#ev-lightbox.open { display: flex; }
+#ev-lightbox img {
+  max-width: 98vw;
+  max-height: 92vh;
+  object-fit: contain;
+  border-radius: 12px;
+  box-shadow: 0 8px 40px rgba(0,0,0,.6);
+  cursor: default;
+}
+#ev-lightbox-close {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 900;
+  cursor: pointer;
+  background: rgba(0,0,0,.4);
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  border: none;
+  transition: background .15s;
+  /* override del estilo global de button */
+  padding: 0;
+  box-sizing: border-box;
+}
+#ev-lightbox-close:hover {
+  background: rgba(255,0,0,.5);
+  transform: none;
+  color: #fff;
+}
+
 /* ─── RESPONSIVE GENERAL ─────────────────────────────────── */
 @media (max-width: 700px) {
   .btn-row { flex-direction: column; }
@@ -971,7 +1020,42 @@ button:active { transform: translateY(0); }
 
   </div>
 
+  <!-- Lightbox evidencia -->
+<div id="ev-lightbox" aria-modal="true" role="dialog" aria-label="Ver imagen en zoom">
+  <button id="ev-lightbox-close" aria-label="Cerrar zoom" title="Cerrar">✕</button>
+  <img id="ev-lightbox-img" src="" alt="Evidencia ampliada" onclick="event.stopPropagation()" />
+</div>
+
 <script>
+
+  /* ── Lightbox evidencia ──────────────────────────────────── */
+(function initEvLightbox_() {
+  const lb      = document.getElementById('ev-lightbox');
+  const lbImg   = document.getElementById('ev-lightbox-img');
+  const lbClose = document.getElementById('ev-lightbox-close');
+  if (!lb || !lbImg) return;
+
+  window.openEvLightbox_ = function(src) {
+    lbImg.src = src;
+    lb.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  };
+  window.closeEvLightbox_ = function() {
+    lb.classList.remove('open');
+    lbImg.src = '';
+    document.body.style.overflow = '';
+  };
+
+  lb.addEventListener('click', closeEvLightbox_);
+  lbClose.addEventListener('click', function(e) {
+    e.stopPropagation();
+    closeEvLightbox_();
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && lb.classList.contains('open')) closeEvLightbox_();
+  });
+})();
+  
 /* ================== CONFIGURACIÓN PRINCIPAL ================== */
 const API_BASE = 'https://script.google.com/macros/s/AKfycbxrDWVwRyjKheTVrijr8cPSVLd_iMZUb1qCuLB1c6PkJQktHc9Mhp2bduGqHK2sTW6PJg/exec';
 const BUILDERBOT_ENDPOINT = 'https://app.builderbot.cloud/api/v2/ff37a123-12b0-4fdc-9866-f3e2daf389fb/messages';
@@ -2382,76 +2466,12 @@ function evidenciaFull(url){
     : primera;
 }
 
-  // Helper de zoom con fallback
-function abrirZoomEvidencia(src, titulo){
-  const overlay = document.createElement('div');
-  overlay.style.position='fixed';
-  overlay.style.inset='0';
-  overlay.style.background='rgba(0,0,0,.75)';
-  overlay.style.zIndex='10000';
-  overlay.style.display='flex';
-  overlay.style.alignItems='center';
-  overlay.style.justifyContent='center';
-  overlay.style.padding='24px';
-
-  const box = document.createElement('div');
-  box.style.maxWidth='90%';
-  box.style.maxHeight='90%';
-  box.style.position='relative';
-  box.style.background='#fff';
-  box.style.borderRadius='14px';
-  box.style.padding='12px';
-  box.style.boxShadow='0 8px 24px rgba(0,0,0,.4)';
-  box.style.display='flex';
-  box.style.flexDirection='column';
-  box.style.alignItems='center';
-  box.style.gap='12px';
-
-  const titleEl = document.createElement('h3');
-  titleEl.textContent = titulo;
-  titleEl.style.margin='0';
-  titleEl.style.color='var(--primary)';
-  titleEl.style.textAlign='center';
-
-  const img = document.createElement('img');
-  img.style.maxWidth='100%';
-  img.style.maxHeight='70vh';
-  img.style.borderRadius='10px';
-  img.style.objectFit='contain';
-  img.style.background='#f0f0f0';
-  img.alt = titulo;
-
-  const loaderMsg = document.createElement('p');
-  loaderMsg.textContent='Cargando imagen…';
-  loaderMsg.style.margin='0';
-  loaderMsg.style.fontSize='.85rem';
-  loaderMsg.style.color='#333';
-
-  img.addEventListener('error', ()=>{
-    if(src.includes('uc?export=view&id=')){
-      const idMatch = src.match(/id=([A-Za-z0-9_-]{10,})/);
-      if(idMatch){
-        img.src = 'https://drive.google.com/thumbnail?sz=w1000&id='+idMatch[1];
-        loaderMsg.textContent='(Vista alternativa)';
-      }
-    } else {
-      loaderMsg.textContent='No se pudo cargar la evidencia.';
-    }
-  });
-  img.addEventListener('load', ()=> loaderMsg.textContent='');
-
-  img.src = src;
-
-  const cerrarBtn = document.createElement('button');
-  cerrarBtn.textContent='Cerrar';
-  cerrarBtn.className='btn-primary';
-  cerrarBtn.style.maxWidth='160px';
-  cerrarBtn.addEventListener('click', ()=> document.body.removeChild(overlay));
-
-  overlay.addEventListener('click', (e)=>{
-    if(e.target === overlay){
-      document.body.removeChild(overlay);
-    }
+ /* Helper de zoom — usa lightbox nativo (sin alert) */
+function abrirZoomEvidencia(src) {
+  if (typeof openEvLightbox_ === 'function') {
+    openEvLightbox_(src);
+  }
+}
   });
 
   box.appendChild(titleEl);
@@ -2511,7 +2531,7 @@ function abrirZoomEvidencia(src, titulo){
       img.alt='Evidencia '+i;
       img.addEventListener('click', ()=>{
   const full = evidenciaFull(evid);
-  abrirZoomEvidencia(full, 'Evidencia '+i);
+   abrirZoomEvidencia(full);
 });
       evDiv.appendChild(img);
       block.appendChild(evDiv);
