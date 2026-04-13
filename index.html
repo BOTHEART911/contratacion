@@ -2461,8 +2461,9 @@ function evidenciaFull(url){
     const m = primera.match(rx);
     if(m){ id = m[1]; break; }
   }
+  // Usa thumbnail con tamaño grande en lugar de uc?export=view (que devuelve 403)
   return id
-    ? 'https://drive.google.com/uc?export=view&id='+id
+    ? 'https://drive.google.com/thumbnail?sz=w1600&id='+id
     : primera;
 }
 
