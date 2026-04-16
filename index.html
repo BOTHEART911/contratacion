@@ -3897,51 +3897,6 @@ async function abrirVistaAdicion(documento){
   }
 })();
 
-  /* ========= GET DATOS PARA EDITAR CONTRATISTA (OTROSÍ) ========= */
-function getEditarContratistaData(documento) {
-  if (!documento) return null;
-  var sh   = sheetByName('CONTRATISTAS');
-  var last = sh.getLastRow();
-  if (last < 2) return null;
-
-  var data = sh.getRange(2, 1, last - 1, 81).getValues();
-  for (var i = data.length - 1; i >= 0; i--) {
-    var row    = data[i];
-    var doc    = String(row[0]  || '').trim();
-    var estado = String(row[80] || '').trim().toUpperCase();
-    if (doc !== String(documento) || estado !== 'ACTIVO') continue;
-
-    // Obligaciones: índices 54..79 → columnas BC..CB
-    var oblArr = [];
-    for (var j = 54; j <= 79; j++) {
-      var v = String(row[j] || '').trim();
-      oblArr.push(v);
-    }
-    // Quita vacíos al final
-    while (oblArr.length > 0 && !oblArr[oblArr.length - 1]) oblArr.pop();
-
-    return {
-      documento:         String(row[0]  || ''),
-      nombre:            String(row[1]  || ''),
-      secretaria:        String(row[2]  || ''),
-      carpetaSecretaria: String(row[3]  || ''),
-      supervisor:        String(row[4]  || ''),
-      contacto:          String(row[5]  || ''),
-      contrato:          String(row[19] || '').replace(/^'/, ''),
-      fechaContrato:     formatFechaDMY(row[20]),
-      diaContrato:       String(row[21] || '').replace(/^'/, ''),
-      mesContrato:       String(row[22] || ''),
-      objeto:            String(row[23] || ''),
-      tipoContrato:      String(row[24] || ''),
-      valor:             row[36] !== '' && row[36] !== null ? String(Number(row[36]) || 0) : '0',
-      valorTexto:        String(row[39] || ''),
-      cdp:               String(row[41] || '').replace(/^'/, ''),
-      obligaciones:      oblArr
-    };
-  }
-  return null;
-}
-
   /* ================== OTROSÍ (EDICIÓN) ================== */
 
 /* ── Inicializar selects del picker de fecha propio ── */
