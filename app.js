@@ -931,11 +931,11 @@ const MAP_SECRETARIA_CARPETA={
 };
 const MAP_SUPERVISOR_CONTACTO={
   'ANA JUDITH GAMBOA MANTILLA':'GuEkoHmea8Q0CEi2cwROuR',
-  'LADY BRIGITTE GUERRERO MUÑOZ':'HvQIM3gY68tJfcH5PLqsTS',
+  'DAMARA HAIDY LEAL LEAL':'HvQIM3gY68tJfcH5PLqsTS',
   'LUZ HAYDEE ORTEGA MAYORGA':'HQhVJXsVyQ0D61ntAqrDod',
   'VALENTINA PÁEZ GUZMÁN':'Bp90wihdj5Z6a9H2mV4p5n',
   'JOSE ARCESIO VARGAS BENITEZ':'HCydU18HqL96I0BFjlymex',
-  'JOHAN SEBASTIÁN CUARTAS GUARÍN':'HMwizc0fb54CRkEEMEj1Lk',
+  'MARLEN DEYANIRA MELO ZAMORA':'HMwizc0fb54CRkEEMEj1Lk',
   'YEIMY SUGEY ORTIZ SAENZ':'FMNWiyEBjH71rClLVjUjg7',
   'LAURA FABIANA BOCANEGRA CONDE':'DXJ1uoXhgXl3fObjPkS4te',
   'BRAYHAM JUSSET RODRIGUEZ CALDERON':'CJ0UJdJtoqI5AFHJBPig6t',
@@ -1617,8 +1617,8 @@ document.getElementById('rc-guardar').addEventListener('click', async ()=>{
     'Estimado(a) *'+nombre+'*\n\n' +
     '¡Tu *Cuenta N° '+informe+'* ha sido *Aprobada*!\n\n' +
     '📌 En la *App Contratista*, toma la opción *MI CUENTA DRIVE*, si te aparece que no tienes acceso, en la parte inferior usa el correo *'+correo+'*\n' +
-    '📌 Descarga los documentos de la carpeta *CUENTA '+informe+'* E *IMPRIME DE UNA VEZ*.\n\n' +
-    'Después de hacer el Plan de Pagos en el SECOP II y Enviar a la entidad, toma la opción *PLAN DE PAGOS* en la App para avisarle a tu Supervisor(a).\n\n' +
+    '📌 Descarga los documentos de la carpeta *CUENTA '+informe+' E IMPRIME DE UNA VEZ*.\n\n' +
+    'Después de hacer correctamente el Plan de Pagos en el SECOP II, toma la opción *PLAN DE PAGOS* en la App para avisarle a tu Supervisor(a).\n\n' +
     'Cordialmente,\n\n*Equipo de Contratación*\n> Alcaldía de Flandes'
   );
 }
