@@ -742,9 +742,120 @@ button:active { transform: translateY(0); }
       <div class="card">
         <h2 style="color:var(--primary)">DETALLES DE CONTRATISTA</h2>
         <div id="detalles-body" class="narrow"></div>
-        <div class="btn-row spaced">
+                <div class="btn-row spaced">
+          <button id="btn-detalles-otrosi" class="btn-primary">OTROSÍ (EDICIÓN)</button>
           <button id="detalles-ocultar" class="danger">OCULTAR</button>
         </div>
+      </div>
+    </section>
+
+        <!-- VISTA OTROSÍ (EDICIÓN) -->
+    <section id="view-otrosi" class="view">
+      <div class="card narrow">
+        <h2 style="color:var(--primary)">OTROSÍ (EDICIÓN)</h2>
+
+        <label>Documento</label>
+        <input id="ot-documento" type="text" readonly
+          style="background:rgba(6,64,43,.06);color:#555;cursor:not-allowed;">
+
+        <label>Nombre del Contratista</label>
+        <input id="ot-nombre" type="text" placeholder="Nombre completo">
+
+        <label>Secretaría</label>
+        <select id="ot-secretaria">
+          <option value="" disabled>Selecciona la Secretaría</option>
+          <option value="DESPACHO MUNICIPAL">DESPACHO MUNICIPAL</option>
+          <option value="SECRETARÍA DE GOBIERNO Y SERVICIOS ADMINISTRATIVOS">SECRETARÍA DE GOBIERNO Y SERVICIOS ADMINISTRATIVOS</option>
+          <option value="SECRETARÍA DE HACIENDA">SECRETARÍA DE HACIENDA</option>
+          <option value="SECRETARÍA DE EDUCACIÓN, DESARROLLO ECONÓMICO Y SOCIAL">SECRETARÍA DE EDUCACIÓN, DESARROLLO ECONÓMICO Y SOCIAL</option>
+          <option value="SECRETARÍA DE PLANEACIÓN E INFRAESTRUCTURA">SECRETARÍA DE PLANEACIÓN E INFRAESTRUCTURA</option>
+          <option value="SECRETARÍA DE ASUNTOS AGROPECUARIOS">SECRETARÍA DE ASUNTOS AGROPECUARIOS</option>
+          <option value="SECRETARÍA DE SALUD">SECRETARÍA DE SALUD</option>
+        </select>
+        <input id="ot-carpetaSecretaria" type="hidden">
+
+        <label>Supervisor</label>
+        <select id="ot-supervisor">
+          <option value="" disabled>Selecciona Supervisor</option>
+          <option value="ANA JUDITH GAMBOA MANTILLA">ANA JUDITH GAMBOA MANTILLA</option>
+          <option value="LADY BRIGITTE GUERRERO MUÑOZ">LADY BRIGITTE GUERRERO MUÑOZ</option>
+          <option value="LUZ HAYDEE ORTEGA MAYORGA">LUZ HAYDEE ORTEGA MAYORGA</option>
+          <option value="VALENTINA PÁEZ GUZMÁN">VALENTINA PÁEZ GUZMÁN</option>
+          <option value="JOSE ARCESIO VARGAS BENITEZ">JOSE ARCESIO VARGAS BENITEZ</option>
+          <option value="JOHAN SEBASTIÁN CUARTAS GUARÍN">JOHAN SEBASTIÁN CUARTAS GUARÍN</option>
+          <option value="YEIMY SUGEY ORTIZ SAENZ">YEIMY SUGEY ORTIZ SAENZ</option>
+          <option value="LAURA FABIANA BOCANEGRA CONDE">LAURA FABIANA BOCANEGRA CONDE</option>
+          <option value="BRAYHAM JUSSET RODRIGUEZ CALDERON">BRAYHAM JUSSET RODRIGUEZ CALDERON</option>
+          <option value="LIDA ERIKA SANCHEZ PEÑA">LIDA ERIKA SANCHEZ PEÑA</option>
+        </select>
+        <input id="ot-contactoSupervisor" type="hidden">
+
+        <label>Contrato</label>
+        <input id="ot-contrato" type="tel" inputmode="numeric" placeholder="Ej: 002" maxlength="3">
+
+        <label>Tipo de Contrato</label>
+        <select id="ot-tipoContrato">
+          <option value="" disabled>Selecciona el tipo de Contrato</option>
+          <option value="PRESTACIÓN DE SERVICIOS PROFESIONALES">PRESTACIÓN DE SERVICIOS PROFESIONALES</option>
+          <option value="PRESTACIÓN DE SERVICIOS DE APOYO A LA GESTIÓN">PRESTACIÓN DE SERVICIOS DE APOYO A LA GESTIÓN</option>
+          <option value="PRESTACIÓN DE SERVICIOS">PRESTACIÓN DE SERVICIOS</option>
+        </select>
+
+        <label>Fecha del Contrato</label>
+        <input id="ot-fechaContrato" type="text" placeholder="dd/mm/2026" required readonly
+          onclick="abrirPickerOtFecha()">
+        <input id="ot-diaContrato" type="text" style="display:none;">
+        <input id="ot-mesContrato" type="text" style="display:none;">
+
+        <!-- Modal picker fecha para OTROSÍ -->
+        <div id="otFechaModal" class="picker-modal" aria-hidden="true">
+          <div class="picker-box">
+            <h3 style="margin:0 0 8px 0;">Selecciona la fecha</h3>
+            <div class="picker-grid">
+              <div>
+                <small>Día</small>
+                <select id="otPickerDia" size="10"></select>
+              </div>
+              <div>
+                <small>Mes</small>
+                <select id="otPickerMes" size="12"></select>
+              </div>
+              <div>
+                <small>Año</small>
+                <select id="otPickerAnio" size="3" disabled>
+                  <option selected>2026</option>
+                </select>
+              </div>
+            </div>
+            <div class="picker-actions">
+              <button type="button" class="btn btn-cancel" onclick="cancelarPickerOtFecha()">Cancelar</button>
+              <button type="button" class="btn btn-ok"     onclick="confirmarPickerOtFecha()">Ok</button>
+            </div>
+          </div>
+        </div>
+
+        <label>Valor del Contrato</label>
+        <input id="ot-valor" type="tel" inputmode="numeric"
+          placeholder="Sin puntos ni espacios" maxlength="8">
+        <textarea id="ot-valorTexto" rows="2" placeholder="Campo Automático" readonly></textarea>
+
+        <label>CDP N°</label>
+        <input id="ot-cdp" type="tel" inputmode="numeric" placeholder="10 dígitos" maxlength="10">
+
+        <label>Objeto del Contrato</label>
+        <textarea id="ot-objeto" rows="3"
+          placeholder="Describe el objeto del contrato" required></textarea>
+
+        <label>Obligaciones</label>
+        <textarea id="ot-obligaciones" rows="3"
+          placeholder="Una obligación por línea (puede iniciar con 1., 2., 3., ...)"
+          required></textarea>
+
+        <div class="btn-row spaced">
+          <button id="btn-ot-guardar" class="btn-primary">Guardar</button>
+          <button id="btn-ot-volver"  class="danger">Regresar</button>
+        </div>
+        <p class="center muted spaced"><b>Revisa muy bien la información antes de Guardar</b></p>
       </div>
     </section>
 
@@ -2145,6 +2256,8 @@ if (obligaciones.length === 0){
 });
 
 /* ================== DETALLES CONTRATISTA ================== */
+  let _detallesDocActual = null; //
+  
 async function mostrarDetallesContratista(documento){
   try{
     const d=await apiGet('detallesContratista',{documento});
@@ -2185,6 +2298,7 @@ async function mostrarDetallesContratista(documento){
       }
       body.innerHTML=lines.map(l=>`<p>${l}</p>`).join('');
     }
+     _detallesDocActual = documento;
     showView('view-detalles');
   }catch(e){
     Swal.fire({icon:'error',title:'Error',text:e.message});
@@ -3782,6 +3896,492 @@ async function abrirVistaAdicion(documento){
     });
   }
 })();
+
+  /* ========= GET DATOS PARA EDITAR CONTRATISTA (OTROSÍ) ========= */
+function getEditarContratistaData(documento) {
+  if (!documento) return null;
+  var sh   = sheetByName('CONTRATISTAS');
+  var last = sh.getLastRow();
+  if (last < 2) return null;
+
+  var data = sh.getRange(2, 1, last - 1, 81).getValues();
+  for (var i = data.length - 1; i >= 0; i--) {
+    var row    = data[i];
+    var doc    = String(row[0]  || '').trim();
+    var estado = String(row[80] || '').trim().toUpperCase();
+    if (doc !== String(documento) || estado !== 'ACTIVO') continue;
+
+    // Obligaciones: índices 54..79 → columnas BC..CB
+    var oblArr = [];
+    for (var j = 54; j <= 79; j++) {
+      var v = String(row[j] || '').trim();
+      oblArr.push(v);
+    }
+    // Quita vacíos al final
+    while (oblArr.length > 0 && !oblArr[oblArr.length - 1]) oblArr.pop();
+
+    return {
+      documento:         String(row[0]  || ''),
+      nombre:            String(row[1]  || ''),
+      secretaria:        String(row[2]  || ''),
+      carpetaSecretaria: String(row[3]  || ''),
+      supervisor:        String(row[4]  || ''),
+      contacto:          String(row[5]  || ''),
+      contrato:          String(row[19] || '').replace(/^'/, ''),
+      fechaContrato:     formatFechaDMY(row[20]),
+      diaContrato:       String(row[21] || '').replace(/^'/, ''),
+      mesContrato:       String(row[22] || ''),
+      objeto:            String(row[23] || ''),
+      tipoContrato:      String(row[24] || ''),
+      valor:             row[36] !== '' && row[36] !== null ? String(Number(row[36]) || 0) : '0',
+      valorTexto:        String(row[39] || ''),
+      cdp:               String(row[41] || '').replace(/^'/, ''),
+      obligaciones:      oblArr
+    };
+  }
+  return null;
+}
+
+/* ========= EDITAR CONTRATISTA (OTROSÍ) ========= */
+function editarContratista(body) {
+  body = body || {};
+
+  var documento         = String(body.documento         || '').trim();
+  var nombre            = String(body.nombre            || '').trim();
+  var secretaria        = String(body.secretaria        || '').trim();
+  var carpetaSecretaria = String(body.carpetaSecretaria || '').trim();
+  var supervisor        = String(body.supervisor        || '').trim();
+  var contacto          = String(body.contacto          || '').trim();
+  var contratoRaw       = String(body.contrato          || '').trim();
+  var tipoContrato      = String(body.tipoContrato      || '').trim();
+  var fechaContratoStr  = String(body.fechaContrato     || '').trim();
+  var diaContratoRaw    = String(body.diaContrato       || '').trim();
+  var mesContrato       = String(body.mesContrato       || '').trim();
+  var valorRaw          = String(body.valor             || '').trim();
+  var valorTexto        = String(body.valorTexto        || '').trim();
+  var cdpRaw            = String(body.cdp               || '').replace(/\D/g, '').trim();
+  var objetoRaw         = String(body.objeto            || '').trim();
+
+  var obligacionesArr;
+  if (Array.isArray(body.obligaciones)) {
+    obligacionesArr = body.obligaciones;
+  } else if (typeof body.obligaciones === 'string') {
+    obligacionesArr = [body.obligaciones];
+  } else {
+    obligacionesArr = [];
+  }
+
+  // ── Validaciones (idénticas a agregarContratista) ──────────────────
+  if (!documento)                                         throw new Error('Documento requerido');
+  if (!nombre || !secretaria || !carpetaSecretaria || !supervisor || !contacto)
+                                                          throw new Error('Campos incompletos');
+  if (!contratoRaw)                                       throw new Error('Contrato requerido');
+  if (!tipoContrato)                                      throw new Error('Tipo de contrato requerido');
+  if (!fechaContratoStr || !/^\d{2}\/\d{2}\/\d{4}$/.test(fechaContratoStr))
+                                                          throw new Error('Fecha de contrato inválida');
+  if (!diaContratoRaw   || !/^\d{2}$/.test(diaContratoRaw))
+                                                          throw new Error('Día de contrato inválido');
+  if (!mesContrato)                                       throw new Error('Mes de contrato requerido');
+  if (!/^\d{1,8}$/.test(valorRaw.replace(/\D/g, '')))    throw new Error('Valor inválido');
+  if (!valorTexto)                                        throw new Error('Valor en texto faltante');
+  if (!/^\d{10}$/.test(cdpRaw))                          throw new Error('CDP inválido');
+  if (!objetoRaw)                                         throw new Error('Objeto del contrato requerido');
+  if (!obligacionesArr || obligacionesArr.length === 0)  throw new Error('Obligaciones requeridas');
+
+  // ── Buscar fila ACTIVO ─────────────────────────────────────────────
+  var sh   = sheetByName('CONTRATISTAS');
+  var last = sh.getLastRow();
+  if (last < 2) throw new Error('Sin datos');
+
+  var docs = sh.getRange(2, 1, last - 1, 1).getValues().flat();
+  var targetRow = -1;
+  for (var i = docs.length - 1; i >= 0; i--) {
+    if (String(docs[i]) !== String(documento)) continue;
+    var tmpRow = sh.getRange(2 + i, 1, 1, 81).getValues()[0];
+    if (String(tmpRow[80] || '').trim().toUpperCase() === 'ACTIVO') {
+      targetRow = 2 + i;
+      break;
+    }
+  }
+  if (targetRow < 0) throw new Error('Contratista no encontrado o no está ACTIVO');
+
+  // ── Leer mra existente para preservar adición (no se sobreescribe AL) ──
+  var existingRow = sh.getRange(targetRow, 1, 1, 81).getValues()[0];
+  var existingMra = Number(existingRow[37]) || 0; // col AL (índice 37)
+
+  // ── Normalizaciones (idénticas a agregarContratista) ──────────────
+  var numeroContrato = contratoRaw.replace(/\D/g, '');
+  if (numeroContrato) numeroContrato = ('000' + numeroContrato).slice(-3);
+  var contratoCell = numeroContrato ? ("'" + numeroContrato) : '';
+
+  var diaNum = diaContratoRaw.replace(/\D/g, '');
+  if (diaNum) diaNum = ('00' + diaNum).slice(-2);
+  var diaContratoCell = diaNum ? ("'" + diaNum) : '';
+
+  var valorNum   = Number(String(valorRaw).replace(/\D/g, '')) || 0;
+  var valorFinal = valorNum + existingMra; // preserva adición
+  var cdpCell    = cdpRaw ? ("'" + cdpRaw) : '';
+
+  var objetoCell = objetoRaw
+    .replace(/\r?\n+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toUpperCase();
+
+  var obligaciones = [];
+  for (var k = 0; k < obligacionesArr.length && k < 26; k++) {
+    var line = String(obligacionesArr[k] || '')
+      .replace(/^\s*((?:[1-9]|1\d|2[0-6]))\s*(?:[.)]|:|[-–—])\s*/, '')
+      .replace(/\r?\n+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    obligaciones.push(line);
+  }
+
+  // ── Escritura (solo las columnas de agregarContratista, sin tocar carpeta ni estado) ──
+  sh.getRange(targetRow,  2).setValue(nombre);              // B  nombre
+  sh.getRange(targetRow,  3).setValue(secretaria);          // C  secretaria
+  sh.getRange(targetRow,  4).setValue(carpetaSecretaria);   // D  carpetaSecretaria
+  sh.getRange(targetRow,  5).setValue(supervisor);          // E  supervisor
+  sh.getRange(targetRow,  6).setValue(contacto);            // F  contacto
+  sh.getRange(targetRow, 20).setValue(contratoCell);        // T  contrato
+  sh.getRange(targetRow, 21).setValue(fechaContratoStr);    // U  fechaContrato
+  sh.getRange(targetRow, 22).setValue(diaContratoCell);     // V  diaContrato
+  sh.getRange(targetRow, 23).setValue(mesContrato);         // W  mesContrato
+  sh.getRange(targetRow, 24).setValue(objetoCell);          // X  objeto
+  sh.getRange(targetRow, 25).setValue(tipoContrato);        // Y  tipoContrato
+  sh.getRange(targetRow, 37).setValue(valorNum);            // AK valor
+  // col 38 (AL) = mra adición → NO se toca
+  sh.getRange(targetRow, 39).setValue(valorFinal);          // AM valorFinal = valor + mra existente
+  sh.getRange(targetRow, 40).setValue(valorTexto.toUpperCase()); // AN valorTexto
+  sh.getRange(targetRow, 42).setValue(cdpCell);             // AP cdp
+
+  for (var j = 0; j < 26; j++) {
+    sh.getRange(targetRow, 55 + j).setValue(obligaciones[j] || ''); // BC..CB obligaciones 1..26
+  }
+
+  return { success: true, documento: documento };
+}
+
+  /* ================== OTROSÍ (EDICIÓN) ================== */
+
+/* ── Inicializar selects del picker de fecha propio ── */
+(function initOtPickerFecha() {
+  const dias  = document.getElementById('otPickerDia');
+  const meses = document.getElementById('otPickerMes');
+  if (!dias || !meses) return;
+
+  for (let d = 1; d <= 31; d++) {
+    const opt = document.createElement('option');
+    opt.value = String(d).padStart(2, '0');
+    opt.textContent = opt.value;
+    dias.appendChild(opt);
+  }
+  const mesesNombres = [
+    'Enero','Febrero','Marzo','Abril','Mayo','Junio',
+    'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'
+  ];
+  for (let i = 0; i < 12; i++) {
+    const opt = document.createElement('option');
+    opt.value = String(i + 1).padStart(2, '0');
+    opt.textContent = mesesNombres[i];
+    meses.appendChild(opt);
+  }
+})();
+
+function abrirPickerOtFecha() {
+  const modal = document.getElementById('otFechaModal');
+  if (modal) { modal.style.display = 'flex'; modal.setAttribute('aria-hidden','false'); }
+}
+function cancelarPickerOtFecha() {
+  const modal = document.getElementById('otFechaModal');
+  if (modal) { modal.style.display = 'none'; modal.setAttribute('aria-hidden','true'); }
+}
+function confirmarPickerOtFecha() {
+  const dSel = document.getElementById('otPickerDia')?.value || '01';
+  const mSel = document.getElementById('otPickerMes')?.value || '01';
+  const anio = '2026';
+  const mesesNombres = [
+    'Enero','Febrero','Marzo','Abril','Mayo','Junio',
+    'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'
+  ];
+  const idx = Math.max(1, Math.min(12, parseInt(mSel, 10))) - 1;
+
+  const fc = document.getElementById('ot-fechaContrato'); if (fc) fc.value = `${dSel}/${mSel}/${anio}`;
+  const d  = document.getElementById('ot-diaContrato');   if (d)  d.value  = dSel;
+  const m  = document.getElementById('ot-mesContrato');   if (m)  m.value  = mesesNombres[idx];
+  cancelarPickerOtFecha();
+}
+
+/* ── Secretaría → CarpetaSecretaria ── */
+document.getElementById('ot-secretaria').addEventListener('change', () => {
+  document.getElementById('ot-carpetaSecretaria').value =
+    MAP_SECRETARIA_CARPETA[document.getElementById('ot-secretaria').value] || '';
+});
+
+/* ── Supervisor → Contacto ── */
+document.getElementById('ot-supervisor').addEventListener('change', () => {
+  document.getElementById('ot-contactoSupervisor').value =
+    MAP_SUPERVISOR_CONTACTO[document.getElementById('ot-supervisor').value] || '';
+});
+
+/* ── Valor → ValorTexto (idéntico al add) ── */
+(function initOtValorTexto() {
+  const valor      = document.getElementById('ot-valor');
+  const valorTexto = document.getElementById('ot-valorTexto');
+  if (!valor || !valorTexto) return;
+  valor.addEventListener('input', () => {
+    const raw = (valor.value || '').replace(/\D/g, '');
+    valor.value = raw;
+    const len = raw.length;
+    valorTexto.style.border = '';
+    if ((len >= 1 && len <= 5) || len > 8) valorTexto.style.border = '2px solid red';
+    else if (len === 8)                     valorTexto.style.border = '2px solid green';
+    const n     = parseInt(raw || '0', 10);
+    const texto = convertirNumeroATexto(n);
+    valorTexto.value = texto ? (texto + ' PESOS M/CTE').toUpperCase() : '';
+  });
+})();
+
+/* ── CDP → borde verde si 10 dígitos y empieza por 2026 ── */
+(function initOtCDP() {
+  const cdp = document.getElementById('ot-cdp');
+  if (!cdp) return;
+  cdp.addEventListener('input', () => {
+    const raw = (cdp.value || '').replace(/\D/g, '').slice(0, 10);
+    cdp.value = raw;
+    cdp.style.border = '';
+    if (raw.length === 10 && raw.startsWith('2026')) cdp.style.border = '2px solid green';
+  });
+})();
+
+/* ── Autogrow textarea obligaciones ── */
+(function autoGrowOtObligaciones() {
+  const ta = document.getElementById('ot-obligaciones');
+  if (!ta) return;
+  const resize = () => { ta.style.height = 'auto'; ta.style.height = (ta.scrollHeight + 4) + 'px'; };
+  ['input','change'].forEach(ev => ta.addEventListener(ev, resize));
+  resize();
+})();
+
+/* ── Botón OTROSÍ (EDICIÓN) en view-detalles ── */
+document.getElementById('btn-detalles-otrosi').addEventListener('click', () => {
+  playSoundOnce(SOUNDS.login);
+  if (!_detallesDocActual) {
+    Swal.fire({ icon:'warning', title:'Sin contratista seleccionado' });
+    return;
+  }
+  abrirOtrosiEdicion(_detallesDocActual);
+});
+
+/* ── Abrir vista OTROSÍ y prellenar campos ── */
+async function abrirOtrosiEdicion(documento) {
+  try {
+    const data = await apiGet('getEditarContratistaData', { documento });
+    if (!data) { Swal.fire({ icon:'info', title:'No encontrado' }); return; }
+
+    document.getElementById('ot-documento').value = data.documento || '';
+    document.getElementById('ot-nombre').value    = data.nombre    || '';
+
+    /* Secretaría */
+    const secEl = document.getElementById('ot-secretaria');
+    secEl.value = data.secretaria || '';
+    document.getElementById('ot-carpetaSecretaria').value = data.carpetaSecretaria || '';
+
+    /* Supervisor */
+    const supEl = document.getElementById('ot-supervisor');
+    supEl.value = data.supervisor || '';
+    document.getElementById('ot-contactoSupervisor').value = data.contacto || '';
+
+    /* Contrato */
+    document.getElementById('ot-contrato').value = String(data.contrato || '').replace(/^'/,'');
+
+    /* Tipo contrato */
+    document.getElementById('ot-tipoContrato').value = data.tipoContrato || '';
+
+    /* Fecha contrato + sync picker */
+    document.getElementById('ot-fechaContrato').value = data.fechaContrato || '';
+    if (data.fechaContrato && /^\d{2}\/\d{2}\/\d{4}$/.test(data.fechaContrato)) {
+      const pts = data.fechaContrato.split('/');
+      const pd  = document.getElementById('otPickerDia');
+      const pm  = document.getElementById('otPickerMes');
+      if (pd) pd.value = pts[0];
+      if (pm) pm.value = pts[1];
+    }
+    document.getElementById('ot-diaContrato').value = data.diaContrato || '';
+    document.getElementById('ot-mesContrato').value = data.mesContrato || '';
+
+    /* Valor */
+    const valorEl      = document.getElementById('ot-valor');
+    const valorTextoEl = document.getElementById('ot-valorTexto');
+    const valorNum = Number(String(data.valor || '').replace(/\D/g,'')) || 0;
+    valorEl.value      = valorNum ? String(valorNum) : '';
+    valorEl.style.border = '';
+    valorTextoEl.value = data.valorTexto ||
+      (valorNum ? (convertirNumeroATexto(valorNum) + ' PESOS M/CTE').toUpperCase() : '');
+
+    /* CDP */
+    const cdpEl = document.getElementById('ot-cdp');
+    cdpEl.value = String(data.cdp || '').replace(/\D/g,'').slice(0, 10);
+    cdpEl.style.border = '';
+    if (cdpEl.value.length === 10 && cdpEl.value.startsWith('2026'))
+      cdpEl.style.border = '2px solid green';
+
+    /* Objeto */
+    document.getElementById('ot-objeto').value = data.objeto || '';
+
+    /* Obligaciones */
+    const oblEl  = document.getElementById('ot-obligaciones');
+    const oblArr = Array.isArray(data.obligaciones) ? data.obligaciones : [];
+    oblEl.value  = oblArr.filter(v => v).join('\n');
+    oblEl.style.height = 'auto';
+    oblEl.style.height = (oblEl.scrollHeight + 4) + 'px';
+
+    showView('view-otrosi');
+  } catch (e) {
+    Swal.fire({ icon:'error', title:'Error cargando datos', text:e.message });
+  }
+}
+
+/* ── Regresar ── */
+document.getElementById('btn-ot-volver').addEventListener('click', () => {
+  playSoundOnce(SOUNDS.back);
+  showView('view-detalles');
+});
+
+/* ── Guardar (OTROSÍ) ── */
+document.getElementById('btn-ot-guardar').addEventListener('click', async () => {
+  const documento         = (document.getElementById('ot-documento').value         || '').trim();
+  const nombre            = (document.getElementById('ot-nombre').value            || '').trim();
+  const secretaria        = (document.getElementById('ot-secretaria').value        || '').trim();
+  const carpetaSecretaria = (document.getElementById('ot-carpetaSecretaria').value || '').trim();
+  const supervisor        = (document.getElementById('ot-supervisor').value        || '').trim();
+  const contacto          = (document.getElementById('ot-contactoSupervisor').value|| '').trim();
+  const contratoRaw       = (document.getElementById('ot-contrato').value          || '').trim();
+  const tipoContrato      = (document.getElementById('ot-tipoContrato').value      || '').trim();
+  const fechaContrato     = (document.getElementById('ot-fechaContrato').value     || '').trim();
+  const diaContrato       = (document.getElementById('ot-diaContrato').value       || '').trim();
+  const mesContrato       = (document.getElementById('ot-mesContrato').value       || '').trim();
+  const valorRaw          = (document.getElementById('ot-valor').value             || '').trim();
+  const valorTexto        = (document.getElementById('ot-valorTexto').value        || '').trim();
+  const cdp               = (document.getElementById('ot-cdp').value               || '').trim();
+  const objetoRaw         = (document.getElementById('ot-objeto').value            || '').trim();
+  const obligacionesRaw   = (document.getElementById('ot-obligaciones').value      || '').trim();
+
+  /* ── Validaciones (idénticas al add) ── */
+  if (!nombre) {
+    Swal.fire({ icon:'warning', title:'Nombre requerido' }); return;
+  }
+  if (nombre.split(/\s+/).filter(Boolean).length < 2) {
+    Swal.fire({ icon:'warning', title:'Nombre incompleto', text:'Ingresa mínimo nombre y apellido' }); return;
+  }
+  if (!secretaria || !carpetaSecretaria) {
+    Swal.fire({ icon:'warning', title:'Secretaría requerida' }); return;
+  }
+  if (!supervisor || !contacto) {
+    Swal.fire({ icon:'warning', title:'Supervisor requerido' }); return;
+  }
+  if (!contratoRaw) {
+    Swal.fire({ icon:'warning', title:'Contrato requerido' }); return;
+  }
+  if (!tipoContrato) {
+    Swal.fire({ icon:'warning', title:'Tipo de contrato requerido' }); return;
+  }
+  if (!fechaContrato || !/^\d{2}\/\d{2}\/\d{4}$/.test(fechaContrato)) {
+    Swal.fire({ icon:'warning', title:'Fecha de contrato inválida', text:'Usa el picker' }); return;
+  }
+  if (!diaContrato || !/^\d{2}$/.test(diaContrato)) {
+    Swal.fire({ icon:'warning', title:'Día de contrato inválido' }); return;
+  }
+  if (!mesContrato) {
+    Swal.fire({ icon:'warning', title:'Mes de contrato requerido' }); return;
+  }
+  if (!/^\d{1,8}$/.test(valorRaw.replace(/\D/g,''))) {
+    Swal.fire({ icon:'warning', title:'Valor inválido' }); return;
+  }
+  if (!valorTexto) {
+    Swal.fire({ icon:'warning', title:'Valor en texto faltante' }); return;
+  }
+  if (!/^\d{10}$/.test(cdp.replace(/\D/g,''))) {
+    Swal.fire({ icon:'warning', title:'CDP inválido' }); return;
+  }
+  if (!objetoRaw) {
+    Swal.fire({ icon:'warning', title:'Objeto del contrato requerido' }); return;
+  }
+  if (!obligacionesRaw) {
+    Swal.fire({ icon:'warning', title:'Obligaciones requeridas' }); return;
+  }
+
+  /* ── Normalizaciones ── */
+  let numeroContrato = contratoRaw.replace(/\D/g,'');
+  numeroContrato = ('000' + numeroContrato).slice(-3);
+
+  let dia2 = diaContrato.replace(/\D/g,'');
+  dia2 = ('00' + dia2).slice(-2);
+
+  const valorNum = Number(valorRaw.replace(/\D/g,'')) || 0;
+
+  /* ── Parseo de obligaciones (idéntico al add) ── */
+  const obligaciones = (() => {
+    const text = String(obligacionesRaw || '').trim();
+    if (!text) return [];
+
+    const marker = /(?:^|\s)((?:[1-9]|1\d|2[0-6]))\s*(?:[.)]|:|[-–—])\s*/g;
+    if (!marker.test(text)) {
+      const unico = text.replace(/\r?\n+/g,' ').replace(/\s+/g,' ').trim();
+      return unico ? [unico] : [];
+    }
+    marker.lastIndex = 0;
+
+    const indices = [];
+    let match;
+    while ((match = marker.exec(text)) !== null) {
+      indices.push({ index: match.index, len: match[0].length });
+    }
+
+    const parts = [];
+    for (let i = 0; i < indices.length; i++) {
+      const start   = indices[i].index + indices[i].len;
+      const end     = (i + 1 < indices.length) ? indices[i + 1].index : text.length;
+      const cleaned = text.slice(start, end).replace(/\r?\n+/g,' ').replace(/\s+/g,' ').trim();
+      if (cleaned) parts.push(cleaned);
+    }
+    return parts.slice(0, 26);
+  })();
+
+  if (obligaciones.length === 0) {
+    Swal.fire({ icon:'warning', title:'Debes ingresar al menos una obligación' }); return;
+  }
+
+  /* ── Enviar al backend ── */
+  try {
+    await apiPost('editarContratista', {
+      documento,
+      nombre:           nombre.toUpperCase(),
+      secretaria,
+      carpetaSecretaria,
+      supervisor,
+      contacto,
+      contrato:         numeroContrato,
+      tipoContrato,
+      fechaContrato,
+      diaContrato:      dia2,
+      mesContrato,
+      valor:            String(valorNum),
+      valorTexto:       valorTexto.toUpperCase(),
+      cdp:              cdp.replace(/\D/g,''),
+      objeto:           objetoRaw,
+      obligaciones
+    });
+
+    Swal.fire({ icon:'success', title:'Contratista Actualizado', timer:2800, showConfirmButton:false });
+    await cargarContratistas();
+    // Recarga la vista de detalles con los datos actualizados
+    await mostrarDetallesContratista(documento);
+  } catch (e) {
+    Swal.fire({ icon:'error', title:'Error al guardar', text: e.message });
+  }
+});
   
 /* ================== FIN ================== */
 </script>
