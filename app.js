@@ -1615,10 +1615,11 @@ document.getElementById('rc-guardar').addEventListener('click', async ()=>{
   return (
     '> Estado 2️⃣\n' +
     'Estimado(a) *'+nombre+'*\n\n' +
-    '¡Tu *Cuenta N° '+informe+'* ha sido *Aprobada*!\n\n' +
+    '¡Tu *Cuenta N° '+informe+'* ha sido *Aprobada*! ✅\n\n' +
     '📌 En la *App Contratista*, toma la opción *MI CUENTA DRIVE*, si te aparece que no tienes acceso, en la parte inferior usa el correo *'+correo+'*\n' +
-    '📌 Descarga los documentos de la carpeta *CUENTA '+informe+' E IMPRIME DE UNA VEZ*.\n\n' +
-    'Después de hacer correctamente el Plan de Pagos en el SECOP II, toma la opción *PLAN DE PAGOS* en la App para avisarle a tu Supervisor(a).\n\n' +
+    '📌 Descarga los documentos de la carpeta *CUENTA '+informe+', ¡IMPRIME DE UNA VEZ!*\n\n' +
+    'Después de hacer correctamente el Plan de Pagos en el SECOP II:\n' +
+    '📌 Toma la opción *PLAN DE PAGOS* en la App para avisarle a tu Supervisor(a).\n\n' +
     'Cordialmente,\n\n*Equipo de Contratación*\n> Alcaldía de Flandes'
   );
 }
