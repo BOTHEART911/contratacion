@@ -1480,11 +1480,39 @@ function abrirZoomEvidencia(src) {
 
   const bAct = document.createElement('b');
   bAct.textContent = 'Actividades: ';
-
-  const txtAct = document.createTextNode(String(act));
-
   ac.appendChild(bAct);
-  ac.appendChild(txtAct);
+
+  // ✅ Detectar URLs en el texto y convertirlas en enlaces clicables
+  const texto = String(act);
+  const regexUrl = /(https?:\/\/[^\s]+)/g;
+  let ultimoIndice = 0;
+  let match;
+  while ((match = regexUrl.exec(texto)) !== null) {
+    if (match.index > ultimoIndice) {
+      ac.appendChild(document.createTextNode(texto.substring(ultimoIndice, match.index)));
+    }
+    // Limpiar signos de puntuación finales que no son parte de la URL
+    let urlLimpia = match[0];
+    const puntFinal = urlLimpia.match(/[.,;:!?)\]]+$/);
+    if (puntFinal) urlLimpia = urlLimpia.slice(0, -puntFinal[0].length);
+
+    const enlace = document.createElement('a');
+    enlace.href = urlLimpia;
+    enlace.textContent = urlLimpia;
+    enlace.target = '_blank';
+    enlace.rel = 'noopener noreferrer';
+    enlace.style.color = '#1d4ed8';
+    enlace.style.textDecoration = 'underline';
+    enlace.style.wordBreak = 'break-all';
+    ac.appendChild(enlace);
+
+    if (puntFinal) ac.appendChild(document.createTextNode(puntFinal[0]));
+    ultimoIndice = match.index + match[0].length;
+  }
+  if (ultimoIndice < texto.length) {
+    ac.appendChild(document.createTextNode(texto.substring(ultimoIndice)));
+  }
+
   block.appendChild(ac);
 }
     if(evid && evid!=='-'){
