@@ -1169,11 +1169,35 @@ document.getElementById('detalles-ocultar').addEventListener('click', ()=>{
 });
 
 /* ================== REVISIÓN DE CUENTAS (Listado) ================== */
+// Convierte "dd/mm/yyyy" o "dd/mm/yyyy h:mm AM/PM" a timestamp comparable
+function parseFechaRadicacion(s){
+  const str = String(s || '').trim();
+  if(!str) return Number.POSITIVE_INFINITY; // sin fecha -> al final
+  const m = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})\s*(AM|PM)?)?/i);
+  if(m){
+    const dd = parseInt(m[1],10);
+    const mm = parseInt(m[2],10) - 1;
+    const yy = parseInt(m[3],10);
+    let h = m[4] ? parseInt(m[4],10) : 0;
+    const min = m[5] ? parseInt(m[5],10) : 0;
+    const ampm = m[6] ? m[6].toUpperCase() : '';
+    if(ampm === 'PM' && h < 12) h += 12;
+    if(ampm === 'AM' && h === 12) h = 0;
+    return new Date(yy, mm, dd, h, min).getTime();
+  }
+  const t = Date.parse(str);
+  return isNaN(t) ? Number.POSITIVE_INFINITY : t;
+}
+
 let CUENTAS_DATA=[];
 async function cargarCuentasPendientes(){
   try{
     const list=await apiGet('listCuentasPendientes');
     CUENTAS_DATA=Array.isArray(list)?list:[];
+    // 🔽 Ordenar: la más antigua primero (ascendente por FECHA DE RADICACIÓN)
+    CUENTAS_DATA.sort((a,b)=>
+      parseFechaRadicacion(a.fechaRadicacion) - parseFechaRadicacion(b.fechaRadicacion)
+    );
     pintarCuentas(CUENTAS_DATA);
     actualizarResumenCuentas(CUENTAS_DATA);
   }catch(e){
@@ -1182,8 +1206,7 @@ async function cargarCuentasPendientes(){
     actualizarResumenCuentas(CUENTAS_DATA);
     Swal.fire({icon:'error',title:'Error',text:e.message});
   }
-}
-function actualizarResumenCuentas(list){
+}function actualizarResumenCuentas(list){
   const box=document.getElementById('cuentas-count');
   if(!box) return;
   if(!list.length){ box.style.display='none'; box.textContent=''; return; }
