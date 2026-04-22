@@ -349,8 +349,12 @@
 
         <label>Obligaciones</label>
         <textarea id="ot-obligaciones" rows="3"
-          placeholder="Una obligación por línea (puede iniciar con 1., 2., 3., ...)"
+          placeholder="Una obligación por línea. Cada salto de línea = una obligación nueva."
           required></textarea>
+        <p id="ot-obligaciones-count" class="muted center" style="margin:4px 0 0; font-weight:700;">
+          0 obligaciones detectadas
+        </p>
+        <div id="ot-obligaciones-preview" class="ot-oblig-preview"></div>
 
         <div class="btn-row spaced">
           <button id="btn-ot-guardar" class="btn-primary">Guardar</button>
