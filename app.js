@@ -2900,13 +2900,63 @@ document.getElementById('ot-supervisor').addEventListener('change', () => {
   });
 })();
 
-/* ── Autogrow textarea obligaciones ── */
-(function autoGrowOtObligaciones() {
-  const ta = document.getElementById('ot-obligaciones');
+/* ── Autogrow + contador + preview de obligaciones ── */
+(function initOtObligacionesUI() {
+  const ta    = document.getElementById('ot-obligaciones');
+  const count = document.getElementById('ot-obligaciones-count');
+  const prev  = document.getElementById('ot-obligaciones-preview');
   if (!ta) return;
-  const resize = () => { ta.style.height = 'auto'; ta.style.height = (ta.scrollHeight + 4) + 'px'; };
-  ['input','change'].forEach(ev => ta.addEventListener(ev, resize));
-  resize();
+
+  function parsearLineas(texto) {
+    return String(texto || '')
+      .split(/\r?\n+/)
+      .map(l => l.replace(/\s+/g, ' ').trim())
+      .map(l => l.replace(/^\s*(?:[1-9]|1\d|2[0-6])\s*(?:[.)]|:|[-–—])\s*/, '').trim())
+      .filter(l => l.length > 0);
+  }
+
+  function actualizar() {
+    // autogrow
+    ta.style.height = 'auto';
+    ta.style.height = (ta.scrollHeight + 4) + 'px';
+
+    const lineas = parsearLineas(ta.value);
+    const n = lineas.length;
+
+    if (count) {
+      count.textContent = n === 1
+        ? '1 obligación detectada'
+        : n + ' obligaciones detectadas';
+      count.style.color = (n > 26) ? '#b91c1c' : (n > 0 ? '#06402B' : '#555');
+    }
+
+    if (prev) {
+      prev.innerHTML = '';
+      lineas.slice(0, 26).forEach((t, i) => {
+        const div = document.createElement('div');
+        div.className = 'ot-oblig-line';
+        div.setAttribute('data-num', String(i + 1));
+        div.textContent = t;
+        prev.appendChild(div);
+      });
+      if (n > 26) {
+        const aviso = document.createElement('div');
+        aviso.className = 'ot-oblig-line';
+        aviso.setAttribute('data-num', '!');
+        aviso.style.color = '#b91c1c';
+        aviso.style.fontWeight = '800';
+        aviso.textContent = 'Solo se guardarán las primeras 26 obligaciones.';
+        prev.appendChild(aviso);
+      }
+    }
+  }
+
+  ['input','change','keyup','paste'].forEach(ev => ta.addEventListener(ev, () => {
+    // en paste el valor aún no está listo, difiere un tick
+    setTimeout(actualizar, 0);
+  }));
+
+  actualizar();
 })();
 
 /* ── Botón OTROSÍ (EDICIÓN) en view-detalles ── */
@@ -2981,6 +3031,8 @@ async function abrirOtrosiEdicion(documento) {
     oblEl.value  = oblArr.filter(v => v).join('\n');
     oblEl.style.height = 'auto';
     oblEl.style.height = (oblEl.scrollHeight + 4) + 'px';
+    // dispara el recálculo de contador + preview al cargar los datos
+    oblEl.dispatchEvent(new Event('input'));
 
     showView('view-otrosi');
   } catch (e) {
