@@ -3066,34 +3066,23 @@ document.getElementById('btn-ot-guardar').addEventListener('click', async () => 
 
   const valorNum = Number(valorRaw.replace(/\D/g,'')) || 0;
 
-  /* ── Parseo de obligaciones (idéntico al add) ── */
+ /* ── Parseo de obligaciones en OTROSÍ: una por línea ── */
   const obligaciones = (() => {
     const text = String(obligacionesRaw || '').trim();
     if (!text) return [];
 
-    const marker = /(?:^|\s)((?:[1-9]|1\d|2[0-6]))\s*(?:[.)]|:|[-–—])\s*/g;
-    if (!marker.test(text)) {
-      const unico = text.replace(/\r?\n+/g,' ').replace(/\s+/g,' ').trim();
-      return unico ? [unico] : [];
-    }
-    marker.lastIndex = 0;
+    // Cada salto de línea = una obligación distinta
+    // Dentro de cada línea se colapsan espacios y se limpia
+    // Se remueve cualquier marcador residual tipo "1.", "2)", "3-", "10:" al inicio
+    const parts = text
+      .split(/\r?\n+/)
+      .map(line => line.replace(/\s+/g, ' ').trim())
+      .map(line => line.replace(/^\s*(?:[1-9]|1\d|2[0-6])\s*(?:[.)]|:|[-–—])\s*/, '').trim())
+      .filter(line => line.length > 0);
 
-    const indices = [];
-    let match;
-    while ((match = marker.exec(text)) !== null) {
-      indices.push({ index: match.index, len: match[0].length });
-    }
-
-    const parts = [];
-    for (let i = 0; i < indices.length; i++) {
-      const start   = indices[i].index + indices[i].len;
-      const end     = (i + 1 < indices.length) ? indices[i + 1].index : text.length;
-      const cleaned = text.slice(start, end).replace(/\r?\n+/g,' ').replace(/\s+/g,' ').trim();
-      if (cleaned) parts.push(cleaned);
-    }
     return parts.slice(0, 26);
   })();
-
+  
   if (obligaciones.length === 0) {
     Swal.fire({ icon:'warning', title:'Debes ingresar al menos una obligación' }); return;
   }
