@@ -2984,7 +2984,9 @@ async function abrirOtrosiEdicion(documento) {
     const data = await apiGet('getEditarContratistaData', { documento });
     if (!data) { Swal.fire({ icon:'info', title:'No encontrado' }); return; }
 
-    document.getElementById('ot-documento').value = data.documento || '';
+    const otDocEl = document.getElementById('ot-documento');
+    otDocEl.value = data.documento || '';
+    otDocEl.dataset.original = String(data.documento || '').trim(); // guarda el documento ORIGINAL
     document.getElementById('ot-nombre').value    = data.nombre    || '';
 
     /* Secretaría */
@@ -3057,7 +3059,9 @@ document.getElementById('btn-ot-volver').addEventListener('click', () => {
 
 /* ── Guardar (OTROSÍ) ── */
 document.getElementById('btn-ot-guardar').addEventListener('click', async () => {
-  const documento         = (document.getElementById('ot-documento').value         || '').trim();
+  const otDocEl           = document.getElementById('ot-documento');
+  const documentoOriginal = String(otDocEl.dataset.original || '').trim();
+  const documento         = (otDocEl.value || '').trim();
   const nombre            = (document.getElementById('ot-nombre').value            || '').trim();
   const secretaria        = (document.getElementById('ot-secretaria').value        || '').trim();
   const carpetaSecretaria = (document.getElementById('ot-carpetaSecretaria').value || '').trim();
@@ -3074,7 +3078,13 @@ document.getElementById('btn-ot-guardar').addEventListener('click', async () => 
   const objetoRaw         = (document.getElementById('ot-objeto').value            || '').trim();
   const obligacionesRaw   = (document.getElementById('ot-obligaciones').value      || '').trim();
 
-  /* ── Validaciones (idénticas al add) ── */
+ /* ── Validaciones (idénticas al add) ── */
+  if (!documentoOriginal) {
+    Swal.fire({ icon:'warning', title:'No se pudo leer el documento original' }); return;
+  }
+  if (!/^\d{6,10}$/.test(documento)) {
+    Swal.fire({ icon:'warning', title:'Documento inválido', text:'Debe tener entre 6 y 10 dígitos, sin puntos ni espacios.' }); return;
+  }
   if (!nombre) {
     Swal.fire({ icon:'warning', title:'Nombre requerido' }); return;
   }
@@ -3151,6 +3161,7 @@ document.getElementById('btn-ot-guardar').addEventListener('click', async () => 
   /* ── Enviar al backend ── */
   try {
     await apiPost('editarContratista', {
+      documentoOriginal,
       documento,
       nombre:           nombre.toUpperCase(),
       secretaria,
