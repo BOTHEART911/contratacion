@@ -1198,6 +1198,15 @@ async function cargarCuentasPendientes(){
     CUENTAS_DATA.sort((a,b)=>
       parseFechaRadicacion(a.fechaRadicacion) - parseFechaRadicacion(b.fechaRadicacion)
     );
+
+    // Priorizar a OSCAR MAURICIO POLANIA GUERRA al inicio
+    const PRIORITARIO = 'OSCAR MAURICIO POLANIA GUERRA';
+    CUENTAS_DATA.sort((a, b) => {
+      const aPrio = String(a.nombre || '').trim().toUpperCase() === PRIORITARIO ? 0 : 1;
+      const bPrio = String(b.nombre || '').trim().toUpperCase() === PRIORITARIO ? 0 : 1;
+      return aPrio - bPrio;
+    });
+
     pintarCuentas(CUENTAS_DATA);
     actualizarResumenCuentas(CUENTAS_DATA);
   }catch(e){
