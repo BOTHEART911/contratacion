@@ -3168,3 +3168,69 @@ document.getElementById('btn-ot-guardar').addEventListener('click', async () => 
     Swal.fire({ icon:'error', title:'Error al guardar', text: e.message });
   }
 });
+
+/* ================== AUTO-ACTUALIZACIÓN (version.json) ================== */
+let __APP_VERSION_LOADED = '';
+let __versionCheckInFlight = false;
+
+async function checkAppVersion(){
+  if(__versionCheckInFlight) return;
+  __versionCheckInFlight = true;
+  try{
+    const url = 'version.json?t=' + Date.now();
+    const r = await fetch(url, { cache: 'no-store' });
+    if(!r.ok) return;
+    const j = await r.json();
+    const serverVersion = String(j.version || '').trim();
+    if(!serverVersion) return;
+
+    // Primera lectura: guardar la versión actual y pintarla en login
+    if(!__APP_VERSION_LOADED){
+      __APP_VERSION_LOADED = serverVersion;
+      const el = document.getElementById('app-version');
+      if(el) el.textContent = 'Versión ' + serverVersion;
+      return;
+    }
+
+    // Lecturas posteriores: si cambió, recargar silenciosamente
+    if(serverVersion !== __APP_VERSION_LOADED){
+      try{
+        const keys = await caches.keys();
+        await Promise.all(keys.map(k => caches.delete(k)));
+      }catch(_){}
+      location.reload();
+    }
+  }catch(_){
+    /* silencio: sin red no hay actualización */
+  }finally{
+    __versionCheckInFlight = false;
+  }
+}
+
+// Recarga automática cuando el SW nuevo toma control (solo una vez por sesión de página)
+if('serviceWorker' in navigator){
+  let __reloadingFromSW = false;
+  navigator.serviceWorker.addEventListener('controllerchange', ()=>{
+    if(__reloadingFromSW) return;
+    // Evitar loop: solo recargar si NO veníamos de una recarga reciente
+    const lastReload = Number(sessionStorage.getItem('__swReloadTs') || 0);
+    const now = Date.now();
+    if(now - lastReload < 10000) return; // si recargamos hace menos de 10s, no recargar otra vez
+    __reloadingFromSW = true;
+    sessionStorage.setItem('__swReloadTs', String(now));
+    location.reload();
+  });
+}
+
+// Chequeo al cargar la página
+window.addEventListener('load', ()=>{ checkAppVersion(); });
+
+// Chequeo cada vez que la pestaña/PWA vuelve a estar visible (máx 1 vez cada 30s)
+let __lastVersionCheck = Date.now();
+document.addEventListener('visibilitychange', ()=>{
+  if(document.hidden) return;
+  const now = Date.now();
+  if(now - __lastVersionCheck < 30000) return;
+  __lastVersionCheck = now;
+  checkAppVersion();
+});
