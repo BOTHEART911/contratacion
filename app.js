@@ -694,6 +694,8 @@ function pintarContratistas(list){
   for(const c of list){
     const div=document.createElement('div');
     div.className='item-card';
+    // NUEVO: contacto oculto en la tarjeta (grupo WhatsApp del supervisor)
+    div.dataset.contacto = c.contacto || '';
 
     const header=document.createElement('div');
     header.className='item-header';
@@ -825,8 +827,59 @@ btnAdicion.addEventListener('click', async ()=>{
   }
 });
 leftGroup.appendChild(btnAdicion);
+    // NUEVO: Botón CESIÓN
+    const btnCesion=document.createElement('button');
+    btnCesion.className='btn-icon';
+    btnCesion.innerHTML='<img src="https://res.cloudinary.com/dqqeavica/image/upload/v1773342299/no_found_czsnkj.webp" alt="Cesión">';
+    btnCesion.setAttribute('aria-label','Cesión de contrato');
+    btnCesion.title='Cesión de contrato';
+    btnCesion.addEventListener('click', async ()=>{
+      const contacto   = String(div.dataset.contacto || c.contacto || '').trim();
+      const supervisor = String(c.supervisor || '').trim();
+      const contrato   = String(c.contrato   || '').trim();
+
+      if(!contacto){
+        Swal.fire({icon:'warning',title:'Sin contacto del supervisor',text:'No hay grupo de WhatsApp asociado.'});
+        return;
+      }
+
+      const rs = await Swal.fire({
+        icon:'info',
+        title:'¿Confirmar Cesión?',
+        text:'Se notificará al supervisor sobre la cesión del contrato '+contrato,
+        showCancelButton:true,
+        confirmButtonText:'Informar',
+        cancelButtonText:'Cancelar'
+      });
+
+      if(rs.isConfirmed){
+        const mensaje =
+          'Estimado(a) *'+supervisor+'*\n' +
+          'Se ha configurado la *Cesión del contrato '+contrato+'* ✍🏻\n\n' +
+          'Por favor compartir con el contratista el enlace para descargar la *App Contratistas* junto a las siguientes instrucción:\n' +
+          'https://tinyurl.com/GDF-CONTRATISTA-APP\n' +
+          '*1.* Descargar la App\n' +
+          '*2.* Inciar sesión con CC o NIT\n' +
+          '*3.* Tomar la opción DATOS DEL PROCESO / DATOS DEL CONTRATO / ACTUALIZAR\n' +
+          '*4.* Cambiar asertivamente todos los datos incluyendo la firma\n' +
+          '*5.* En la 1ra cuenta bajo la Cesión, debe adjuntar la justificación en el campo *Otro Documento Requerido*\n\n' +
+          'Revisar muy bien para evitar reprocesos.\n\n' +
+          'Cordialmente,\n\n*Equipo de Contratación*\n> Alcaldía de Flandes';
+
+        sendBuilderbotMessage(contacto, mensaje);
+
+        Swal.fire({
+          icon:'success',
+          title:'EL SUPERVISOR HA SIDO NOTIFICADO',
+          timer:2000,
+          showConfirmButton:false
+        });
+      }
+    });
+
     rightGroup.appendChild(btnWhatsapp);
     rightGroup.appendChild(btnDrive);
+    rightGroup.appendChild(btnCesion);
     actionsRow.appendChild(leftGroup);
     actionsRow.appendChild(rightGroup);
 
