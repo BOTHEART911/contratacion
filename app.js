@@ -3238,7 +3238,16 @@ document.getElementById('btn-ot-guardar').addEventListener('click', async () => 
     // Recarga la vista de detalles con los datos actualizados
     await mostrarDetallesContratista(documento);
   } catch (e) {
-    Swal.fire({ icon:'error', title:'Error al guardar', text: e.message });
+    var msg = String((e && e.message) || e || '');
+    if (msg.indexOf('CUENTAS_PENDIENTES') !== -1) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'NO SE PUEDE PROCESAR',
+        text: 'El Contratista a reemplazar tiene cuenta(s) pendiente(s) por pagar.'
+      });
+    } else {
+      Swal.fire({ icon:'error', title:'Error al guardar', text: e.message });
+    }
   }
 });
 
