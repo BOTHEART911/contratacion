@@ -444,6 +444,48 @@ button:active { transform: translateY(0); }
 .swal2-icon.swal2-success .swal2-success-ring { border-color: rgba(6,64,43,.25) !important; }
 .swal2-icon.swal2-info { border-color: var(--primary) !important; color: var(--primary) !important; }
 
+/* ─── FIRMA DEL CONTRATISTA EN REVISIÓN ─────────────────── */
+.rc-firma-wrap {
+  margin-top: 14px;
+  padding: 14px 16px;
+  background: rgba(255,255,255,.07);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1.5px solid var(--pr);
+  border-left: 3.5px solid var(--primary);
+  border-radius: 16px;
+  box-shadow: 0 4px 18px var(--ps);
+  text-align: center;
+}
+.rc-firma-title {
+  font-family: 'Sora', sans-serif;
+  font-weight: 800;
+  font-size: .85rem;
+  color: var(--primary);
+  margin: 0 0 10px;
+  letter-spacing: .4px;
+}
+.rc-firma-img {
+  display: block;
+  margin: 0 auto 10px;
+  max-width: 280px;
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  border: 1.5px solid var(--pr);
+  background: #fff;
+  box-shadow: 0 4px 14px var(--ps);
+}
+.rc-firma-note {
+  font-size: .75rem;
+  color: #555;
+  line-height: 1.45;
+  margin: 0 auto;
+  max-width: 480px;
+  text-align: center;
+  font-family: 'IBM Plex Sans', sans-serif;
+}
+
     /* ── Lightbox evidencia (estilo index2) ─────────────────── */
 #ev-lightbox {
   position: fixed;
