@@ -292,6 +292,7 @@ button:active { transform: translateY(0); }
 .item-title  { font-weight: 900; font-size: 1rem; color: var(--primary); margin: 0; font-family: 'Sora', sans-serif; }
 .item-sub    { font-size: .72rem; font-weight: 700; color: #333; margin: 0; font-family: 'IBM Plex Sans', sans-serif; }
 .item-sub.adicionado { color: #dc2626; font-weight: 900; }
+.item-sub.contractual { color: #16a34a; font-weight: 900; }
 
 /* ─── LOGIN: mostrar/ocultar ─────────────────────────────── */
 .pwd-wrapper { position: relative; width: 100%; }
