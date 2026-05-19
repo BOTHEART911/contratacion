@@ -2567,8 +2567,6 @@ function recomputeAdicionAll(recalcDesdeFechas){
   const txtA = textoTiempo(mA, dA);
   const adicionEl = document.getElementById('adicion');
   if(adicionEl) adicionEl.value = txtA;
-  const textoAd = document.getElementById('textoAdicion');
-  if(textoAd) textoAd.value = txtA;
 
   // Tiempo de Ejecución Total: SIEMPRE se recalcula desde los campos Meses/Días Totales
   const mT = document.getElementById('mesesT')?.value || '0';
@@ -2589,6 +2587,13 @@ function recomputeAdicionAll(recalcDesdeFechas){
   if(textoValorEl){
     const texto = convertirNumeroATexto(valorFin);
     textoValorEl.value = (texto ? (texto + ' PESOS M/CTE') : '').toUpperCase();
+  }
+
+   // ✅ AGREGAR — valor de la adición en letras (destino: columna AO)
+  const textoAdicionEl = document.getElementById('textoAdicion');
+  if(textoAdicionEl){
+    const textoAd = convertirNumeroATexto(mraRaw);
+    textoAdicionEl.value = (textoAd ? (textoAd + ' PESOS M/CTE') : '').toUpperCase();
   }
 }
 
@@ -2889,7 +2894,7 @@ async function abrirVistaAdicion(documento){
           cdpA2,
           tipoAdicion,
           mra: String(mraVal),
-          textoAdicion: textoAdicion || adicionTxt,
+         textoAdicion: textoAdicion,
           valorFin: String(valorFin),
           textoValor
         };
