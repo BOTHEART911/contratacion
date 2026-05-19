@@ -2340,6 +2340,7 @@ let AD_STATE = {
   diasT: '',
   ejecucion: '',
   cdpA: '',
+  cdpA2: '',
   mra: 0,
   textoAdicion: '',
   valorFin: 0,
@@ -2499,8 +2500,8 @@ function confirmarPickerAdicion(){
   const input = document.getElementById(__adPickerTarget);
   if(input) input.value = val;
 
-  cancelarPickerAdicion();
-  recomputeAdicionAll();
+ cancelarPickerAdicion();
+  recomputeAdicionAll(true);
 }
 
 /* Formato COP mientras escribe en mra */
@@ -2511,76 +2512,72 @@ function formatCOPInstantLocal(el){
   el.value = formatCOPViewLocal(raw);
 }
 
-function recomputeAdicionAll(){
+function recomputeAdicionAll(recalcDesdeFechas){
+  // recalcDesdeFechas:
+  //   true  -> (cambio de fechas) recalcula Meses/Días desde las fechas
+  //   false -> (edición manual de Meses/Días) respeta lo que escribió el usuario
+  if(typeof recalcDesdeFechas === 'undefined') recalcDesdeFechas = true;
+
   const fechaInicioContrato = normDMY(AD_STATE.fechaInicio || document.getElementById('fechaInicioRO')?.value || '');
   const inicioA = normDMY(document.getElementById('inicioA')?.value || '');
   const finA    = normDMY(document.getElementById('finA')?.value || '');
 
   const mesesNombres = [
-  'Enero','Febrero','Marzo','Abril','Mayo','Junio',
-  'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'
-];
+    'Enero','Febrero','Marzo','Abril','Mayo','Junio',
+    'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'
+  ];
 
-// diaFa / mesFa desde finA (dd/mm/yyyy)
-const diaFaEl = document.getElementById('diaFa');
-const mesFaEl = document.getElementById('mesFa');
-if(finA && /^\d{2}\/\d{2}\/\d{4}$/.test(finA)){
-  const parts = finA.split('/');
-  const dd = parts[0];
-  const mm = parts[1];
-  const idx = Math.max(1, Math.min(12, parseInt(mm,10))) - 1;
-  if(diaFaEl) diaFaEl.value = dd;
-  if(mesFaEl) mesFaEl.value = mesesNombres[idx] || '';
-} else {
-  if(diaFaEl) diaFaEl.value = '';
-  if(mesFaEl) mesFaEl.value = '';
-}
+  // diaFa / mesFa desde finA (dd/mm/yyyy)
+  const diaFaEl = document.getElementById('diaFa');
+  const mesFaEl = document.getElementById('mesFa');
+  if(finA && /^\d{2}\/\d{2}\/\d{4}$/.test(finA)){
+    const parts = finA.split('/');
+    const dd = parts[0];
+    const mm = parts[1];
+    const idx = Math.max(1, Math.min(12, parseInt(mm,10))) - 1;
+    if(diaFaEl) diaFaEl.value = dd;
+    if(mesFaEl) mesFaEl.value = mesesNombres[idx] || '';
+  } else {
+    if(diaFaEl) diaFaEl.value = '';
+    if(mesFaEl) mesFaEl.value = '';
+  }
 
   if(fechaInicioContrato){
     document.getElementById('fechaInicioRO').value = fechaInicioContrato;
   }
 
-   if(inicioA && finA){
+  // Recalcula Meses/Días SOLO cuando el cambio proviene de las fechas
+  if(recalcDesdeFechas && inicioA && finA){
     const { meses, dias } = calcMesesDiasEntre(inicioA, finA);
-
     const mesesEl = document.getElementById('mesesA');
     const diasEl  = document.getElementById('diasA');
-
-    // Siempre recalcula ante cambio de fechas (pero permite editar luego)
     if(mesesEl){ mesesEl.value = String(meses); }
     if(diasEl){  diasEl.value  = String(dias);  }
 
-    const mA = document.getElementById('mesesA')?.value || '0';
-    const dA = document.getElementById('diasA')?.value  || '0';
-    const txtA = textoTiempo(mA, dA);
-
-    const adicionEl = document.getElementById('adicion');
-    if(adicionEl) adicionEl.value = txtA;
-
-    const textoAd = document.getElementById('textoAdicion');
-    if(textoAd) textoAd.value = txtA;
-
     const { meses: mesesT, dias: diasT } = calcMesesDiasEntre(fechaInicioContrato, finA);
-
     const mesesTEl = document.getElementById('mesesT');
     const diasTEl  = document.getElementById('diasT');
-
     if(mesesTEl){ mesesTEl.value = String(mesesT); }
     if(diasTEl){  diasTEl.value  = String(diasT);  }
-
-    const mT = document.getElementById('mesesT')?.value || '0';
-    const dT = document.getElementById('diasT')?.value  || '0';
-    const txtT = textoTiempo(mT, dT);
-
-    const ejecEl = document.getElementById('ejecucion');
-    if(ejecEl) ejecEl.value = txtT;
-  }else{
-    const adicionEl = document.getElementById('adicion');
-    if(adicionEl) adicionEl.value = '';
-    const ejecEl = document.getElementById('ejecucion');
-    if(ejecEl) ejecEl.value = '';
   }
 
+  // Tiempo de Adición: SIEMPRE se recalcula desde los campos Meses/Días de Adición
+  const mA = document.getElementById('mesesA')?.value || '0';
+  const dA = document.getElementById('diasA')?.value  || '0';
+  const txtA = textoTiempo(mA, dA);
+  const adicionEl = document.getElementById('adicion');
+  if(adicionEl) adicionEl.value = txtA;
+  const textoAd = document.getElementById('textoAdicion');
+  if(textoAd) textoAd.value = txtA;
+
+  // Tiempo de Ejecución Total: SIEMPRE se recalcula desde los campos Meses/Días Totales
+  const mT = document.getElementById('mesesT')?.value || '0';
+  const dT = document.getElementById('diasT')?.value  || '0';
+  const txtT = textoTiempo(mT, dT);
+  const ejecEl = document.getElementById('ejecucion');
+  if(ejecEl) ejecEl.value = txtT;
+
+  // Valor final del contrato
   const valorInicial = numPureCOP(AD_STATE.valorInicial || document.getElementById('valorInicioRO')?.value || '');
   const mraRaw = numPureCOP(document.getElementById('mra')?.value || '');
   const valorFin = valorInicial + mraRaw;
@@ -2620,6 +2617,7 @@ async function abrirVistaAdicion(documento){
     diasT: String(data.diasT||''),
     ejecucion: String(data.ejecucion||''),
     cdpA: String(data.cdpA||''),
+    cdpA2: String(data.cdpA2||''),
     mra: Number(String(data.mra||'').replace(/\D/g,'')) || 0,
     textoAdicion: String(data.textoAdicion||''),
     valorFin: Number(String(data.valorFin||'').replace(/\D/g,'')) || 0,
@@ -2654,6 +2652,15 @@ async function abrirVistaAdicion(documento){
     cdpEl.style.border = '';
     if(cdpEl.value.length === 10 && cdpEl.value.startsWith('2026')){
       cdpEl.style.border = '2px solid green';
+    }
+  }
+
+  const cdpEl2 = document.getElementById('cdpA2');
+  if(cdpEl2){
+    cdpEl2.value = String(AD_STATE.cdpA2 || '').replace(/\D/g,'').slice(0,10);
+    cdpEl2.style.border = '';
+    if(cdpEl2.value.length === 10 && cdpEl2.value.startsWith('2026')){
+      cdpEl2.style.border = '2px solid green';
     }
   }
 
@@ -2707,17 +2714,32 @@ async function abrirVistaAdicion(documento){
     });
   }
 
+  bindNumericSanitizerLocal('cdpA2', 10);
+
+  const cdp2 = document.getElementById('cdpA2');
+  if(cdp2 && !cdp2.dataset.bound){
+    cdp2.dataset.bound='1';
+    cdp2.addEventListener('input', ()=>{
+      const raw = (cdp2.value||'').replace(/\D/g,'').slice(0,10);
+      cdp2.value = raw;
+      cdp2.style.border = '';
+      if(raw.length === 10 && raw.startsWith('2026')){
+        cdp2.style.border = '2px solid green';
+      }
+    });
+  }
+
   const mra = document.getElementById('mra');
   if(mra && !mra.dataset.bound){
     mra.dataset.bound='1';
     if(!mra.value) mra.value = '$ ';
     mra.addEventListener('input', ()=>{
       formatCOPInstantLocal(mra);
-      recomputeAdicionAll();
+      recomputeAdicionAll(false);
     });
     mra.addEventListener('blur', ()=>{
       formatCOPInstantLocal(mra);
-      recomputeAdicionAll();
+      recomputeAdicionAll(false);
     });
   }
 
@@ -2727,17 +2749,17 @@ async function abrirVistaAdicion(documento){
     el.dataset.bound='1';
 
     // Permitir borrar y escribir libre (solo números) sin forzar auto
-    el.addEventListener('input', ()=>{
+ el.addEventListener('input', ()=>{
       const raw = (el.value||'').replace(/\D/g,'').slice(0,3);
       el.value = raw; // puede quedar '' mientras edita
-      recomputeAdicionAll();
+      recomputeAdicionAll(false);
     });
 
     // Si queda vacío al salir, lo deja en 0 (así nunca queda vacío para guardar)
     el.addEventListener('blur', ()=>{
       if(String(el.value||'').trim() === ''){
         el.value = '0';
-        recomputeAdicionAll();
+        recomputeAdicionAll(false);
       }
     });
   });
@@ -2748,9 +2770,9 @@ async function abrirVistaAdicion(documento){
     el.dataset.bound='1';
 
     // Si el valor cambia por cualquier vía (picker o asignación), recalcula
-    el.addEventListener('input', ()=> recomputeAdicionAll());
-    el.addEventListener('change', ()=> recomputeAdicionAll());
-    el.addEventListener('blur', ()=> recomputeAdicionAll());
+   el.addEventListener('input', ()=> recomputeAdicionAll(true));
+    el.addEventListener('change', ()=> recomputeAdicionAll(true));
+    el.addEventListener('blur', ()=> recomputeAdicionAll(true));
   });
 
   const saveBtn = document.getElementById('ad-guardar');
@@ -2762,6 +2784,7 @@ async function abrirVistaAdicion(documento){
         const inicioA = normDMY(document.getElementById('inicioA')?.value || '');
         const finA    = normDMY(document.getElementById('finA')?.value || '');
         const cdpA    = String(document.getElementById('cdpA')?.value || '').replace(/\D/g,'').slice(0,10);
+        const cdpA2   = String(document.getElementById('cdpA2')?.value || '').replace(/\D/g,'').slice(0,10);
         const mraVal  = numPureCOP(document.getElementById('mra')?.value || '');
 
         if(!fechaInicioContrato){
@@ -2784,17 +2807,28 @@ async function abrirVistaAdicion(documento){
           return;
         }
 
-        if(!(cdpA.length === 10 && cdpA.startsWith('2026'))){
-          Swal.fire({ icon:'warning', title:'CDP Adición inválido', text:'Debe tener 10 dígitos e iniciar por 2026.' });
+       if(!(cdpA.length === 10 && cdpA.startsWith('2026'))){
+          Swal.fire({ icon:'warning', title:'CDP 1ra Adición inválido', text:'Debe tener 10 dígitos e iniciar por 2026.' });
           return;
         }
+
+        // CDP 2da Adición es OPCIONAL: solo se valida si trae dígitos
+        if(cdpA2 && !(cdpA2.length === 10 && cdpA2.startsWith('2026'))){
+          Swal.fire({ icon:'warning', title:'CDP 2da Adición inválido', text:'Si lo diligencias, debe tener 10 dígitos e iniciar por 2026.' });
+          return;
+        }
+
+        // Tipo de Adición según el CDP diligenciado
+        const esSegundaAdicion = !!cdpA2;
+        const tipoAdicion    = esSegundaAdicion ? '2DA ADICIÓN' : '1RA ADICIÓN'; // Columna CI
+        const ordinalAdicion = esSegundaAdicion ? '2da' : '1ra';                // para el mensaje
 
         if(!mraVal || mraVal <= 0){
           Swal.fire({ icon:'warning', title:'Valor de la Adición requerido' });
           return;
         }
 
-        recomputeAdicionAll();
+        recomputeAdicionAll(false);
 
         const mesesA = String(document.getElementById('mesesA')?.value || '').trim();
         const diasA  = String(document.getElementById('diasA')?.value  || '').trim();
@@ -2839,7 +2873,7 @@ async function abrirVistaAdicion(documento){
         });
         if(!rs.isConfirmed) return;
 
-        const payload = {
+       const payload = {
           documento: AD_STATE.documento,
           inicioA,
           finA,
@@ -2852,6 +2886,8 @@ async function abrirVistaAdicion(documento){
           diasT,
           ejecucion: ejecTxt,
           cdpA,
+          cdpA2,
+          tipoAdicion,
           mra: String(mraVal),
           textoAdicion: textoAdicion || adicionTxt,
           valorFin: String(valorFin),
@@ -2860,16 +2896,21 @@ async function abrirVistaAdicion(documento){
 
         await apiPost('guardarAdicion', payload);
 
+     const URL_GUIA_ADICION = 'https://res.cloudinary.com/dqqeavica/image/upload/v1779148938/GUIA_ADICION_ylgfsu.pdf';
+
         const tel = normalizeContratistaNumber(AD_STATE.telefono);
         if(tel){
+          const valorAdicionFmt = formatCOPViewLocal(mraVal);
           const msg =
-            'Estimado(a) *'+(AD_STATE.nombre||'')+'*\n\n' +
-            '¡Se ha generado la *Adición del Contrato N° '+(AD_STATE.contrato||'')+'*!\n' +
-            '- En la *App Contratista*, toma la opción *DATOS DEL CONTRATO* - Actualizar. Registra solo el RP de Adición Correctamente una vez lo tengas.\n\n' +
-            'Para la *Primera cuenta en esta Adición* debes Anexar el CDP y RP de Adición.\n' +
-            '> Si no tienes esta guía, revisa los TUTORIALES en la App.\n\n' +
+            'Estimado(a) *'+(AD_STATE.nombre||'')+'*\n' +
+            ' ¡Se ha generado la *'+ordinalAdicion+' Adición del Contrato N° '+(AD_STATE.contrato||'')+'* por un valor de *'+valorAdicionFmt+'* por un periodo de *'+adicionTxt+'*!\n\n' +
+            'Por favor sigue atentamente estos pasos para evitar reprocesos:\n' +
+            '- Ingresa el N° de RP de Adición\n' +
+            '- Al ingresar o corregir la siguiente cuenta debes editar el *Total de pagos y valor de la Adición*.\n' +
+            '- Debes adjuntar el CDP, RP y OTROSI de la Adición.\n' +
+            '- Revisa la guía que te adjuntamos o la sección de Tutoriales para evitar devoluciones.\n\n' +
             'Cordialmente,\n\n*Equipo de Contratación*\n> Alcaldía de Flandes';
-          sendBuilderbotMessage(tel, msg);
+          sendBuilderbotMessage(tel, msg, URL_GUIA_ADICION);
         }
 
         await Swal.fire({ icon:'success', title:'Adición guardada', timer:1800, showConfirmButton:false });
