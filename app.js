@@ -3173,15 +3173,17 @@ async function abrirOtrosiEdicion(documento) {
     if (cdpEl.value.length === 10 && cdpEl.value.startsWith('2026'))
       cdpEl.style.border = '2px solid green';
 
-    /* CDP Adiciones (opcionales) */
+/* CDP Adiciones (opcionales) */
     const cdpA1El = document.getElementById('ot-cdpAdicion');
     cdpA1El.value = String(data.cdpAdicion || '').replace(/\D/g,'').slice(0,10);
+    cdpA1El.dataset.original = cdpA1El.value;
     cdpA1El.style.border = '';
     if (cdpA1El.value.length === 10 && cdpA1El.value.startsWith('2026'))
       cdpA1El.style.border = '2px solid green';
 
     const cdpA2El = document.getElementById('ot-cdpAdicion2');
     cdpA2El.value = String(data.cdpAdicion2 || '').replace(/\D/g,'').slice(0,10);
+    cdpA2El.dataset.original = cdpA2El.value;
     cdpA2El.style.border = '';
     if (cdpA2El.value.length === 10 && cdpA2El.value.startsWith('2026'))
       cdpA2El.style.border = '2px solid green';
@@ -3230,6 +3232,8 @@ document.getElementById('btn-ot-guardar').addEventListener('click', async () => 
   const cdp               = (document.getElementById('ot-cdp').value               || '').trim();
   const cdpAdicion  = (document.getElementById('ot-cdpAdicion').value  || '').replace(/\D/g,'').trim();
   const cdpAdicion2 = (document.getElementById('ot-cdpAdicion2').value || '').replace(/\D/g,'').trim();
+  const cdpAdicionTouched  = cdpAdicion  !== String(document.getElementById('ot-cdpAdicion').dataset.original  || '');
+  const cdpAdicion2Touched = cdpAdicion2 !== String(document.getElementById('ot-cdpAdicion2').dataset.original || '');
   const objetoRaw         = (document.getElementById('ot-objeto').value            || '').trim();
   const obligacionesRaw   = (document.getElementById('ot-obligaciones').value      || '').trim();
 
@@ -3339,6 +3343,8 @@ document.getElementById('btn-ot-guardar').addEventListener('click', async () => 
       cdp:              cdp.replace(/\D/g,''),
       cdpAdicion,
       cdpAdicion2,
+      cdpAdicionTouched,
+      cdpAdicion2Touched,
       objeto:           objetoRaw,
       obligaciones
     });
