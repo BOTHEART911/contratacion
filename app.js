@@ -1424,10 +1424,11 @@ function renderRevisionCuenta(){
   const rcBody=document.getElementById('rc-body');
   rcTitle.textContent='REVISIÓN DE CUENTA N° '+(cu?.informe||'')+' de '+(c?.nombre||'');
   rcBody.innerHTML='';
-  const baseInfo=[
+ const baseInfo=[
     `<b>DOCUMENTO:</b> ${c?.documento||''}`,
     `<b>SECRETARÍA:</b> ${c?.secretaria||''}`,
-    `<b>SUPERVISOR:</b> ${c?.supervisor||''}`
+    `<b>SUPERVISOR:</b> ${c?.supervisor||''}`,
+    `<b>CONTRACTUAL:</b> <span style="color:#16a34a;font-weight:900;">${c?.contractual||''}</span>`
   ];
   rcBody.innerHTML=baseInfo.map(x=>`<p>${x}</p>`).join('');
 
@@ -1443,8 +1444,10 @@ function renderRevisionCuenta(){
     `<b>VALOR FINAL:</b> ${c?.valorFinal||''}`,
     `<b>CDP:</b> ${c?.cdp||''}`,
     `<b>RP:</b> ${c?.rp||''}`,
-    `<b>CDP ADICIÓN:</b> ${c?.cdpAdicion||''}`,
-    `<b>RP ADICIÓN:</b> ${c?.rpAdicion||''}`,
+    `<b>CDP 1RA ADICIÓN:</b> ${c?.cdpAdicion||''}`,
+    `<b>RP 1RA ADICIÓN:</b> ${c?.rpAdicion||''}`,
+    `<b>CDP 2DA ADICIÓN:</b> ${c?.cdpAdicion2||''}`,
+    `<b>RP 2DA ADICIÓN:</b> ${c?.rpAdicion2||''}`,
     `<b>SECRETARÍA:</b> ${c?.secretaria||''}`,
     `<b>SUPERVISOR:</b> ${c?.supervisor||''}`,
   ].map(x=>`<p>${x}</p>`).join('');
@@ -3032,6 +3035,20 @@ document.getElementById('ot-supervisor').addEventListener('change', () => {
   });
 })();
 
+/* ── CDP Adiciones (OTROSÍ): mismo comportamiento que CDP N° ── */
+(function initOtCDPAdiciones(){
+  ['ot-cdpAdicion','ot-cdpAdicion2'].forEach(function(id){
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('input', () => {
+      const raw = (el.value || '').replace(/\D/g, '').slice(0, 10);
+      el.value = raw;
+      el.style.border = '';
+      if (raw.length === 10 && raw.startsWith('2026')) el.style.border = '2px solid green';
+    });
+  });
+})();
+
 /* ── Autogrow + contador + preview de obligaciones ── */
 (function initOtObligacionesUI() {
   const ta    = document.getElementById('ot-obligaciones');
@@ -3156,6 +3173,19 @@ async function abrirOtrosiEdicion(documento) {
     if (cdpEl.value.length === 10 && cdpEl.value.startsWith('2026'))
       cdpEl.style.border = '2px solid green';
 
+    /* CDP Adiciones (opcionales) */
+    const cdpA1El = document.getElementById('ot-cdpAdicion');
+    cdpA1El.value = String(data.cdpAdicion || '').replace(/\D/g,'').slice(0,10);
+    cdpA1El.style.border = '';
+    if (cdpA1El.value.length === 10 && cdpA1El.value.startsWith('2026'))
+      cdpA1El.style.border = '2px solid green';
+
+    const cdpA2El = document.getElementById('ot-cdpAdicion2');
+    cdpA2El.value = String(data.cdpAdicion2 || '').replace(/\D/g,'').slice(0,10);
+    cdpA2El.style.border = '';
+    if (cdpA2El.value.length === 10 && cdpA2El.value.startsWith('2026'))
+      cdpA2El.style.border = '2px solid green';
+
     /* Objeto */
     document.getElementById('ot-objeto').value = data.objeto || '';
 
@@ -3198,6 +3228,8 @@ document.getElementById('btn-ot-guardar').addEventListener('click', async () => 
   const valorRaw          = (document.getElementById('ot-valor').value             || '').trim();
   const valorTexto        = (document.getElementById('ot-valorTexto').value        || '').trim();
   const cdp               = (document.getElementById('ot-cdp').value               || '').trim();
+  const cdpAdicion  = (document.getElementById('ot-cdpAdicion').value  || '').replace(/\D/g,'').trim();
+  const cdpAdicion2 = (document.getElementById('ot-cdpAdicion2').value || '').replace(/\D/g,'').trim();
   const objetoRaw         = (document.getElementById('ot-objeto').value            || '').trim();
   const obligacionesRaw   = (document.getElementById('ot-obligaciones').value      || '').trim();
 
@@ -3243,6 +3275,12 @@ document.getElementById('btn-ot-guardar').addEventListener('click', async () => 
   }
   if (!/^\d{10}$/.test(cdp.replace(/\D/g,''))) {
     Swal.fire({ icon:'warning', title:'CDP inválido' }); return;
+  }
+  if (cdpAdicion && !(cdpAdicion.length === 10 && cdpAdicion.startsWith('2026'))) {
+    Swal.fire({ icon:'warning', title:'CDP 1RA ADICIÓN inválido', text:'Si lo diligencias, debe tener 10 dígitos e iniciar por 2026.' }); return;
+  }
+  if (cdpAdicion2 && !(cdpAdicion2.length === 10 && cdpAdicion2.startsWith('2026'))) {
+    Swal.fire({ icon:'warning', title:'CDP 2DA ADICIÓN inválido', text:'Si lo diligencias, debe tener 10 dígitos e iniciar por 2026.' }); return;
   }
   if (!objetoRaw) {
     Swal.fire({ icon:'warning', title:'Objeto del contrato requerido' }); return;
@@ -3299,6 +3337,8 @@ document.getElementById('btn-ot-guardar').addEventListener('click', async () => 
       valor:            String(valorNum),
       valorTexto:       valorTexto.toUpperCase(),
       cdp:              cdp.replace(/\D/g,''),
+      cdpAdicion,
+      cdpAdicion2,
       objeto:           objetoRaw,
       obligaciones
     });
