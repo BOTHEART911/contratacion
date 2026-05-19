@@ -750,6 +750,11 @@ function pintarContratistas(list){
     pTermino.textContent='FECHA TERMINO: '+(c.fechaTermino||'');
     div.appendChild(pTermino);
 
+    const pContractual=document.createElement('p');
+    pContractual.className='item-sub contractual';
+    pContractual.textContent='CONTRACTUAL: '+(c.contractual||'');
+    div.appendChild(pContractual);
+
     const tieneAdicion = String(c.tieneAdicion||'') === 'true' || c.tieneAdicion === true;
       if(tieneAdicion){
   const pAdi = document.createElement('p');
@@ -1196,10 +1201,13 @@ async function mostrarDetallesContratista(documento){
         `<b>VALOR INICIAL:</b> ${d.valor||''}`,
         `<b>MRA:</b> ${d.mra||''}`,
         `<b>VALOR FINAL:</b> ${d.valorFinal||''}`,
-        `<b>CDP:</b> ${d.cdp||''}`,
+       `<b>CDP:</b> ${d.cdp||''}`,
         `<b>RP:</b> ${d.rp||''}`,
-        `<b>CDP ADICIÓN:</b> ${d.cdpAdicion||''}`,
-        `<b>RP ADICIÓN:</b> ${d.rpAdicion||''}`,
+        `<b>CONTRACTUAL:</b> ${d.contractual||''}`,
+        `<b>CDP 1RA ADICIÓN:</b> ${d.cdpAdicion||''}`,
+        `<b>RP 1RA ADICIÓN:</b> ${d.rpAdicion||''}`,
+        `<b>CDP 2DA ADICIÓN:</b> ${d.cdpAdicion2||''}`,
+        `<b>RP 2DA ADICIÓN:</b> ${d.rpAdicion2||''}`,
         `<b>REGIMEN:</b> ${d.regimen||''}`
       ];
       for(let i=1;i<=26;i++){
@@ -2911,10 +2919,10 @@ async function abrirVistaAdicion(documento){
             'Estimado(a) *'+(AD_STATE.nombre||'')+'*\n' +
             ' ¡Se ha generado la *'+ordinalAdicion+' Adición del Contrato N° '+(AD_STATE.contrato||'')+'* por un valor de *'+valorAdicionFmt+'* y un periodo de *'+adicionTxt+'*!\n\n' +
             'Por favor sigue atentamente estos pasos para evitar reprocesos:\n' +
-            '- Actualiza los DATOS DEL CONTRATO Ingresando el N° de RP de Adición\n' +
+            '- *Actualiza los DATOS DEL CONTRATO* Ingresando el N° de *RP de Adición*\n' +
             '- Al ingresar o corregir la siguiente cuenta debes editar el *Total de pagos y valor de la Adición*.\n' +
-            '- Debes adjuntar el CDP, RP y OTROSI de la Adición.\n' +
-            '- Revisa la guía que te adjuntamos o la sección de Tutoriales para evitar devoluciones.\n\n' +
+            '- Debes *adjuntar el CDP, RP y OTROSI de la Adición*.\n' +
+            '- Revisa la guía que te adjuntamos o la sección de *Tutoriales* para evitar devoluciones.\n\n' +
             'Cordialmente,\n\n*Equipo de Contratación*\n> Alcaldía de Flandes';
           sendBuilderbotMessage(tel, msg, URL_GUIA_ADICION);
         }
