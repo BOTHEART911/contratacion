@@ -2385,7 +2385,8 @@ function calcMesesDiasEntre(dInicio, dFin){
 
   // Normaliza a medianoche local
   const start = new Date(a.getFullYear(), a.getMonth(), a.getDate());
-  const end   = new Date(b.getFullYear(), b.getMonth(), b.getDate());
+  // +1 día al fin para contar de forma INCLUSIVA ambas fechas (inicio y fin)
+  const end   = new Date(b.getFullYear(), b.getMonth(), b.getDate() + 1);
 
   // Función días del mes
   function daysInMonth(y, m0){ return new Date(y, m0 + 1, 0).getDate(); }
