@@ -2903,9 +2903,9 @@ async function abrirVistaAdicion(documento){
           const valorAdicionFmt = formatCOPViewLocal(mraVal);
           const msg =
             'Estimado(a) *'+(AD_STATE.nombre||'')+'*\n' +
-            ' ¡Se ha generado la *'+ordinalAdicion+' Adición del Contrato N° '+(AD_STATE.contrato||'')+'* por un valor de *'+valorAdicionFmt+'* por un periodo de *'+adicionTxt+'*!\n\n' +
+            ' ¡Se ha generado la *'+ordinalAdicion+' Adición del Contrato N° '+(AD_STATE.contrato||'')+'* por un valor de *'+valorAdicionFmt+'* y un periodo de *'+adicionTxt+'*!\n\n' +
             'Por favor sigue atentamente estos pasos para evitar reprocesos:\n' +
-            '- Ingresa el N° de RP de Adición\n' +
+            '- Actualiza los DATOS DEL CONTRATO Ingresando el N° de RP de Adición\n' +
             '- Al ingresar o corregir la siguiente cuenta debes editar el *Total de pagos y valor de la Adición*.\n' +
             '- Debes adjuntar el CDP, RP y OTROSI de la Adición.\n' +
             '- Revisa la guía que te adjuntamos o la sección de Tutoriales para evitar devoluciones.\n\n' +
