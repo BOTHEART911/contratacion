@@ -775,19 +775,24 @@ function pintarContratistas(list){
     const rightGroup=document.createElement('div');
     rightGroup.className='right-group';
 
-    const btnDetalles=document.createElement('button');
+const btnDetalles=document.createElement('button');
 btnDetalles.textContent='MOSTRAR DETALLES';
 btnDetalles.addEventListener('click', ()=>{
   playSoundOnce(SOUNDS.login);
-  mostrarDetallesContratista(c.documento);
+  mostrarDetallesContratista(c.documento, c.contrato, c.supervisor);
 });
 
-    const btnGuardarEstado=document.createElement('button');
+   const btnGuardarEstado=document.createElement('button');
     btnGuardarEstado.textContent='GUARDAR ESTADO';
     btnGuardarEstado.addEventListener('click', async ()=>{
   playSoundOnce(SOUNDS.login);
   try{
-    await apiPost('guardarEstadoContratista',{ documento:c.documento, estado:nuevoEstado });
+    await apiPost('guardarEstadoContratista',{
+      documento:  c.documento,
+      contrato:   c.contrato,
+      supervisor: c.supervisor,
+      estado:     nuevoEstado
+    });
     Swal.fire({icon:'success',title:'Estado actualizado',timer:1600,showConfirmButton:false});
     await cargarContratistas();
   }catch(e){
@@ -1176,11 +1181,14 @@ if (obligaciones.length === 0){
 });
 
 /* ================== DETALLES CONTRATISTA ================== */
-  let _detallesDocActual = null; //
+ let _detallesDocActual = null; // Ahora es { documento, contrato, supervisor }
   
-async function mostrarDetallesContratista(documento){
+async function mostrarDetallesContratista(documento, contrato, supervisor){
   try{
-    const d=await apiGet('detallesContratista',{documento});
+    const params = { documento };
+    if(contrato)   params.contrato   = String(contrato).trim();
+    if(supervisor) params.supervisor = String(supervisor).trim();
+    const d=await apiGet('detallesContratista', params);
     const body=document.getElementById('detalles-body');
     body.innerHTML='';
     if(!d){
@@ -1221,7 +1229,7 @@ async function mostrarDetallesContratista(documento){
       }
       body.innerHTML=lines.map(l=>`<p>${l}</p>`).join('');
     }
-     _detallesDocActual = documento;
+     _detallesDocActual = { documento, contrato, supervisor };
     showView('view-detalles');
   }catch(e){
     Swal.fire({icon:'error',title:'Error',text:e.message});
@@ -2346,6 +2354,7 @@ let AD_STATE = {
   documento: '',
   nombre: '',
   contrato: '',
+  supervisor: '',
   telefono: '',
   fechaInicio: '',
   valorInicial: 0,
@@ -2636,6 +2645,7 @@ async function abrirVistaAdicion(documento, contrato, supervisor){
     documento: String(data.documento||'').trim(),
     nombre: String(data.nombre||'').trim(),
     contrato: String(data.contrato||'').trim(),
+    supervisor: String(supervisor || '').trim(),
     telefono: String(data.telefono||'').trim(),
     fechaInicio: normDMY(data.fechaInicio || ''),
     valorInicial: Number(String(data.valorInicial||'').replace(/\D/g,'')) || 0,
@@ -2906,6 +2916,8 @@ async function abrirVistaAdicion(documento, contrato, supervisor){
 
        const payload = {
           documento: AD_STATE.documento,
+          contrato: AD_STATE.contrato,
+          supervisor: AD_STATE.supervisor,
           inicioA,
           finA,
           diaFa: String(document.getElementById('diaFa')?.value || '').trim(),
@@ -3125,22 +3137,31 @@ document.getElementById('ot-supervisor').addEventListener('change', () => {
 /* ── Botón OTROSÍ (EDICIÓN) en view-detalles ── */
 document.getElementById('btn-detalles-otrosi').addEventListener('click', () => {
   playSoundOnce(SOUNDS.login);
-  if (!_detallesDocActual) {
+  if (!_detallesDocActual || !_detallesDocActual.documento) {
     Swal.fire({ icon:'warning', title:'Sin contratista seleccionado' });
     return;
   }
-  abrirOtrosiEdicion(_detallesDocActual);
+  abrirOtrosiEdicion(
+    _detallesDocActual.documento,
+    _detallesDocActual.contrato,
+    _detallesDocActual.supervisor
+  );
 });
 
 /* ── Abrir vista OTROSÍ y prellenar campos ── */
-async function abrirOtrosiEdicion(documento) {
+async function abrirOtrosiEdicion(documento, contrato, supervisor) {
   try {
-    const data = await apiGet('getEditarContratistaData', { documento });
+    const params = { documento };
+    if(contrato)   params.contrato   = String(contrato).trim();
+    if(supervisor) params.supervisor = String(supervisor).trim();
+    const data = await apiGet('getEditarContratistaData', params);
     if (!data) { Swal.fire({ icon:'info', title:'No encontrado' }); return; }
 
     const otDocEl = document.getElementById('ot-documento');
     otDocEl.value = data.documento || '';
-    otDocEl.dataset.original = String(data.documento || '').trim(); // guarda el documento ORIGINAL
+    otDocEl.dataset.original = String(data.documento || '').trim();          // documento ORIGINAL
+    otDocEl.dataset.contratoOriginal   = String(contrato   || '').trim();   // contrato ORIGINAL
+    otDocEl.dataset.supervisorOriginal = String(supervisor || '').trim();   // supervisor ORIGINAL
     document.getElementById('ot-nombre').value    = data.nombre    || '';
 
     /* Secretaría */
@@ -3228,9 +3249,11 @@ document.getElementById('btn-ot-volver').addEventListener('click', () => {
 
 /* ── Guardar (OTROSÍ) ── */
 document.getElementById('btn-ot-guardar').addEventListener('click', async () => {
-  const otDocEl           = document.getElementById('ot-documento');
-  const documentoOriginal = String(otDocEl.dataset.original || '').trim();
-  const documento         = (otDocEl.value || '').trim();
+  const otDocEl             = document.getElementById('ot-documento');
+  const documentoOriginal   = String(otDocEl.dataset.original             || '').trim();
+  const contratoOriginal    = String(otDocEl.dataset.contratoOriginal     || '').trim();
+  const supervisorOriginal  = String(otDocEl.dataset.supervisorOriginal   || '').trim();
+  const documento           = (otDocEl.value || '').trim();
   const nombre            = (document.getElementById('ot-nombre').value            || '').trim();
   const secretaria        = (document.getElementById('ot-secretaria').value        || '').trim();
   const carpetaSecretaria = (document.getElementById('ot-carpetaSecretaria').value || '').trim();
@@ -3341,6 +3364,8 @@ document.getElementById('btn-ot-guardar').addEventListener('click', async () => 
   try {
     await apiPost('editarContratista', {
       documentoOriginal,
+      contratoOriginal,
+      supervisorOriginal,
       documento,
       nombre:           nombre.toUpperCase(),
       secretaria,
