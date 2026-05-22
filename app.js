@@ -664,6 +664,9 @@ document.getElementById('btn-generar-reporte').addEventListener('click', async (
 /* ================== CONTRATISTAS ================== */
 let CONTR_DATA=[];
 async function cargarContratistas(){
+  // Reset del filtro al iniciar la vista
+  const _filterContr = document.getElementById('contr-filter');
+  if(_filterContr) _filterContr.value = '';
   try{
     const list=await apiGet('listContratistas');
     CONTR_DATA=Array.isArray(list)?list:[];
@@ -826,7 +829,7 @@ btnAdicion.textContent = 'ADICIÓN';
 btnAdicion.addEventListener('click', async ()=>{
   playSoundOnce(SOUNDS.login);
   try{
-    await abrirVistaAdicion(c.documento);
+    await abrirVistaAdicion(c.documento, c.contrato, c.supervisor);
   }catch(e){
     Swal.fire({icon:'error',title:'Error',text:e.message});
   }
@@ -1252,6 +1255,9 @@ function parseFechaRadicacion(s){
 
 let CUENTAS_DATA=[];
 async function cargarCuentasPendientes(){
+  // Reset del filtro al iniciar la vista
+  const _filterCuentas = document.getElementById('cuentas-filter');
+  if(_filterCuentas) _filterCuentas.value = '';
   try{
     const list=await apiGet('listCuentasPendientes');
     CUENTAS_DATA=Array.isArray(list)?list:[];
@@ -1863,6 +1869,9 @@ initRevisionToggleSections();
 /* ================== REQUERIMIENTOS ================== */
 let REQ_DATA=[];
 async function cargarRequerimientosBase(){
+  // Reset del filtro al iniciar la vista
+  const _filterReq = document.getElementById('req-filter');
+  if(_filterReq) _filterReq.value = '';
   try{
     const list=await apiGet('listContratistas');
     REQ_DATA=Array.isArray(list)?list:[];
@@ -2609,10 +2618,15 @@ function recomputeAdicionAll(recalcDesdeFechas){
   }
 }
 
-async function abrirVistaAdicion(documento){
+async function abrirVistaAdicion(documento, contrato, supervisor){
   if(!documento) throw new Error('Documento inválido');
 
-  const data = await apiGet('getAdicionData', { documento });
+  // Parámetros adicionales para diferenciar contratos duplicados (mismo documento, distinto contrato/supervisor)
+  const params = { documento };
+  if(contrato)   params.contrato   = String(contrato).trim();
+  if(supervisor) params.supervisor = String(supervisor).trim();
+
+  const data = await apiGet('getAdicionData', params);
 
   if(!data || !data.found){
     throw new Error('Contratista no encontrado');
@@ -2706,13 +2720,12 @@ async function abrirVistaAdicion(documento){
 }
 
 /* Eventos UI Adición */
-(function bindAdicionHandlers(){
-  const back = document.getElementById('ad-volver');
+const back = document.getElementById('ad-volver');
   if(back && !back.dataset.bound){
     back.dataset.bound = '1';
     back.addEventListener('click', ()=>{
       playSoundOnce(SOUNDS.back);
-      showView('view-inicio');
+      showView('view-contratistas');
     });
   }
 
