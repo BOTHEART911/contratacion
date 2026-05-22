@@ -2618,15 +2618,10 @@ function recomputeAdicionAll(recalcDesdeFechas){
   }
 }
 
-async function abrirVistaAdicion(documento, contrato, supervisor){
+async function abrirVistaAdicion(documento){
   if(!documento) throw new Error('Documento inválido');
 
-  // Parámetros adicionales para diferenciar contratos duplicados (mismo documento, distinto contrato/supervisor)
-  const params = { documento };
-  if(contrato)   params.contrato   = String(contrato).trim();
-  if(supervisor) params.supervisor = String(supervisor).trim();
-
-  const data = await apiGet('getAdicionData', params);
+  const data = await apiGet('getAdicionData', { documento });
 
   if(!data || !data.found){
     throw new Error('Contratista no encontrado');
@@ -2955,6 +2950,7 @@ async function abrirVistaAdicion(documento, contrato, supervisor){
       }
     });
   }
+})();
 
   /* ================== OTROSÍ (EDICIÓN) ================== */
 
