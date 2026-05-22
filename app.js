@@ -2955,7 +2955,6 @@ async function abrirVistaAdicion(documento, contrato, supervisor){
       }
     });
   }
-})();
 
   /* ================== OTROSÍ (EDICIÓN) ================== */
 
