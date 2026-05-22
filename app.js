@@ -2720,7 +2720,8 @@ async function abrirVistaAdicion(documento, contrato, supervisor){
 }
 
 /* Eventos UI Adición */
-const back = document.getElementById('ad-volver');
+(function bindAdicionHandlers(){
+  const back = document.getElementById('ad-volver');
   if(back && !back.dataset.bound){
     back.dataset.bound = '1';
     back.addEventListener('click', ()=>{
