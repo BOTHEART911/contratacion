@@ -2618,10 +2618,15 @@ function recomputeAdicionAll(recalcDesdeFechas){
   }
 }
 
-async function abrirVistaAdicion(documento){
+async function abrirVistaAdicion(documento, contrato, supervisor){
   if(!documento) throw new Error('Documento inválido');
 
-  const data = await apiGet('getAdicionData', { documento });
+  // Parámetros adicionales para diferenciar contratos duplicados (mismo documento, distinto contrato/supervisor)
+  const params = { documento };
+  if(contrato)   params.contrato   = String(contrato).trim();
+  if(supervisor) params.supervisor = String(supervisor).trim();
+
+  const data = await apiGet('getAdicionData', params);
 
   if(!data || !data.found){
     throw new Error('Contratista no encontrado');
