@@ -850,6 +850,7 @@ leftGroup.appendChild(btnAdicion);
       const contacto   = String(div.dataset.contacto || c.contacto || '').trim();
       const supervisor = String(c.supervisor || '').trim();
       const contrato   = String(c.contrato   || '').trim();
+      const nombre     = String(c.nombre     || '').trim();
 
       if(!contacto){
         Swal.fire({icon:'warning',title:'Sin contacto del supervisor',text:'No hay grupo de WhatsApp asociado.'});
@@ -866,20 +867,19 @@ leftGroup.appendChild(btnAdicion);
       });
 
       if(rs.isConfirmed){
-        const mensaje =
-          'Estimado(a) *'+supervisor+'*\n' +
-          'Se ha configurado la *Cesión del contrato '+contrato+'* ✍🏻\n\n' +
-          'Por favor compartir con el contratista el enlace para descargar la *App Contratista* junto a las siguientes instrucciones:\n' +
-          'https://tinyurl.com/GDF-CONTRATISTA-APP\n' +
-          '*1.* Descargar la App\n' +
-          '*2.* Inciar sesión con CC o NIT\n' +
-          '*3.* Tomar la opción DATOS DEL PROCESO / DATOS PERSONALES / ACTUALIZAR\n' +
-          '*4.* Cambiar asertivamente todos los datos incluyendo la firma\n' +
-          '*5.* En la 1ra cuenta bajo la Cesión, debe adjuntar la justificación en el campo *Otro Documento Requerido*\n\n' +
-          'Revisar muy bien para evitar reprocesos, puedes tomar la opción GUIA DE USO / TUTORIALES.\n\n' +
-          'Cordialmente,\n\n*Equipo de Contratación*\n> Alcaldía de Flandes';
-
-        sendBuilderbotMessage(contacto, mensaje);
+    const mensaje =
+      'Estimado(a) *'+supervisor+'*\n' +
+      'Se ha configurado la *Cesión del contrato '+contrato+'* ✍🏻\n\n' +
+      'Por favor compartir con el contratista *'+nombre+'* el enlace para descargar la *App Contratista* junto a las siguientes instrucciones:\n' +
+      'https://tinyurl.com/GDF-CONTRATISTA-APP\n' +
+      '*1.* Descargar la App\n' +
+      '*2.* Iniciar sesión con CC o NIT\n' +
+      '*3.* Tomar la opción DATOS DEL PROCESO / DATOS PERSONALES / ACTUALIZAR\n' +
+      '*4.* Cambiar asertivamente todos los datos incluyendo la firma\n' +
+      '*5.* En la 1ra cuenta bajo la Cesión, debe adjuntar la justificación en el campo *Otro Documento Requerido*\n\n' +
+      'Revisar muy bien para evitar reprocesos, puedes tomar la opción GUIA DE USO / TUTORIALES.\n\n' +
+      'Cordialmente,\n\n*Equipo de Contratación*\n> Alcaldía de Flandes';
+    sendBuilderbotMessage(contacto, mensaje);
 
         Swal.fire({
           icon:'success',
