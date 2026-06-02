@@ -2445,34 +2445,6 @@ function calcMesesDiasEntre(dInicio, dFin){
   return { meses, dias: Math.max(0, dias) };
 }
 
-  // Avanza meses completos desde start sin pasar end
-  let meses = 0;
-  let cursor = new Date(start.getFullYear(), start.getMonth(), start.getDate());
-
-  while(true){
-    const next = new Date(cursor.getFullYear(), cursor.getMonth() + 1, cursor.getDate());
-
-    // Si el día no existe en el mes siguiente (ej 31), ajusta al último día del mes
-    if(next.getDate() !== cursor.getDate()){
-      const dim = daysInMonth(next.getFullYear(), next.getMonth());
-      next.setDate(dim);
-    }
-
-    if(next <= end){
-      meses++;
-      cursor = next;
-    }else{
-      break;
-    }
-  }
-
-  // Días restantes (diferencia exacta sin +1)
-  const msDay = 1000*60*60*24;
-  const dias = Math.round((end - cursor) / msDay);
-
-  return { meses, dias: Math.max(0, dias) };
-}
-
 function textoTiempo(meses, dias){
   const m = parseInt(meses||'0',10) || 0;
   const d = parseInt(dias||'0',10) || 0;
