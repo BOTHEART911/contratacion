@@ -2209,6 +2209,7 @@ function abrirPickerFecha() {
 }
 function cancelarPickerFecha() {
   const modal = document.getElementById('fechaModal');
+  if(modal.contains(document.activeElement)){ document.activeElement.blur(); }
   if (modal) modal.style.display = 'none';
   const fc = $id('fechaContrato'); if (fc) fc.value = '';
   const d  = $id('diaContrato');   if (d)  d.value = '';
@@ -2230,6 +2231,7 @@ function confirmarPickerFecha() {
   const idx = Math.max(1, Math.min(12, parseInt(mSel, 10))) - 1;
   const m   = $id('mesContrato');   if (m)  m.value = mesesNombres[idx];
 
+  if(modal.contains(document.activeElement)){ document.activeElement.blur(); }
   if (modal) modal.style.display = 'none';
 }
 
@@ -2510,8 +2512,12 @@ function abrirPickerAdicion(target){
 function cancelarPickerAdicion(){
   const modal = document.getElementById('adicionModal');
   if(modal){
-    modal.style.display = 'none';
+    // Suelta el foco antes de ocultar para evitar el warning de aria-hidden
+    if(modal.contains(document.activeElement)){
+      document.activeElement.blur();
+    }
     modal.setAttribute('aria-hidden','true');
+    modal.style.display = 'none';
   }
 }
 function confirmarPickerAdicion(){
@@ -2999,7 +3005,11 @@ function abrirPickerOtFecha() {
 }
 function cancelarPickerOtFecha() {
   const modal = document.getElementById('otFechaModal');
-  if (modal) { modal.style.display = 'none'; modal.setAttribute('aria-hidden','true'); }
+  if (modal) {
+    if(modal.contains(document.activeElement)){ document.activeElement.blur(); }
+    modal.setAttribute('aria-hidden','true');
+    modal.style.display = 'none';
+  }
 }
 function confirmarPickerOtFecha() {
   const dSel = document.getElementById('otPickerDia')?.value || '01';
