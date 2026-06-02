@@ -2406,7 +2406,9 @@ function parseDMYToDate(dmy){
   return dt;
 }
 
-/* Calcula meses y días entre dos fechas incluyendo el día final (misma lógica de indexref: diffDays +1) */
+/* Calcula meses y días entre dos fechas incluyendo el día final (conteo inclusivo).
+   Ancla SIEMPRE en la fecha de inicio original para no perder el "día ancla"
+   cuando un mes intermedio tiene menos días (ej. febrero con inicio en día 29/30/31). */
 function calcMesesDiasEntre(dInicio, dFin){
   const a = parseDMYToDate(dInicio);
   const b = parseDMYToDate(dFin);
@@ -2417,8 +2419,31 @@ function calcMesesDiasEntre(dInicio, dFin){
   // +1 día al fin para contar de forma INCLUSIVA ambas fechas (inicio y fin)
   const end   = new Date(b.getFullYear(), b.getMonth(), b.getDate() + 1);
 
-  // Función días del mes
-  function daysInMonth(y, m0){ return new Date(y, m0 + 1, 0).getDate(); }
+  // Suma n meses a "base" recortando al último día del mes destino si el día no existe.
+  // IMPORTANTE: parte SIEMPRE de "start", no del cursor, así el día ancla nunca se pierde.
+  function addMonthsClamped(base, n){
+    const total = base.getMonth() + n;
+    const ty = base.getFullYear() + Math.floor(total / 12);
+    const tm = ((total % 12) + 12) % 12;
+    const dim = new Date(ty, tm + 1, 0).getDate();   // último día del mes destino
+    const day = Math.min(base.getDate(), dim);
+    return new Date(ty, tm, day);
+  }
+
+  // Cuenta cuántos meses completos caben sin pasar "end"
+  let meses = 0;
+  while(addMonthsClamped(start, meses + 1) <= end){
+    meses++;
+  }
+
+  const cursor = addMonthsClamped(start, meses);
+
+  // Días restantes (diferencia exacta, sin +1)
+  const msDay = 1000*60*60*24;
+  const dias = Math.round((end - cursor) / msDay);
+
+  return { meses, dias: Math.max(0, dias) };
+}
 
   // Avanza meses completos desde start sin pasar end
   let meses = 0;
@@ -2651,11 +2676,11 @@ async function abrirVistaAdicion(documento, contrato, supervisor){
     valorInicial: Number(String(data.valorInicial||'').replace(/\D/g,'')) || 0,
     inicioA: normDMY(data.inicioA || ''),
     finA: normDMY(data.finA || ''),
-    mesesA: String(data.mesesA||''),
-    diasA: String(data.diasA||''),
+     mesesA: (data.mesesA === '' || data.mesesA == null) ? '' : String(data.mesesA),
+    diasA:  (data.diasA  === '' || data.diasA  == null) ? '' : String(data.diasA),
     adicion: String(data.adicion||''),
-    mesesT: String(data.mesesT||''),
-    diasT: String(data.diasT||''),
+    mesesT: (data.mesesT === '' || data.mesesT == null) ? '' : String(data.mesesT),
+    diasT:  (data.diasT  === '' || data.diasT  == null) ? '' : String(data.diasT),
     ejecucion: String(data.ejecucion||''),
     cdpA: String(data.cdpA||''),
     cdpA2: String(data.cdpA2||''),
