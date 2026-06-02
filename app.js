@@ -2951,7 +2951,8 @@ async function abrirVistaAdicion(documento, contrato, supervisor){
             '- *Actualiza los DATOS DEL CONTRATO* Ingresando el N° de *RP de Adición*\n' +
             '- Al ingresar o corregir la siguiente cuenta debes editar el *Total de pagos y valor de la Adición*.\n' +
             '- Debes *adjuntar el CDP, RP y OTROSI de la Adición*.\n' +
-            '- Revisa la guía que te adjuntamos o la sección de *Tutoriales* para evitar devoluciones.\n\n' +
+            '- Revisa la guía que te adjuntamos o la sección de *Tutoriales* para evitar devoluciones.\n' +
+            '> *_Revisa que hayamos puesto los datos correctos de tu adición antes de presentar tu cuenta._*\n\n' +
             'Cordialmente,\n\n*Equipo de Contratación*\n> Alcaldía de Flandes';
           sendBuilderbotMessage(tel, msg, URL_GUIA_ADICION);
         }
