@@ -571,3 +571,15 @@ button:active { transform: translateY(0); }
   .btn-row { flex-direction: column; }
   .item-header { flex-direction: column; align-items: flex-start; }
 }
+
+/* ─── SUSPENSIÓN (vista adición) ─────────────────────────── */
+.susp-check-row { display: flex; align-items: center; gap: 10px; margin: 16px 0 4px; }
+#chkSuspension {
+  width: 22px !important; height: 22px !important; flex: 0 0 auto;
+  margin: 0; padding: 0; border-radius: 6px; cursor: pointer;
+  accent-color: var(--primary);
+}
+.susp-check-label {
+  margin: 0 !important; cursor: pointer; font-weight: 800; color: var(--primary);
+  font-size: .95rem !important; text-transform: none !important; letter-spacing: 0 !important;
+}
