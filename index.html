@@ -421,8 +421,25 @@
     <input id="diaFa" type="hidden">
     <input id="mesFa" type="hidden">
 
-    <label>Valor Final del Contrato</label>
+  <label>Valor Final del Contrato</label>
     <input id="valorFin" type="text" readonly>
+
+    <!-- ===== SUSPENSIÓN ===== -->
+    <div class="susp-check-row">
+      <input id="chkSuspension" type="checkbox">
+      <label for="chkSuspension" class="susp-check-label">Suspensión</label>
+    </div>
+
+    <div id="suspFields" class="hidden">
+      <label>Días de Suspensión</label>
+      <input id="suspDias" type="tel" inputmode="numeric" value="0" maxlength="3">
+
+      <label>Meses de Suspensión</label>
+      <input id="suspMeses" type="tel" inputmode="numeric" value="0" maxlength="3">
+
+      <label>Tiempo de Suspensión</label>
+      <input id="suspTiempo" type="text" readonly>
+    </div>
 
     <div id="adicionModal" class="picker-modal" aria-hidden="true">
       <div class="picker-box">
