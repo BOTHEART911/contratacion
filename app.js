@@ -2378,6 +2378,9 @@ let AD_STATE = {
   textoValor: ''
 };
 
+// Suspensión actualmente RESTADA en mesesT/diasT
+let SUSP_STATE = { meses: 0, dias: 0 };
+
 function numPureCOP(s){
   return Number(String(s||'').replace(/\D/g,'')) || 0;
 }
@@ -2462,46 +2465,6 @@ function textoTiempo(meses, dias){
   return (txt||'').toUpperCase();
 }
 
-/* ===== SUSPENSIÓN: helpers de fecha ===== */
-
-// Lee la suspensión activa (0 si el check está desmarcado)
-function leerSuspension(){
-  const chk = document.getElementById('chkSuspension');
-  if(!chk || !chk.checked) return { meses:0, dias:0 };
-  const m = parseInt(String(document.getElementById('suspMeses')?.value || '').replace(/\D/g,''),10) || 0;
-  const d = parseInt(String(document.getElementById('suspDias')?.value  || '').replace(/\D/g,''),10) || 0;
-  return { meses:m, dias:d };
-}
-
-// Fecha efectiva = base + meses (recortando al último día del mes) + días
-function addSuspToDate(dmyBase, meses, dias){
-  const d = parseDMYToDate(dmyBase);
-  if(!d) return dmyBase;
-  let y = d.getFullYear();
-  let mi = d.getMonth() + (parseInt(meses,10) || 0);
-  y += Math.floor(mi/12);
-  mi = ((mi % 12) + 12) % 12;
-  const dim = new Date(y, mi+1, 0).getDate();
-  const day = Math.min(d.getDate(), dim);
-  let res = new Date(y, mi, day);
-  res.setDate(res.getDate() + (parseInt(dias,10) || 0));
-  return pad2Local(res.getDate()) + '/' + pad2Local(res.getMonth()+1) + '/' + res.getFullYear();
-}
-
-// Inverso: base = efectiva - días - meses (para reabrir sin volver a extender)
-function subSuspFromDate(dmyEff, meses, dias){
-  const d = parseDMYToDate(dmyEff);
-  if(!d) return dmyEff;
-  let res = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  res.setDate(res.getDate() - (parseInt(dias,10) || 0));
-  let y = res.getFullYear();
-  let mi = res.getMonth() - (parseInt(meses,10) || 0);
-  y += Math.floor(mi/12);
-  mi = ((mi % 12) + 12) % 12;
-  const dim = new Date(y, mi+1, 0).getDate();
-  const day = Math.min(res.getDate(), dim);
-  return pad2Local(day) + '/' + pad2Local(mi+1) + '/' + y;
-}
 
 function bindNumericSanitizerLocal(id, maxLen){
   const el = document.getElementById(id);
@@ -2569,14 +2532,10 @@ function confirmarPickerAdicion(){
     return;
   }
 
-  const anio = '2026';
-const val = `${dia}/${mes}/${anio}`;
+ const anio = '2026';
+  const val = `${dia}/${mes}/${anio}`;
   const input = document.getElementById(__adPickerTarget);
-  if(input){
-    input.value = val;
-    // La fecha elegida en el picker es la BASE (sin suspensión)
-    if(__adPickerTarget === 'finA') input.dataset.base = val;
-  }
+  if(input) input.value = val;
 
  cancelarPickerAdicion();
   recomputeAdicionAll(true);
@@ -2598,33 +2557,8 @@ function recomputeAdicionAll(recalcDesdeFechas){
 
   const fechaInicioContrato = normDMY(AD_STATE.fechaInicio || document.getElementById('fechaInicioRO')?.value || '');
   const inicioA = normDMY(document.getElementById('inicioA')?.value || '');
-
-  // ===== SUSPENSIÓN: Fecha de Fin de Adición = BASE + meses/días de suspensión =====
-  const finAEl = document.getElementById('finA');
-  const susp   = leerSuspension();
-
-  // Determina la BASE (fecha elegida sin suspensión)
-  let finBase = normDMY(finAEl?.dataset.base || '');
-  if(!finBase){
-    finBase = normDMY(finAEl?.value || '');
-    if(finAEl && finBase) finAEl.dataset.base = finBase;
-  }
-
-  // Campo automático "Tiempo de Suspensión"
-  const suspTiempoEl = document.getElementById('suspTiempo');
-  if(suspTiempoEl){
-    suspTiempoEl.value = (susp.meses > 0 || susp.dias > 0) ? textoTiempo(susp.meses, susp.dias) : '';
-  }
-
-  // Fecha fin EFECTIVA y la escribimos en el campo visible
-  let finEfectiva = finBase;
-  if(finBase && (susp.meses > 0 || susp.dias > 0)){
-    finEfectiva = addSuspToDate(finBase, susp.meses, susp.dias);
-  }
-  if(finAEl && finEfectiva){ finAEl.value = finEfectiva; }
-
-  const finA = normDMY(finAEl?.value || '');
-
+  const finA    = normDMY(document.getElementById('finA')?.value || '');
+  
   const mesesNombres = [
     'Enero','Febrero','Marzo','Abril','Mayo','Junio',
     'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'
@@ -2657,11 +2591,17 @@ function recomputeAdicionAll(recalcDesdeFechas){
     if(mesesEl){ mesesEl.value = String(meses); }
     if(diasEl){  diasEl.value  = String(dias);  }
 
-    const { meses: mesesT, dias: diasT } = calcMesesDiasEntre(fechaInicioContrato, finA);
+    const { meses: baseMesesT, dias: baseDiasT } = calcMesesDiasEntre(fechaInicioContrato, finA);
     const mesesTEl = document.getElementById('mesesT');
     const diasTEl  = document.getElementById('diasT');
-    if(mesesTEl){ mesesTEl.value = String(mesesT); }
-    if(diasTEl){  diasTEl.value  = String(diasT);  }
+    if(mesesTEl){
+      mesesTEl.dataset.base = String(baseMesesT);
+      mesesTEl.value = String(Math.max(0, baseMesesT - SUSP_STATE.meses));
+    }
+    if(diasTEl){
+      diasTEl.dataset.base = String(baseDiasT);
+      diasTEl.value = String(Math.max(0, baseDiasT - SUSP_STATE.dias));
+    }
   }
 
   // Tiempo de Adición: SIEMPRE se recalcula desde los campos Meses/Días de Adición
@@ -2802,16 +2742,22 @@ const valorFinEl = document.getElementById('valorFin');
     valorFinEl.value = formatCOPViewLocal(fin);
   }
 
-  // ===== SUSPENSIÓN (prefill / reset) =====
+ // ===== SUSPENSIÓN (prefill / reset) =====
+  SUSP_STATE = { meses: 0, dias: 0 };
   const _chk    = document.getElementById('chkSuspension');
   const _wrap   = document.getElementById('suspFields');
   const _sDiasEl= document.getElementById('suspDias');
   const _sMesEl = document.getElementById('suspMeses');
   const _sTimeEl= document.getElementById('suspTiempo');
-  const _finEl  = document.getElementById('finA');
+  const _mesesTEl = document.getElementById('mesesT');
+  const _diasTEl  = document.getElementById('diasT');
 
   const sDias  = Number(String(AD_STATE.suspDias  || '').replace(/\D/g,'')) || 0;
   const sMeses = Number(String(AD_STATE.suspMeses || '').replace(/\D/g,'')) || 0;
+
+  // Los totales cargados YA están con la suspensión restada
+  const totMesesShown = parseInt(String(_mesesTEl?.value||'').replace(/\D/g,''),10) || 0;
+  const totDiasShown  = parseInt(String(_diasTEl?.value ||'').replace(/\D/g,''),10) || 0;
 
   if(sDias > 0 || sMeses > 0){
     if(_chk)    _chk.checked = true;
@@ -2819,19 +2765,18 @@ const valorFinEl = document.getElementById('valorFin');
     if(_sDiasEl)_sDiasEl.value = String(sDias);
     if(_sMesEl) _sMesEl.value  = String(sMeses);
     if(_sTimeEl)_sTimeEl.value = (AD_STATE.suspTiempo || textoTiempo(sMeses, sDias)).toUpperCase();
-    // El finA guardado YA es la fecha efectiva (con suspensión).
-    // La BASE = efectiva - suspensión, para no volver a extender al editar.
-    if(_finEl) _finEl.dataset.base = subSuspFromDate(AD_STATE.finA, sMeses, sDias);
+    if(_mesesTEl) _mesesTEl.dataset.base = String(totMesesShown + sMeses);
+    if(_diasTEl)  _diasTEl.dataset.base  = String(totDiasShown + sDias);
+    SUSP_STATE = { meses: sMeses, dias: sDias };
   } else {
     if(_chk)    _chk.checked = false;
     if(_wrap)   _wrap.classList.add('hidden');
     if(_sDiasEl)_sDiasEl.value = '0';
     if(_sMesEl) _sMesEl.value  = '0';
-  
     if(_sTimeEl)_sTimeEl.value = '';
-    if(_finEl)  _finEl.dataset.base = AD_STATE.finA || '';
+    if(_mesesTEl) _mesesTEl.dataset.base = String(totMesesShown);
+    if(_diasTEl)  _diasTEl.dataset.base  = String(totDiasShown);
   }
-
   showView('view-adicion');
 }
 
@@ -2895,17 +2840,19 @@ const valorFinEl = document.getElementById('valorFin');
     if(!el || el.dataset.bound) return;
     el.dataset.bound='1';
 
-    // Permitir borrar y escribir libre (solo números) sin forzar auto
- el.addEventListener('input', ()=>{
+    el.addEventListener('input', ()=>{
       const raw = (el.value||'').replace(/\D/g,'').slice(0,3);
-      el.value = raw; // puede quedar '' mientras edita
+      el.value = raw;
+      if(id === 'mesesT') el.dataset.base = String((parseInt(raw,10)||0) + SUSP_STATE.meses);
+      if(id === 'diasT')  el.dataset.base = String((parseInt(raw,10)||0) + SUSP_STATE.dias);
       recomputeAdicionAll(false);
     });
 
-    // Si queda vacío al salir, lo deja en 0 (así nunca queda vacío para guardar)
     el.addEventListener('blur', ()=>{
       if(String(el.value||'').trim() === ''){
         el.value = '0';
+        if(id === 'mesesT') el.dataset.base = String(SUSP_STATE.meses);
+        if(id === 'diasT')  el.dataset.base = String(SUSP_STATE.dias);
         recomputeAdicionAll(false);
       }
     });
@@ -2922,11 +2869,52 @@ const valorFinEl = document.getElementById('valorFin');
     el.addEventListener('blur', ()=> recomputeAdicionAll(true));
   });
 
-  /* ===== SUSPENSIÓN ===== */
+ /* ===== SUSPENSIÓN ===== */
   const chkSusp     = document.getElementById('chkSuspension');
   const suspWrap    = document.getElementById('suspFields');
   const suspDiasEl  = document.getElementById('suspDias');
   const suspMesesEl = document.getElementById('suspMeses');
+
+  function leerSuspInputs(){
+    const m = parseInt(String(suspMesesEl?.value || '').replace(/\D/g,''),10) || 0;
+    const d = parseInt(String(suspDiasEl?.value  || '').replace(/\D/g,''),10) || 0;
+    return { meses:m, dias:d };
+  }
+
+  function aplicarSuspension(){
+    const activa = !!(chkSusp && chkSusp.checked);
+    const nuevo  = activa ? leerSuspInputs() : { meses:0, dias:0 };
+
+    // Campo automático "Tiempo de Suspensión"
+    const suspTiempoEl = document.getElementById('suspTiempo');
+    if(suspTiempoEl){
+      suspTiempoEl.value = (nuevo.meses > 0 || nuevo.dias > 0)
+        ? textoTiempo(nuevo.meses, nuevo.dias) : '';
+    }
+
+    const mesesTEl = document.getElementById('mesesT');
+    const diasTEl  = document.getElementById('diasT');
+
+    // Base (pre-suspensión): dataset.base si existe; si no, reconstruye desde valor + suspensión previa
+    const baseM = (mesesTEl && mesesTEl.dataset.base !== undefined && mesesTEl.dataset.base !== '')
+      ? (parseInt(mesesTEl.dataset.base,10) || 0)
+      : ((parseInt(String(mesesTEl?.value||'').replace(/\D/g,''),10) || 0) + SUSP_STATE.meses);
+    const baseD = (diasTEl && diasTEl.dataset.base !== undefined && diasTEl.dataset.base !== '')
+      ? (parseInt(diasTEl.dataset.base,10) || 0)
+      : ((parseInt(String(diasTEl?.value||'').replace(/\D/g,''),10) || 0) + SUSP_STATE.dias);
+
+    if(mesesTEl) mesesTEl.dataset.base = String(baseM);
+    if(diasTEl)  diasTEl.dataset.base  = String(baseD);
+
+    // RESTA la suspensión a los totales (Adición NO se toca)
+    if(mesesTEl) mesesTEl.value = String(Math.max(0, baseM - nuevo.meses));
+    if(diasTEl)  diasTEl.value  = String(Math.max(0, baseD - nuevo.dias));
+
+    SUSP_STATE = { meses:nuevo.meses, dias:nuevo.dias };
+
+    // Recalcula "Tiempo de Ejecución Total" desde mesesT/diasT (sin tocar fechas)
+    recomputeAdicionAll(false);
+  }
 
   if(chkSusp && !chkSusp.dataset.bound){
     chkSusp.dataset.bound = '1';
@@ -2936,12 +2924,13 @@ const valorFinEl = document.getElementById('valorFin');
         if(suspDiasEl  && String(suspDiasEl.value).trim()  === '') suspDiasEl.value  = '0';
         if(suspMesesEl && String(suspMesesEl.value).trim() === '') suspMesesEl.value = '0';
       } else {
-        // Al desmarcar: se formatean los campos y finA vuelve a la BASE
         if(suspWrap) suspWrap.classList.add('hidden');
         if(suspDiasEl)  suspDiasEl.value  = '0';
         if(suspMesesEl) suspMesesEl.value = '0';
+        const st = document.getElementById('suspTiempo');
+        if(st) st.value = '';
       }
-      recomputeAdicionAll(true); // recalcula fin efectiva + tiempos desde fechas
+      aplicarSuspension();
     });
   }
 
@@ -2950,11 +2939,11 @@ const valorFinEl = document.getElementById('valorFin');
     el.dataset.bound = '1';
     el.addEventListener('input', ()=>{
       el.value = String(el.value || '').replace(/\D/g,'').slice(0,3);
-      recomputeAdicionAll(true);
+      aplicarSuspension();
     });
     el.addEventListener('blur', ()=>{
       if(String(el.value || '').trim() === '') el.value = '0';
-      recomputeAdicionAll(true);
+      aplicarSuspension();
     });
   });
 
@@ -3053,13 +3042,14 @@ const valorFinEl = document.getElementById('valorFin');
           `<b>Valor final:</b> ${formatCOPViewLocal(valorFin)}`
        ].join('<br>');
 
-        if(suspDiligenciada){
+       if(suspDiligenciada){
           resumen +=
             '<br><br><b style="color:#b91c1c;">⏸ SUSPENSIÓN</b><br>' +
             `<b>Meses de suspensión:</b> ${suspMesesVal}<br>` +
             `<b>Días de suspensión:</b> ${suspDiasVal}<br>` +
             `<b>Tiempo de suspensión:</b> ${suspTiempoVal}<br>` +
-            `<b style="color:#b91c1c;">Fin de adición (con suspensión):</b> ${finA}`;
+            `<b>Meses totales (con descuento):</b> ${document.getElementById('mesesT')?.value || '0'}<br>` +
+            `<b>Días complemento (con descuento):</b> ${document.getElementById('diasT')?.value || '0'}`;
         }
 
         const rs = await Swal.fire({
