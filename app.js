@@ -2462,6 +2462,47 @@ function textoTiempo(meses, dias){
   return (txt||'').toUpperCase();
 }
 
+/* ===== SUSPENSIÓN: helpers de fecha ===== */
+
+// Lee la suspensión activa (0 si el check está desmarcado)
+function leerSuspension(){
+  const chk = document.getElementById('chkSuspension');
+  if(!chk || !chk.checked) return { meses:0, dias:0 };
+  const m = parseInt(String(document.getElementById('suspMeses')?.value || '').replace(/\D/g,''),10) || 0;
+  const d = parseInt(String(document.getElementById('suspDias')?.value  || '').replace(/\D/g,''),10) || 0;
+  return { meses:m, dias:d };
+}
+
+// Fecha efectiva = base + meses (recortando al último día del mes) + días
+function addSuspToDate(dmyBase, meses, dias){
+  const d = parseDMYToDate(dmyBase);
+  if(!d) return dmyBase;
+  let y = d.getFullYear();
+  let mi = d.getMonth() + (parseInt(meses,10) || 0);
+  y += Math.floor(mi/12);
+  mi = ((mi % 12) + 12) % 12;
+  const dim = new Date(y, mi+1, 0).getDate();
+  const day = Math.min(d.getDate(), dim);
+  let res = new Date(y, mi, day);
+  res.setDate(res.getDate() + (parseInt(dias,10) || 0));
+  return pad2Local(res.getDate()) + '/' + pad2Local(res.getMonth()+1) + '/' + res.getFullYear();
+}
+
+// Inverso: base = efectiva - días - meses (para reabrir sin volver a extender)
+function subSuspFromDate(dmyEff, meses, dias){
+  const d = parseDMYToDate(dmyEff);
+  if(!d) return dmyEff;
+  let res = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  res.setDate(res.getDate() - (parseInt(dias,10) || 0));
+  let y = res.getFullYear();
+  let mi = res.getMonth() - (parseInt(meses,10) || 0);
+  y += Math.floor(mi/12);
+  mi = ((mi % 12) + 12) % 12;
+  const dim = new Date(y, mi+1, 0).getDate();
+  const day = Math.min(res.getDate(), dim);
+  return pad2Local(day) + '/' + pad2Local(mi+1) + '/' + y;
+}
+
 function bindNumericSanitizerLocal(id, maxLen){
   const el = document.getElementById(id);
   if(!el) return;
@@ -2529,9 +2570,13 @@ function confirmarPickerAdicion(){
   }
 
   const anio = '2026';
-  const val = `${dia}/${mes}/${anio}`;
+const val = `${dia}/${mes}/${anio}`;
   const input = document.getElementById(__adPickerTarget);
-  if(input) input.value = val;
+  if(input){
+    input.value = val;
+    // La fecha elegida en el picker es la BASE (sin suspensión)
+    if(__adPickerTarget === 'finA') input.dataset.base = val;
+  }
 
  cancelarPickerAdicion();
   recomputeAdicionAll(true);
@@ -2553,7 +2598,32 @@ function recomputeAdicionAll(recalcDesdeFechas){
 
   const fechaInicioContrato = normDMY(AD_STATE.fechaInicio || document.getElementById('fechaInicioRO')?.value || '');
   const inicioA = normDMY(document.getElementById('inicioA')?.value || '');
-  const finA    = normDMY(document.getElementById('finA')?.value || '');
+
+  // ===== SUSPENSIÓN: Fecha de Fin de Adición = BASE + meses/días de suspensión =====
+  const finAEl = document.getElementById('finA');
+  const susp   = leerSuspension();
+
+  // Determina la BASE (fecha elegida sin suspensión)
+  let finBase = normDMY(finAEl?.dataset.base || '');
+  if(!finBase){
+    finBase = normDMY(finAEl?.value || '');
+    if(finAEl && finBase) finAEl.dataset.base = finBase;
+  }
+
+  // Campo automático "Tiempo de Suspensión"
+  const suspTiempoEl = document.getElementById('suspTiempo');
+  if(suspTiempoEl){
+    suspTiempoEl.value = (susp.meses > 0 || susp.dias > 0) ? textoTiempo(susp.meses, susp.dias) : '';
+  }
+
+  // Fecha fin EFECTIVA y la escribimos en el campo visible
+  let finEfectiva = finBase;
+  if(finBase && (susp.meses > 0 || susp.dias > 0)){
+    finEfectiva = addSuspToDate(finBase, susp.meses, susp.dias);
+  }
+  if(finAEl && finEfectiva){ finAEl.value = finEfectiva; }
+
+  const finA = normDMY(finAEl?.value || '');
 
   const mesesNombres = [
     'Enero','Febrero','Marzo','Abril','Mayo','Junio',
@@ -2664,8 +2734,11 @@ async function abrirVistaAdicion(documento, contrato, supervisor){
     cdpA2: String(data.cdpA2||''),
     mra: Number(String(data.mra||'').replace(/\D/g,'')) || 0,
     textoAdicion: String(data.textoAdicion||''),
-    valorFin: Number(String(data.valorFin||'').replace(/\D/g,'')) || 0,
-    textoValor: String(data.textoValor||'')
+  valorFin: Number(String(data.valorFin||'').replace(/\D/g,'')) || 0,
+    textoValor: String(data.textoValor||''),
+    suspDias:   Number(String(data.suspDias  || '').replace(/\D/g,'')) || 0,
+    suspMeses:  Number(String(data.suspMeses || '').replace(/\D/g,'')) || 0,
+    suspTiempo: String(data.suspTiempo || '')
   };
 
   document.getElementById('fechaInicioRO').value = AD_STATE.fechaInicio;
@@ -2723,10 +2796,40 @@ async function abrirVistaAdicion(documento, contrato, supervisor){
   const textoValEl = document.getElementById('textoValor');
   if(textoValEl) textoValEl.value = (AD_STATE.textoValor || '').toUpperCase();
 
-  const valorFinEl = document.getElementById('valorFin');
+const valorFinEl = document.getElementById('valorFin');
   if(valorFinEl){
     const fin = AD_STATE.valorFin || (AD_STATE.valorInicial + (AD_STATE.mra||0));
     valorFinEl.value = formatCOPViewLocal(fin);
+  }
+
+  // ===== SUSPENSIÓN (prefill / reset) =====
+  const _chk    = document.getElementById('chkSuspension');
+  const _wrap   = document.getElementById('suspFields');
+  const _sDiasEl= document.getElementById('suspDias');
+  const _sMesEl = document.getElementById('suspMeses');
+  const _sTimeEl= document.getElementById('suspTiempo');
+  const _finEl  = document.getElementById('finA');
+
+  const sDias  = Number(String(AD_STATE.suspDias  || '').replace(/\D/g,'')) || 0;
+  const sMeses = Number(String(AD_STATE.suspMeses || '').replace(/\D/g,'')) || 0;
+
+  if(sDias > 0 || sMeses > 0){
+    if(_chk)    _chk.checked = true;
+    if(_wrap)   _wrap.classList.remove('hidden');
+    if(_sDiasEl)_sDiasEl.value = String(sDias);
+    if(_sMesEl) _sMesEl.value  = String(sMeses);
+    if(_sTimeEl)_sTimeEl.value = (AD_STATE.suspTiempo || textoTiempo(sMeses, sDias)).toUpperCase();
+    // El finA guardado YA es la fecha efectiva (con suspensión).
+    // La BASE = efectiva - suspensión, para no volver a extender al editar.
+    if(_finEl) _finEl.dataset.base = subSuspFromDate(AD_STATE.finA, sMeses, sDias);
+  } else {
+    if(_chk)    _chk.checked = false;
+    if(_wrap)   _wrap.classList.add('hidden');
+    if(_sDiasEl)_sDiasEl.value = '0';
+    if(_sMesEl) _sMesEl.value  = '0';
+  
+    if(_sTimeEl)_sTimeEl.value = '';
+    if(_finEl)  _finEl.dataset.base = AD_STATE.finA || '';
   }
 
   showView('view-adicion');
@@ -2819,6 +2922,42 @@ async function abrirVistaAdicion(documento, contrato, supervisor){
     el.addEventListener('blur', ()=> recomputeAdicionAll(true));
   });
 
+  /* ===== SUSPENSIÓN ===== */
+  const chkSusp     = document.getElementById('chkSuspension');
+  const suspWrap    = document.getElementById('suspFields');
+  const suspDiasEl  = document.getElementById('suspDias');
+  const suspMesesEl = document.getElementById('suspMeses');
+
+  if(chkSusp && !chkSusp.dataset.bound){
+    chkSusp.dataset.bound = '1';
+    chkSusp.addEventListener('change', ()=>{
+      if(chkSusp.checked){
+        if(suspWrap) suspWrap.classList.remove('hidden');
+        if(suspDiasEl  && String(suspDiasEl.value).trim()  === '') suspDiasEl.value  = '0';
+        if(suspMesesEl && String(suspMesesEl.value).trim() === '') suspMesesEl.value = '0';
+      } else {
+        // Al desmarcar: se formatean los campos y finA vuelve a la BASE
+        if(suspWrap) suspWrap.classList.add('hidden');
+        if(suspDiasEl)  suspDiasEl.value  = '0';
+        if(suspMesesEl) suspMesesEl.value = '0';
+      }
+      recomputeAdicionAll(true); // recalcula fin efectiva + tiempos desde fechas
+    });
+  }
+
+  [suspDiasEl, suspMesesEl].forEach(el=>{
+    if(!el || el.dataset.bound) return;
+    el.dataset.bound = '1';
+    el.addEventListener('input', ()=>{
+      el.value = String(el.value || '').replace(/\D/g,'').slice(0,3);
+      recomputeAdicionAll(true);
+    });
+    el.addEventListener('blur', ()=>{
+      if(String(el.value || '').trim() === '') el.value = '0';
+      recomputeAdicionAll(true);
+    });
+  });
+
   const saveBtn = document.getElementById('ad-guardar');
   if(saveBtn && !saveBtn.dataset.bound){
     saveBtn.dataset.bound='1';
@@ -2893,10 +3032,17 @@ async function abrirVistaAdicion(documento, contrato, supervisor){
         const textoAdicion= String(document.getElementById('textoAdicion')?.value || '').trim().toUpperCase();
         const textoValor  = String(document.getElementById('textoValor')?.value || '').trim().toUpperCase();
 
-        const valorInicial = numPureCOP(AD_STATE.valorInicial);
+     const valorInicial = numPureCOP(AD_STATE.valorInicial);
         const valorFin     = valorInicial + mraVal;
 
-        const resumen = [
+        // ===== SUSPENSIÓN (para resumen/guardado) =====
+        const suspActiva   = !!document.getElementById('chkSuspension')?.checked;
+        const suspMesesVal = suspActiva ? (parseInt(String(document.getElementById('suspMeses')?.value||'').replace(/\D/g,''),10)||0) : 0;
+        const suspDiasVal  = suspActiva ? (parseInt(String(document.getElementById('suspDias')?.value ||'').replace(/\D/g,''),10)||0) : 0;
+        const suspDiligenciada = suspActiva && (suspMesesVal > 0 || suspDiasVal > 0);
+        const suspTiempoVal    = suspDiligenciada ? textoTiempo(suspMesesVal, suspDiasVal) : '';
+
+        let resumen = [
           `<b>Inicio contrato:</b> ${fechaInicioContrato}`,
           `<b>Inicio adición:</b> ${inicioA}`,
           `<b>Fin adición:</b> ${finA}`,
@@ -2905,7 +3051,16 @@ async function abrirVistaAdicion(documento, contrato, supervisor){
           `<b>Valor contrato:</b> ${formatCOPViewLocal(valorInicial)}`,
           `<b>Valor adición:</b> ${formatCOPViewLocal(mraVal)}`,
           `<b>Valor final:</b> ${formatCOPViewLocal(valorFin)}`
-        ].join('<br>');
+       ].join('<br>');
+
+        if(suspDiligenciada){
+          resumen +=
+            '<br><br><b style="color:#b91c1c;">⏸ SUSPENSIÓN</b><br>' +
+            `<b>Meses de suspensión:</b> ${suspMesesVal}<br>` +
+            `<b>Días de suspensión:</b> ${suspDiasVal}<br>` +
+            `<b>Tiempo de suspensión:</b> ${suspTiempoVal}<br>` +
+            `<b style="color:#b91c1c;">Fin de adición (con suspensión):</b> ${finA}`;
+        }
 
         const rs = await Swal.fire({
           icon:'info',
@@ -2936,9 +3091,16 @@ async function abrirVistaAdicion(documento, contrato, supervisor){
           tipoAdicion,
           mra: String(mraVal),
          textoAdicion: textoAdicion,
-          valorFin: String(valorFin),
+         valorFin: String(valorFin),
           textoValor
         };
+
+        // Solo se envían si la suspensión fue diligenciada
+        if(suspDiligenciada){
+          payload.suspDias   = String(suspDiasVal);
+          payload.suspMeses  = String(suspMesesVal);
+          payload.suspTiempo = suspTiempoVal;
+        }
 
         await apiPost('guardarAdicion', payload);
 
